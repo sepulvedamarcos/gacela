@@ -27,8 +27,8 @@ End
 
 Public Function getPhotos(Optional id As Integer) As PhotoEntity[]
 
-  Dim photo As PhotoEntity
-  Dim photos As PhotoEntity[]
+  ' Dim photo As PhotoEntity
+  ' Dim photos As PhotoEntity[]
   Dim photoResult As Result
   Dim query As String
 
@@ -120,18 +120,19 @@ End
 Public Function createPhoto(photo As PhotoEntity) As PhotoEntity
 
   Dim result As Result
+  Dim photoId As Integer
+  Dim photoAlbumId As Integer
 
   $dbContext.DBConnection.Begin()
 
   result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS)
-
   result["file_name"] = photo.FileName
   result["width_pixels"] = photo.WidthPixels
   result["height_pixels"] = photo.HeightPixels
   result["creation_date"] = Now()
   result["import_date"] = photo.ImportDate
   result["description"] = photo.Description
-  result["stars"] = photo.Stars & "x"
+  result["stars"] = photo.Stars
   result["import_user"] = photo.ImportUser
   result["image_path"] = photo.ImagePath
   result["hash256"] = photo.Hash256
@@ -146,8 +147,20 @@ Public Function createPhoto(photo As PhotoEntity) As PhotoEntity
   result["locked_by"] = Null
   result["locked_date"] = Null
   result["lock_reason"] = Null
-
   result.Update()
+
+  photoId = $dbContext.DBConnection.LastInsertId
+  $log4Gambas.Debug($titulo & "Codigo de foto creado [" & photoId & "]")
+
+  result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS_ALBUMS)
+  result["photo_id"] = photoId
+  result["album_id"] = 1
+  result["added_date"] = Now
+  result["added_user"] = photo.ImportUser
+  result.Update()
+
+  photoAlbumId = $dbContext.DBConnection.LastInsertId
+  $log4Gambas.Debug($titulo & "Codigo de foto-album creado [" & photoAlbumId & "]")
 
   $dbContext.DBConnection.Commit
 
@@ -183,22 +196,33 @@ Catch
 
 End
 
-Public Function FindAlbums(album As String) As AlbumEntity[]
+Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[]
 
   Dim query As String
   Dim result As Result
+  Dim con As String = " WHERE "
 
   query = "SELECT * FROM " & Constants.TABLE_ALBUMS
-  If album <> "" Then
-    query &= " WHERE name LIKE " & album
+  If useSoftDelete <> -1 Then
+    query &= " WHERE soft_delete = " & useSoftDelete
+    con = " AND "
   Endif
 
+  If id <> 0 Then
+    query &= con & " id = " & id
+  Endif
+
+  If text <> "" Then
+    query &= con & " LOWER(description) LIKE '%" & Lower(text) & "%'"
+  Endif
+
+  $log4Gambas.Debug($titulo & "Query [" & query & "]")
   result = $dbContext.DBConnection.Exec(query)
-  If Result.Available Then
-
+  If result.Available Then
+    Return MapAlbumEntity(result)
   Endif
 
-  Return []
+  Return New AlbumEntity[]
 
 Catch
   $log4gambas.Error($titulo & "Problema al leer los albums")
@@ -258,9 +282,9 @@ End
 Private Sub MapAlbumEntity(result As Result) As AlbumEntity[] '' Mapeo de albums
 
   Dim album As AlbumEntity
-  Dim albums As AlbumEntity[]
+  Dim albums As New AlbumEntity[]
 
-  For Each album In result
+  For Each result
     album = New AlbumEntity
 
     ' Mapeo todos los campos
@@ -271,7 +295,7 @@ Private Sub MapAlbumEntity(result As Result) As AlbumEntity[] '' Mapeo de albums
     album.CreationUser = result["creation_user"]
     album.Thumbnail = result["thumbnail"]
     album.SoftDelete = result["soft_delete"]
-    '
+
     albums.Add(album)
   Next
 

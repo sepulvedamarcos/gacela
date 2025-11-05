@@ -1,0 +1,134 @@
+' Gambas class file
+
+'
+'
+' Clase de manejo de negocio
+'
+'
+Private $photoService As PhotoService
+Private $log4gambas As Log4Gambas3
+Private $titulo As String = "[FImportDialog] "
+Private $filesDrop As String[]
+
+' ==================================================
+'
+'          Metodos publicos
+'
+' ==================================================
+Public Sub _new(photoService As PhotoService, logger As Log4Gambas3, filesDrop As String[])
+
+  $photoService = photoService
+  $log4gambas = logger
+  $filesDrop = filesDrop
+
+  $log4gambas.Info($titulo & ("Creando la ventana de dialogo y la lista de albumes"))
+  FindAlbums()
+
+End
+
+Public Sub Run() As Boolean
+
+  $log4gambas.Debug($titulo & "metodo run")
+  Return Not Me.ShowModal()
+
+End
+
+Public Sub btnOK_Click()
+
+  Dim resp As Integer
+  Dim al As AlbumEntity[]
+  Dim id As Integer
+
+  If ButtonBoxFilter.Text = "" And ListBoxCollections.Index = -1 Then
+    resp = Message.Question(("Estas seguro de no incluir las fotos en un album?"), ("Si"), ("No"))
+    If resp = 2 Then
+      Return
+    Else
+      $photoService.ImportPhoto($filesDrop, "")
+    Endif
+  Else
+    If ButtonBoxFilter.Text <> "" And ListBoxCollections.Index = -1 Then
+      $log4gambas.Debug($titulo & "Toma texto filtro")
+      $photoService.ImportPhoto($filesDrop, ButtonBoxFilter.Text)
+    Else
+
+      al = ListBoxCollections.Tag
+      id = al[ListBoxCollections.Index].Id
+
+      $log4gambas.Debug($titulo & "Toma id album listbox")
+      $photoService.ImportPhotos($filesDrop, Null, id)
+    Endif
+  Endif
+
+  Me.Close(Enumeration.DLG_OK)
+
+End
+
+Public Sub btnCancel_Click()
+
+  Me.Close
+
+End
+
+Public Sub Form_Open()
+
+End
+
+Public Sub ButtonBoxFilter_Filter()
+
+  $log4gambas.Debug($titulo & "Filter escribe [" & ButtonBoxFilter.Text & "]")
+  FindAlbums(ButtonBoxFilter.Text)
+
+End
+
+Public Sub ButtonBoxFilter_Click()
+
+  $log4gambas.Debug($titulo & "Click filter con texto [" & ButtonBoxFilter.Text & "]")
+  FindAlbums(ButtonBoxFilter.Text)
+
+End
+
+Public Sub ButtonBoxFilter_Clear()
+
+  $log4gambas.Debug($titulo & "Clear")
+
+End
+
+Public Sub ListBoxCollections_Select()
+
+  Dim al As AlbumEntity[]
+  Dim de As String
+  Dim id As Integer
+
+  al = ListBoxCollections.Tag
+  de = al[ListBoxCollections.Index].Description
+  id = al[ListBoxCollections.Index].Id
+
+  $log4gambas.Debug($titulo & "Selecciona en el listbox [" & de & "-" & id & "]")
+
+End
+
+' ==================================================
+'
+'          Metodos privados
+'
+' ==================================================
+
+Private Sub FindAlbums(Optional text As String)
+
+  Dim albums As AlbumEntity[]
+  Dim album As AlbumEntity
+
+  $log4gambas.Debug($titulo & "Buscando un album [" & text & "]")
+  albums = $photoService.FindAlbums(text, 0, Constants.USE_SOFT_FALSE)
+
+  ListBoxCollections.Clear
+  ListBoxCollections.Index = -1
+  ListBoxCollections.Tag = albums
+  For Each album In albums
+
+    ListBoxCollections.Add(album.Description)
+
+  Next
+
+End

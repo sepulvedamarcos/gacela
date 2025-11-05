@@ -12,3 +12,9 @@ Public Enum APP_THEME_DARK = 3                      '' Enum para indicar que se 
 ' Enums para indicar estado de sincronizacion
 Public Enum SYNC_PENDING = 1                        '' Enum para indicar que esta pendiente de sincronizacion
 Public Enum SYNC_SYNCED = 2                         '' Enum para indicar que fue sincronizada
+
+Public Enum DLG_CANCEL = 0                          '' Valor de retorno de una showdialog como cancelado
+Public Enum DLG_OK = 1                              '' Valor de retorno de una showdialog como aceptado
+
+Public Enum QTN_YES = 1                             '' Valor de retorno de una Pregunta Si
+Public Enum QTN_No = 0                              '' Valor de retorno de una Pregunta No

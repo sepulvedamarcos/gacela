@@ -55,13 +55,13 @@ Public Function loadNextPage() As PhotoEntity[] '' Metodo para cargar paginas se
 
 End
 
-Public Function ToggleFavorite(photoId As Integer, stars As Integer) As Boolean
-
-  Dim photo As PhotoEntity
-
-  Return True
-
-End
+' Public Function ToggleFavorite(photoId As Integer, stars As Integer) As Boolean
+'
+'   Dim photo As PhotoEntity
+'
+'   Return True
+'
+' End
 
 Public Sub DeletePhoto(photoId As Integer) As Boolean
 
@@ -100,14 +100,28 @@ Catch
 
 End
 
-Public Sub ImportPhotos(imagesPath As String[], album As String, tags As String)
+Public Sub ImportPhotos(imagesPath As String[], Optional albumDes As String, Optional albumId As Integer = 0)
 
   Dim photo As String
+  Dim I As Integer
+  Dim albumEntity As New AlbumEntity
+  '' TODO: crear entidad de photo album
+
+  ' If albumDes <> "" Or albumId <> "" Then
+  '   If albumDes <> "" Then
+  '     albumEntity.Id =
+  '       albumEntity.name =
+  '       albumEntity.Description =
+  '       albumEntity.
+  '   Else
+  '
+  '   Endif
+  ' Endif
 
   For Each photo In imagesPath
-
+    i += 1
     $log4gambas.Debug($titulo & "Archivo a procesar " & photo)
-    If SavePhoto(photo, album) Then
+    If SavePhoto(photo, albumId, i) Then
       Error.Raise("Error al insertar foto" & photo)
     End If
 
@@ -124,11 +138,11 @@ Public Function GetPhotoIterator() As PhotoIterator
 
 End
 
-Public Function FindAlbums(album As String) As AlbumEntity[]
+Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[]
 
-  $log4gambas.Debug($titulo & "album :" & album)
+  $log4gambas.Debug($titulo & "Buscar de albums : [" & text & "] usa softdelete [" & useSoftDelete & "]")
 
-  Return New AlbumEntity[]
+  Return $photoRepository.FindAlbums(text, id, useSoftDelete)
 
 End
 
@@ -138,9 +152,11 @@ End
 '
 ' ==================================================
 
-Private Function SavePhoto(imagenPath As String, album As String) As Boolean
+Private Function SavePhoto(imagenPath As String, Optional albumId As Integer, Optional index As Integer) As Boolean
 
+  '' TODO: agregar entidad de phto-album
   Dim photoEntity As New PhotoEntity
+  ' Dim photoAlbumEntity As New PhotoAlbumEntity
   Dim originalPhoto As Image
   Dim imageString As String
   Dim hash256 As String
@@ -172,6 +188,9 @@ Private Function SavePhoto(imagenPath As String, album As String) As Boolean
   photoEntity.ImagePath = newPath
   photoEntity.Hash256 = hash256
   photoEntity.Thumbnail = $compressionService.CreateThumbnail(originalPhoto, imagenPath)
+
+  ' photoAlbumEntity.AlbumId = albumId
+  ' photoAlbumEntity.OrderInAlbum = index
 
   photoEntity = $photoRepository.createPhoto(photoEntity)
 

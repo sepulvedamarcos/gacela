@@ -1,7 +1,7 @@
 # Gambas Project File 3.0
 Title=Gestor de Álbumes Compartidos en Linux Avanzado
 Startup=Main
-Icon=4139955.png
+Icon=.icon.png
 Version=0.0.1
 Component=gb.db
 Component=gb.image
@@ -12,7 +12,7 @@ Component=gb.db.sqlite3
 Component=gb.settings
 Component=gb.hash
 Library=:sepulvedamarcos/Log4Gambas:3.0
-Description="Gestor de Álbumes Compartidos en Linux Avanzado"
+Description="Gestor de álbumes de fotos familiares compartidos en computadores con linux"
 Authors="Marcos Sepúlveda"
 TabSize=2
 Translate=1

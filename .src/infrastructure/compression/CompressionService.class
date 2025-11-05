@@ -73,7 +73,7 @@ Public Function CreateThumbnail(originalPhoto As Image, imagenPath As String) As
   Dim thumbnailImage As Image
   Dim tempThumbFile As String
   Dim thumbnailString As String = ""
-  Dim THUMBNAIL_MIN_BENEFIT As Float = 1.5      ' Generar si reduce al menos 50%
+  ' Dim THUMBNAIL_MIN_BENEFIT As Float = 1.5      ' Generar si reduce al menos 50%
   ' TODO: Crear un calculo para determinar cuando hacer una miniatura
 
   $log4gambas.Debug($titulo & "Tamaño de la imagen " & originalPhoto.Width & " x " & originalPhoto.Height)

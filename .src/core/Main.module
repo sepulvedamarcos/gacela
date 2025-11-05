@@ -11,9 +11,9 @@ Private $compressionService As CompressionService
 
 Public Sub Main()
 
-  Dim response As Integer
+  ' Dim response As Integer
   Dim formMain As FMain
-  Dim result As String
+  ' Dim result As String
 
   $configuration = New Configuration
   $log4Gambas = $configuration.InitializeLogger()

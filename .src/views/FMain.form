@@ -69,13 +69,8 @@
         MoveScaled(1,1,90,7)
         Arrangement = Arrange.Horizontal
         Padding = 8
-        { Label1 Label
-          MoveScaled(2,2,27,3)
-          Font = Font["Ubuntu Sans,Bold,10"]
-          Text = ("Photos en xxxx GRoup")
-        }
         { MenuButton1 MenuButton
-          MoveScaled(25,1,20,4)
+          MoveScaled(25,1,20,5)
           Text = (",mn,mn,nm")
           Picture = Picture["icon:/medium/find"]
           Menu = "buscar"

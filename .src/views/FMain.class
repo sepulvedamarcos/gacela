@@ -6,7 +6,8 @@ Private $height As Integer = 90
 Private $configuration As Configuration
 Private $log4Gambas As Log4Gambas3
 Private $photoService As PhotoService
-Private $formPhotos As FPhoto
+' Private $formPhotos As FPhoto
+Private $titulo As String = "[FMain] "
 
 Public Sub _new(configuration As Configuration, logger As Log4Gambas3, photoService As PhotoService)
 
@@ -37,20 +38,35 @@ End
 
 Public Sub Form_Drop()
 
-  Dim fileDrop As String[]
-  Dim selector As FImportar
+  Dim filedrop As String
+  Dim filesDrop As String[]
+  Dim selector As FImportDialog
+  Dim namesErr As String
+  Dim resp As Integer
 
-  $log4Gambas.Debug("Activa drop")
+  $log4Gambas.Debug($titulo & "Drag and drop de archivos")
 
-  fileDrop = Drag.Paste("text/uri-list")
+  filesDrop = Drag.Paste("text/uri-list")
+  For Each fileDrop In filesDrop
+    $log4Gambas.debug($titulo & "archivo : [" & File.BaseName(fileDrop) & "." & File.Ext(fileDrop) & "]")
+    If LCase(File.Ext(fileDrop)) = "jpg" Or LCase(File.Ext(fileDrop)) = "png" Then
+    Else
+      namesErr = namesErr & File.BaseName(fileDrop) & "." & File.Ext(fileDrop)
+    Endif
+  Next
 
-  selector = New FImportar($photoService, $log4Gambas)
-  selector.ShowDialog()
+  If namesErr = "" Then
 
-  $photoService.ImportPhoto(fileDrop, "")
+    selector = New FImportDialog($photoService, $log4Gambas, filesDrop)
+    resp = selector.ShowModal()
 
-  ' PanelGalleryContent.Children.Clear
-  CreatePhotoPanels($photoService.loadNextPage())
+    If resp = Enumeration.DLG_OK Then
+      CreatePhotoPanels($photoService.loadNextPage())
+
+    Endif
+  Else
+    Message.Error(("Algunos de los archivos que se intenta importar no son validos"))
+  Endif
 
 End
 
@@ -133,7 +149,7 @@ Private Sub CreatePhotoPanels(photos As PhotoEntity[])
   Dim panelPhoto As Panel
   Dim formPhoto As FPhoto
   Dim photo As PhotoEntity
-  Dim pictureBox As PictureBox
+  ' Dim pictureBox As PictureBox
 
   $log4Gambas.Info("Creacion de paneles iniciales")
   For Each photo In photos

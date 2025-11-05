@@ -7,6 +7,10 @@
     MoveScaled(1,1,3,3)
     Visible = False
     AutoResize = True
-    Picture = Picture["icon:/medium/add"]
+    Picture = Picture["icon:/tiny/add"]
+  }
+  { ButtonDelete Button
+    MoveScaled(11,10,3,3)
+    Picture = Picture["icon:/tiny/trash"]
   }
 }

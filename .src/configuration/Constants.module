@@ -23,3 +23,6 @@ Public Const PHOTO_SEED_2 As String = "./img-125.png"           '' Foto para ini
 ' Textos para indicar estado de sincronizacion
 Public Const SYNC_PENDING As String = "Pendiente"               '' Estado de sincronizacion pendiente
 Public Const SYNC_SYNCED As String = "Sincronizado"             '' Estado de sincronizacion realizada
+
+Public Const USE_SOFT_TRUE As Integer = 1                           '' Valor para indicar que se usa el softDelete
+Public Const USE_SOFT_FALSE As Integer = 0                          '' Valor para indicar que se no usa el softDelete

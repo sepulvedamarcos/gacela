@@ -191,7 +191,7 @@ Private Sub CreatePhotosTable()
   Dim table As Table
 
   table = $db.Tables.Add(Constants.TABLE_PHOTOS)
-  table.Fields.Add("id", db.Serial)                         ' identificador del registro
+  table.Fields.Add("id", db.Serial)                       ' identificador del registro
   table.Fields.Add("file_name", db.String, 255)           ' Nombre original del archivo
   table.Fields.Add("width_pixels", db.Integer)            ' Ancho en píxeles
   table.Fields.Add("height_pixels", db.Integer)           ' Alto en píxeles
@@ -228,7 +228,7 @@ Private Sub CreateAlbumsTable()
   Dim table As Table
 
   table = $db.Tables.Add(Constants.TABLE_ALBUMS)
-  table.Fields.Add("id", db.Integer)                      ' Identificador del registro
+  table.Fields.Add("id", db.Serial)                      ' Identificador del registro
   table.Fields.Add("name", db.String, 255)                ' Nombre corto para el album
   table.Fields.Add("description", db.String)              ' Descripcion identificadora del album
   table.Fields.Add("creation_date", db.Date)              ' Fecha de creación del album
@@ -248,7 +248,7 @@ Private Sub CreatePhotosAlbumsTable()
   Dim table As Table
 
   table = $db.Tables.Add(Constants.TABLE_PHOTOS_ALBUMS)
-  table.Fields.Add("id", db.Integer)                      ' Identificador del registro
+  table.Fields.Add("id", db.Serial)                      ' Identificador del registro
   table.Fields.Add("photo_id", db.Integer)                ' Identificador de foto asociada
   table.Fields.Add("album_id", db.Integer)                ' Identificador de album asociado
   table.Fields.Add("order_in_album", db.Integer)          ' Indicador de orden de la foto dentro del album
@@ -267,7 +267,7 @@ Private Sub CreateTagsTable()
   Dim table As Table
 
   table = $db.Tables.Add(Constants.TABLE_TAGS)
-  table.Fields.Add("id", db.Integer)                    ' Identificador del registro
+  table.Fields.Add("id", db.Serial)                    ' Identificador del registro
   table.Fields.Add("name", db.String, 100)              ' Nombre del tag
   table.Fields.Add("description", db.String)            ' Descripcion del tag
   table.Fields.Add("color", db.String, 7)               ' Color de despliegue del tag
@@ -285,13 +285,15 @@ Private Sub CreatePhotosTagsTable()
   Dim table As Table
 
   table = $db.Tables.Add(Constants.TABLE_PHOTOS_TAGS)
-  table.Fields.Add("id", db.Integer)                    ' Identificador del registro
-  table.Fields.Add("photo_id", db.Integer)              ' Identificador de foto relacionada
-  table.Fields.Add("tag_id", db.Integer)                ' Identificador de tag relacionado
-  table.Fields.Add("added_date", db.Date)               ' Fecha de agregacion
-  table.Fields.Add("added_user", db.String, 50)         ' Usuario que agrego la relacion
-  table.PrimaryKey = ["id"]
-  table.Update()
+  With table
+    .Fields.Add("id", db.Serial)                    ' Identificador del registro
+    .Fields.Add("photo_id", db.Integer)              ' Identificador de foto relacionada
+    .Fields.Add("tag_id", db.Integer)                ' Identificador de tag relacionado
+    .Fields.Add("added_date", db.Date)               ' Fecha de agregacion
+    .Fields.Add("added_user", db.String, 50)         ' Usuario que agrego la relacion
+    .PrimaryKey = ["id"]
+    .Update()
+  End With
 
   $log4gambas.Debug("Tabla '" & Constants.TABLE_PHOTOS_TAGS & "' creada")
 
