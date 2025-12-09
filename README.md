@@ -78,10 +78,10 @@ Descargar el paquete .deb que esta disponible en el repositorio
 
 ## 🎯 Casos de uso perfectos
 
-- **👨‍👩‍👧‍👦 Familias**: Computadora compartida con fotos de todos
-- **🏢 Pequeñas oficinas**: Archivo fotográfico colaborativo  
-- **🏠 Servidores caseros**: NAS con acceso multiusuario
-- **👥 Colectivos**: Proyectos fotográficos grupales
+- ** Familias**: Computadora compartida con fotos de todos
+- ** Pequeñas oficinas**: Archivo fotográfico colaborativo  
+- ** Servidores caseros**: NAS con acceso multiusuario
+- ** Colectivos**: Proyectos fotográficos grupales
 
 ## 🤝 Contribuir
 
