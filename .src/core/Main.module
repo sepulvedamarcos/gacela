@@ -7,7 +7,6 @@ Private $log4Gambas As Log4Gambas3
 Private $connDB As SQLiteContext
 Private $photorepository As PhotoRepository
 Private $photoService As PhotoService
-Private $compressionService As CompressionService
 
 Public Sub Main()
 
@@ -26,10 +25,8 @@ Public Sub Main()
   $connDB = New SQLiteContext($configuration, $log4gambas)
   ' Crea la clase de capa repository
   $photorepository = New PhotoRepository($configuration, $log4Gambas, $connDB)
-  ' Crea el servicio de compresion
-  $compressionService = New CompressionService($configuration, $log4gambas)
   ' Crea el servicio de creacion de fotos
-  $photoService = New PhotoService($log4gambas, $photorepository, $compressionService, $configuration)
+  $photoService = New PhotoService($log4gambas, $photorepository, $configuration)
 
   ' Si es primera vez, insertar datos de prueba en base privada
   If $configuration.IsFirstRun Then

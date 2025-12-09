@@ -1,7 +1,7 @@
 # Gambas Project File 3.0
 Title=Gestor de Álbumes Compartidos en Linux Avanzado
 Startup=Main
-Icon=.icon.png
+Icon=penguin.png
 Version=0.0.1
 Component=gb.db
 Component=gb.image

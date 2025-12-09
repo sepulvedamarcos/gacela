@@ -1,0 +1,359 @@
+' Gambas class file
+
+'
+'
+' Clase de iteracion de datos
+'
+'
+Private $repository As PhotoRepository
+Private $currentIndex As Integer = 0
+Private $pageSize As Integer = 15
+Private $currentPage As Integer = 0
+Private $cachedPhotos As PhotoEntity[]
+Private $totalCount As Integer = 0
+Private $log4gambas As Log4Gambas3
+Private $hasMorePages As Boolean = True
+' Filtros
+Private $filterGarbage As Boolean = False
+Private $filterFavorites As Boolean = False
+Private $filterFormat As String = ""
+Private $filterDateFrom As Date
+Private $filterDateTo As Date
+Private $filterUser As String = ""
+Private $searchText As String = ""
+Private $sortBy As String = "import_date"  ' import_date, file_name, creation_date
+Private $sortOrder As String = "DESC"      ' ASC, DESC
+
+' ==================================================
+'
+'          Metodos publicos
+'
+' ==================================================
+Public Sub _new(repository As PhotoRepository, logger As Log4Gambas3)
+
+  $repository = repository
+  $log4gambas = logger
+  $cachedPhotos = New PhotoEntity[]
+
+  ' Contar total con filtros actuales
+  UpdateTotalCount()
+
+End
+
+Public Function HasNext() As Boolean '' Verifica si hay más elementos
+
+  If $currentIndex < $cachedPhotos.Count Then
+    Return True
+  Endif
+
+  Return $hasMorePages
+
+End
+
+Public Function Next() As PhotoEntity '' Obtiene el siguiente elemento
+
+  If $currentIndex >= $cachedPhotos.Count Then
+    $log4gambas.Warning("No hay más elementos en el caché. Llame a LoadNextBatch() primero")
+    Return Null
+  Endif
+
+  Dim photo As PhotoEntity = $cachedPhotos[$currentIndex]
+  $currentIndex += 1
+
+  Return photo
+
+End
+
+Public Function LoadNextBatch() As PhotoEntity[] ''Carga el siguiente lote de fotos para scroll infinito
+
+  Dim offset As Integer
+  Dim newPhotos As New PhotoEntity[]
+
+  ' Si ya no hay más páginas
+  If Not $hasMorePages Then
+    $log4gambas.Debug("No hay más páginas para cargar")
+    Return newPhotos
+  Endif
+
+  $currentPage = $currentPage + 1
+  offset = ($currentPage - 1) * $pageSize
+
+  $log4gambas.Debug("Cargando página " & $currentPage & " (offset=" & offset & ", limit=" & $pageSize & ")")
+
+  ' Cargar siguiente lote desde repository
+  newPhotos = $repository.FindWithFilters(BuildFilterQuery(), $sortBy, $sortOrder, $pageSize, offset)
+
+  For Each photo As PhotoEntity In newPhotos
+    $cachedPhotos.Add(photo)
+  Next
+
+  ' Si cargó menos de lo esperado, no hay más páginas
+  If newPhotos.Count < $pageSize Then
+    $hasMorePages = False
+    $log4gambas.Debug("Última página alcanzada")
+  Endif
+
+  $log4gambas.Debug("Lote cargado: " & newPhotos.Count & " fotos. Total en caché: " & $cachedPhotos.Count)
+
+  Return newPhotos
+
+Catch
+  $log4gambas.Error("Error cargando siguiente lote: " & Error.Text)
+
+End
+
+Public Sub Reset() '' Reinicia el iterator
+
+  $currentIndex = 0
+  $currentPage = 0
+  $cachedPhotos.Clear()
+  $hasMorePages = True
+  UpdateTotalCount()
+
+  $log4gambas.Debug("Iterator reiniciado")
+
+End
+
+Public Sub SetFilterFavorites(onlyFavorites As Boolean)
+
+  If $filterFavorites = onlyFavorites Then Return
+
+  $filterFavorites = onlyFavorites
+  Reset()
+
+End
+
+Public Sub SetFilterFormat(format As String)
+
+  format = LCase(format)
+  If $filterFormat = format Then Return
+
+  $filterFormat = format
+  Reset()
+
+End
+
+Public Sub SetFilterDateRange(dateFrom As Date, dateTo As Date)
+
+  $filterDateFrom = dateFrom
+  $filterDateTo = dateTo
+  Reset()
+
+End
+
+Public Sub SetFilterUser(userName As String)
+
+  $filterUser = userName
+  Reset()
+
+End
+
+Public Sub SetSearchText(searchText As String)
+
+  If $searchText = searchText Then Return
+
+  $searchText = searchText
+  Reset()
+
+End
+
+Public Sub SetSortBy(sortBy As String, Optional sortOrder As String = "DESC")
+
+  $sortBy = sortBy
+  $sortOrder = sortOrder
+  Reset()
+
+End
+
+Public Sub ClearFilters()
+
+  $filterGarbage = False
+  $filterFavorites = False
+  $filterFormat = ""
+  $filterDateFrom = Null
+  $filterDateTo = Null
+  $filterUser = ""
+  $searchText = ""
+  Reset()
+
+End
+
+Public Sub SetPageSize(pageSize As Integer)
+
+  If pageSize > 0 And pageSize <= 500 Then
+    $pageSize = pageSize
+    Reset()
+  Endif
+
+End
+
+Public Function GetCurrentPage() As Integer
+
+  Return $currentPage
+
+End
+
+Public Function GetTotalPages() As Integer
+
+  Return Ceil($totalCount / $pageSize)
+
+End
+
+Public Function GetTotalCount() As Integer
+
+  Return $totalCount
+
+End
+
+Public Function GetPageSize() As Integer
+
+  Return $pageSize
+
+End
+
+' Cargar página específica
+Public Sub LoadPage(pageNumber As Integer)
+
+  If pageNumber < 0 Or pageNumber >= GetTotalPages() Then
+    $log4gambas.Warning("Página fuera de rango: " & pageNumber)
+    Return
+  Endif
+
+  $currentPage = pageNumber
+  $currentIndex = 0
+  LoadCurrentPage()
+
+End
+' ==================================================
+'
+'          Metodos privados
+'
+' ==================================================
+
+' Private Sub LoadNextPage()
+'
+'   $currentPage += 1
+'   $currentIndex = 0
+'   LoadCurrentPage()
+'
+' End
+
+Private Sub LoadCurrentPage()
+
+  Dim offset As Integer = $currentPage * $pageSize
+
+  $log4gambas.Debug("Cargando página " & $currentPage & ", offset=" & offset & ", limit=" & $pageSize)
+
+  $cachedPhotos = $repository.FindWithFilters(BuildFilterQuery(), BuildFilterParams(), $sortBy, $sortOrder, $pageSize, offset)
+
+  $log4gambas.Debug("Página cargada: " & $cachedPhotos.Count & " fotos")
+
+Catch
+  $log4gambas.Error("Error cargando página: " & Error.Text)
+  $cachedPhotos = New PhotoEntity[]
+
+End
+
+Private Sub UpdateTotalCount()
+
+  $totalCount = $repository.CountWithFilters(BuildFilterQuery())
+
+  $log4gambas.Debug("Total de fotos con filtros: " & $totalCount)
+
+Catch
+  $log4gambas.Error("Error contando fotos: " & Error.Text)
+  $totalCount = 0
+  Error.Propagate
+
+End
+
+' Construye query WHERE con filtros activos
+Private Function BuildFilterQuery() As String
+
+  Dim conditions As String[] = New String[]
+
+  conditions.Add("soft_delete = " & If($filterGarbage, "true", "false"))
+
+  ' Filtro: solo favoritas
+  If $filterFavorites Then
+    conditions.Add("is_favorite = &2")
+  Endif
+
+  ' Filtro: por formato
+  If $filterFormat <> "" Then
+    conditions.Add("LOWER(original_format) = &3")
+  Endif
+
+  ' Filtro: rango de fechas
+  If $filterDateFrom Then
+    conditions.Add("creation_date >= &4")
+  Endif
+
+  If $filterDateTo Then
+    conditions.Add("creation_date <= &5")
+  Endif
+
+  ' Filtro: por usuario
+  If $filterUser <> "" Then
+    conditions.Add("import_user = &6")
+  Endif
+
+  ' Filtro: búsqueda en nombre
+  If $searchText <> "" Then
+    conditions.Add("LOWER(file_name) LIKE &7")
+  Endif
+
+  Return conditions.Join(" AND ")
+
+End
+
+' Construye parámetros para la query
+Private Function BuildFilterParams() As Variant[]
+
+  Dim params As New Variant[]
+
+  ' Parámetro 1: soft_delete
+  params.Add(False)
+
+  ' Parámetro 2: is_favorite
+  If $filterFavorites Then
+    params.Add(True)
+  Endif
+
+  ' Parámetro 3: format
+  If $filterFormat <> "" Then
+    params.Add($filterFormat)
+  Endif
+
+  ' Parámetro 4: date from
+  If $filterDateFrom Then
+    params.Add($filterDateFrom)
+  Endif
+
+  ' Parámetro 5: date to
+  If $filterDateTo Then
+    params.Add($filterDateTo)
+  Endif
+
+  ' Parámetro 6: user
+  If $filterUser <> "" Then
+    params.Add($filterUser)
+  Endif
+
+  ' Parámetro 7: search text
+  If $searchText <> "" Then
+    params.Add("%" & LCase($searchText) & "%")
+  Endif
+
+  Return params
+
+End
+
+' Properties de solo lectura
+Property Read IsFiltered As Boolean
+
+Function IsFiltered_Read() As Boolean
+
+  Return $filterFavorites Or $filterFormat <> "" Or $filterDateFrom <> Null Or $filterDateTo <> Null Or $filterUser <> "" Or $searchText <> ""
+
+End

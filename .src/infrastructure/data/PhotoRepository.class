@@ -80,12 +80,14 @@ Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrd
     " LIMIT " & limit &
     " OFFSET " & offset
 
+  $log4gambas.Debug($titulo & query)
   ' Convertir params a array para Exec
   result = $dbContext.DBConnection.Exec(query)
 
   If result.Available Then
     Return MapResultToEntities(result)
   Endif
+  Return New PhotoEntity[]
 
 Catch
   $log4gambas.Error($titulo & "Problema en FindWithFilters: " & Error.Text)
@@ -117,7 +119,32 @@ Catch
 
 End
 
-Public Function createPhoto(photo As PhotoEntity) As PhotoEntity
+Public Function createAlbum(album As AlbumEntity) As Integer
+
+  Dim result As Result
+
+  $dbContext.DBConnection.Begin()
+
+  result = $dbContext.DBConnection.Create(Constants.TABLE_ALBUMS)
+  result["name"] = album.Name
+  result["description"] = album.Description
+  result["creation_date"] = Now
+  result["creation_user"] = album.CreationUser
+  result["thumbnail"] = ""
+  result["soft_delete"] = False
+  result.Update()
+
+  $dbContext.DBConnection.Commit
+  Return $dbContext.DBConnection.LastInsertId
+
+Catch
+  $dbContext.DBConnection.Rollback
+  $log4gambas.Error($titulo & "Problemas al crear un album, se hace Rollback")
+  Error.Propagate
+
+End
+
+Public Function createPhoto(photo As PhotoEntity, Optional photoAlbumEntity As PhotoAlbumEntity) As Boolean
 
   Dim result As Result
   Dim photoId As Integer
@@ -152,17 +179,23 @@ Public Function createPhoto(photo As PhotoEntity) As PhotoEntity
   photoId = $dbContext.DBConnection.LastInsertId
   $log4Gambas.Debug($titulo & "Codigo de foto creado [" & photoId & "]")
 
-  result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS_ALBUMS)
-  result["photo_id"] = photoId
-  result["album_id"] = 1
-  result["added_date"] = Now
-  result["added_user"] = photo.ImportUser
-  result.Update()
+  If photoAlbumEntity <> Null Then
+    result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS_ALBUMS)
+    result["photo_id"] = photoId
+    result["album_id"] = photoAlbumEntity.AlbumId
+    result["order_in_album"] = photoAlbumEntity.Order
+    result["added_date"] = Now
+    result["added_user"] = photoAlbumEntity.AddedUser
+    result.Update()
 
-  photoAlbumId = $dbContext.DBConnection.LastInsertId
-  $log4Gambas.Debug($titulo & "Codigo de foto-album creado [" & photoAlbumId & "]")
+    photoAlbumId = $dbContext.DBConnection.LastInsertId
+    $log4Gambas.Debug($titulo & "Codigo de foto-album creado [" & photoAlbumId & "]")
+
+  End If
 
   $dbContext.DBConnection.Commit
+
+  Return True
 
 Catch
   $dbContext.DBConnection.Rollback
@@ -213,7 +246,7 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
   Endif
 
   If text <> "" Then
-    query &= con & " LOWER(description) LIKE '%" & Lower(text) & "%'"
+    query &= con & " LOWER(name) LIKE '%" & Lower(text) & "%'"
   Endif
 
   $log4Gambas.Debug($titulo & "Query [" & query & "]")

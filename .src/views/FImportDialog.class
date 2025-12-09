@@ -38,26 +38,34 @@ Public Sub btnOK_Click()
   Dim resp As Integer
   Dim al As AlbumEntity[]
   Dim id As Integer
+  Dim photoErrors As String[]
 
   If ButtonBoxFilter.Text = "" And ListBoxCollections.Index = -1 Then
     resp = Message.Question(("Estas seguro de no incluir las fotos en un album?"), ("Si"), ("No"))
+
     If resp = 2 Then
       Return
+
     Else
-      $photoService.ImportPhoto($filesDrop, "")
+      $photoService.ImportPhotos($filesDrop)
+
     Endif
   Else
-    If ButtonBoxFilter.Text <> "" And ListBoxCollections.Index = -1 Then
+    If ListBoxCollections.Index = -1 Then
       $log4gambas.Debug($titulo & "Toma texto filtro")
-      $photoService.ImportPhoto($filesDrop, ButtonBoxFilter.Text)
+      photoErrors = $photoService.ImportPhotos($filesDrop, ButtonBoxFilter.Text, TextAreaDescription.Text)
+
     Else
+      $log4gambas.Debug($titulo & "Toma id album listbox" & ListBoxCollections.Tag[ListBoxCollections.Index].Id)
+      photoErrors = $photoService.ImportPhotos($filesDrop, Null, Null, ListBoxCollections.Tag[ListBoxCollections.Index].Id)
 
-      al = ListBoxCollections.Tag
-      id = al[ListBoxCollections.Index].Id
-
-      $log4gambas.Debug($titulo & "Toma id album listbox")
-      $photoService.ImportPhotos($filesDrop, Null, id)
     Endif
+
+    If photoErrors.Count > 0 Then
+      Message.Error("No se pudieron impotar algunas imagenes")
+
+    Endif
+
   Endif
 
   Me.Close(Enumeration.DLG_OK)
@@ -77,6 +85,7 @@ End
 Public Sub ButtonBoxFilter_Filter()
 
   $log4gambas.Debug($titulo & "Filter escribe [" & ButtonBoxFilter.Text & "]")
+  TextAreaDescription.Text = ""
   FindAlbums(ButtonBoxFilter.Text)
 
 End
@@ -84,6 +93,7 @@ End
 Public Sub ButtonBoxFilter_Click()
 
   $log4gambas.Debug($titulo & "Click filter con texto [" & ButtonBoxFilter.Text & "]")
+  TextAreaDescription.Text = ""
   FindAlbums(ButtonBoxFilter.Text)
 
 End
@@ -99,12 +109,16 @@ Public Sub ListBoxCollections_Select()
   Dim al As AlbumEntity[]
   Dim de As String
   Dim id As Integer
+  Dim nm As String
 
   al = ListBoxCollections.Tag
+  nm = al[ListBoxCollections.Index].Name
   de = al[ListBoxCollections.Index].Description
   id = al[ListBoxCollections.Index].Id
+  ' ButtonBoxFilter.Text = nm
+  TextAreaDescription.Text = de
 
-  $log4gambas.Debug($titulo & "Selecciona en el listbox [" & de & "-" & id & "]")
+  $log4gambas.Debug($titulo & "Selecciona en el listbox [" & nm & "][" & de & "][" & id & "]")
 
 End
 
@@ -127,7 +141,7 @@ Private Sub FindAlbums(Optional text As String)
   ListBoxCollections.Tag = albums
   For Each album In albums
 
-    ListBoxCollections.Add(album.Description)
+    ListBoxCollections.Add(album.Name)
 
   Next
 

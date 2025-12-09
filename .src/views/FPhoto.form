@@ -10,7 +10,7 @@
     Picture = Picture["icon:/tiny/add"]
   }
   { ButtonDelete Button
-    MoveScaled(11,10,3,3)
+    MoveScaled(10,9,3,3)
     Picture = Picture["icon:/tiny/trash"]
   }
 }

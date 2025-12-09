@@ -1,7 +1,7 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,48,36)
+  MoveScaled(0,0,73,39)
   Resizable = False
   Spacing = True
   Margin = True
@@ -10,10 +10,10 @@
     Text = ("Agregar un album o crea uno nuevo")
   }
   { ListBoxCollections ListBox
-    MoveScaled(1,10,46,20)
+    MoveScaled(1,13,46,20)
   }
   { HBox1 HBox
-    MoveScaled(1,31,46,4)
+    MoveScaled(1,34,71,4)
     Spacing = True
     { Panel1 Panel
       MoveScaled(4,0,4,4)
@@ -35,5 +35,12 @@
     Button = False
     ClearButton = True
     Filter = True
+  }
+  { TextAreaDescription TextArea
+    MoveScaled(48,5,24,28)
+  }
+  { Label2 Label
+    MoveScaled(1,10,16,3)
+    Text = ("Lista de albumes")
   }
 }

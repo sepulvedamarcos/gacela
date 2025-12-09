@@ -19,6 +19,8 @@ End
 
 Public Sub Form_Open()
 
+  Dim btn As Button
+
   $log4Gambas.Debug("en formulario open obtenemos los registros de fotos")
   ToggleButtonPersonal.Value = IIf($configuration.whichLibrary = Enumeration.LibraryType_Private, True, False)
   If $configuration.whichLibrary = Enumeration.LibraryType_Private Then
@@ -33,6 +35,11 @@ Public Sub Form_Open()
   ClearPhotoGallery()
   ' TODO: aqui deberia levantar los filtros usados la ultima vez
   CreatePhotoPanels($photoService.loadFirstPage())
+
+  btn = New Button(ExpanderAlbum)
+  btn.Width = 60
+  btn.Height = 24
+  btn.Text = "hola que tal"
 
 End
 
@@ -117,6 +124,7 @@ Public Sub PanelGalleryContent_Scroll()
   Dim scrollPos As Float
   Dim scrollMax As Float
   Dim threshold As Float = 0.8  ' 80% del scroll
+  Dim newPhotos As PhotoEntity[]
 
   ' Calcular posición del scroll (0.0 a 1.0)
   scrollMax = PanelGalleryContent.ScrollHeight - PanelGalleryContent.ClientHeight
@@ -127,7 +135,10 @@ Public Sub PanelGalleryContent_Scroll()
 
   ' Si llegó al 80% y no está cargando, cargar más
   If scrollPos >= threshold Then
-    CreatePhotoPanels($photoService.loadNextPage())
+    newPhotos = $photoService.loadNextPage()
+    If newPhotos.Count > 0 Then
+      CreatePhotoPanels(newPhotos)
+    End If
   Endif
 
 End

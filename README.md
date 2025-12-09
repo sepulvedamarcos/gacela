@@ -118,18 +118,27 @@ cd gacela
 4. Push al branch (`git push origin feature/nueva-funcionalidad`)
 5. Abre un Pull Request
 
-## 📄 Licencia
+**¿Necesitas algo similar para libros?**
+📚 Mantente atento a nuestro próximo proyecto...
 
-GPL v3 - Software libre para siempre.
+### 🤝 Conectemos
 
-## 💡 Inspiración
-
-*"Una aplicación no debería obligarte a reorganizar tu vida digital. Debería adaptarse a como ya trabajas."*
+<p align="center">
+  <a href="https://www.linkedin.com/in/sepulveda-marcos">
+    <img src="https://img.shields.io/badge/LinkedIn-Marcos%20Sep%C3%BAlveda-blue?logo=linkedin&logoColor=white" />
+  </a>
+  <a href="mailto:sepulvedamarcos@gmail.com">
+    <img src="https://img.shields.io/badge/Email-sepulvedamarcos%40gmail.com-red?logo=gmail&logoColor=white" />
+  </a>
+  <a href="https://ko-fi.com/sepulvedamarcos">
+    <img src="https://img.shields.io/badge/Ko--fi-Apoyar%20con%20un%20caf%C3%A9-ff5e5b?logo=kofi&logoColor=white" />
+  </a>
+</p>
 
 ---
-
-**¿Te gusta Gacela?** ⭐ Dale una estrella al repo y cuéntanos tu experiencia en [Issues](https://github.com/sepulvedamarcos/gambas_acela/issues)
-
-**¿Necesitas algo similar para libros?** 📚 Mantente atento a nuestro próximo proyecto...
-
-**¿Quieres apoyar el desarrollo?** ☕ [Invítame un café](https://ko-fi.com/sepulvedamarcos)
+**¿Te gusta Gacela?**
+⭐ Dale una estrella al repo y cuéntanos tu experiencia en [Issues](https://github.com/sepulvedamarcos/gambas_acela/issues)
+---
+<p align="center">
+  <i>"Una aplicación no debería obligarte a reorganizar tu vida digital. Debería adaptarse a como ya trabajas."</i>
+</p>
