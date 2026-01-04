@@ -18,7 +18,6 @@
     Spacing = True
     { PanelIzquierdo Panel
       MoveScaled(1,1,27,69)
-      Background = &HCDD9E4
       Arrangement = Arrange.Row
       Padding = 4
       { Label2 Label
@@ -125,7 +124,7 @@
         }
       }
       { !PanelGalleryContent ScrollView
-        MoveScaled(1,17,90,27)
+        MoveScaled(1,16,90,27)
         #Public = True
         Expand = True
         Arrangement = Arrange.Row

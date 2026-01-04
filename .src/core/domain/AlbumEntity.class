@@ -1,0 +1,112 @@
+' Gambas class file
+
+'
+' Gambas class file - AlbumEntity
+' Modelo de dominio para representar una foto en Gacela
+'
+
+' Propiedades privadas del modelo
+Private $id As Integer = 0
+Private $name As String = ""
+Private $description As String = ""
+Private $creationDate As Date
+Private $creationUser As Date
+Private $thumbnail As String
+Private $softDelete As Boolean
+
+' =============================================
+'
+'            PROPIEDADES PÚBLICAS
+'
+'==============================================
+Property Id As Integer                      '' Id Unico del album
+Property Name As String                     '' Nombre del album
+Property Description As String              '' Descripcion del album
+Property CreationDate As Date               '' Fecha de creacion del album
+Property CreationUser As Date               '' Usuario que crea el album
+Property Thumbnail As String                '' Imagen miniatura del album
+Property SoftDelete As Boolean              '' Indicador para saber si fue borrado
+
+Private Function Id_Read() As Integer
+
+  Return $id
+
+End
+
+Private Sub Id_Write(Value As Integer)
+
+  $id = value
+
+End
+
+Private Function Name_Read() As String
+
+  Return $name
+
+End
+
+Private Sub Name_Write(Value As String)
+
+  $name = value
+
+End
+
+Private Function Description_Read() As String
+
+  Return $description
+
+End
+
+Private Sub Description_Write(Value As String)
+
+  $description = value
+
+End
+
+Private Function CreationDate_Read() As Date
+
+  Return $creationDate
+
+End
+
+Private Sub CreationDate_Write(Value As Date)
+
+  $creationDate = value
+  
+End
+
+Private Function CreationUser_Read() As Date
+
+  Return $creationUser
+
+End
+
+Private Sub CreationUser_Write(Value As Date)
+
+  $creationUser = value
+
+End
+
+Private Function Thumbnail_Read() As String
+
+  Return $thumbnail
+
+End
+
+Private Sub Thumbnail_Write(Value As String)
+
+  $thumbnail = value
+
+End
+
+Private Function SoftDelete_Read() As Boolean
+
+  Return $softDelete
+
+End
+
+Private Sub SoftDelete_Write(Value As Boolean)
+
+  $softDelete = value
+
+End

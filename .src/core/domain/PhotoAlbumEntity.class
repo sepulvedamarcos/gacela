@@ -1,0 +1,111 @@
+' Gambas class file
+
+'
+' Gambas class file - PhotoAlbumEntity
+' Modelo de dominio para representar una foto en Gacela
+'
+
+' Propiedades privadas del modelo
+Private $id As Integer = 0
+Private $photoId As Integer
+Private $albumId As Integer
+Private $orderInAlbum As Integer = 0
+Private $addedDate As Date
+Private $addedUser As String
+Private $softDelete As Boolean
+
+' =============================================
+'
+'            PROPIEDADES PÚBLICAS
+'
+'==============================================
+Property Id As Integer                     ''Id Unico de la relacion photo album
+Property PhotoId As Integer                '' Identificador de la photo
+Property AlbumId As Integer                '' Identificador del album
+Property OrderInAlbum As Integer            '' Indicador de posicion dentro del album
+Property AddedDate As Date                 '' Fecha de agregacion al album
+Property AddedUser As String               '' Usuario que agrego la foto al album
+Property SoftDelete As Boolean             '' Indicador para saber si fue borrado
+
+Private Function Id_Read() As Integer
+
+  Return $id
+
+End
+
+Private Sub Id_Write(Value As Integer)
+
+  $id = value
+
+End
+
+Private Function PhotoId_Read() As Integer
+
+  Return $photoId
+
+End
+
+Private Sub PhotoId_Write(Value As Integer)
+
+  $photoId = value
+
+End
+
+Private Function AlbumId_Read() As Integer
+
+  Return $albumId
+
+End
+
+Private Sub AlbumId_Write(Value As Integer)
+
+  $albumId = value
+
+End
+
+Private Function OrderInAlbum_Read() As Integer
+
+  Return $orderInAlbum
+
+End
+
+Private Sub OrderInAlbum_Write(Value As Integer)
+
+  $orderInAlbum = value
+
+End
+
+Private Function AddedDate_Read() As Date
+
+Return $addedDate  
+
+End
+
+Private Sub AddedDate_Write(Value As Date)
+
+  $addedDate = value
+
+End
+
+Private Function AddedUser_Read() As String
+
+  Return $addedUser
+End
+
+Private Sub AddedUser_Write(Value As String)
+
+  $addedUser = value
+
+End
+
+Private Function SoftDelete_Read() As Boolean
+
+  Return $softDelete
+
+End
+
+Private Sub SoftDelete_Write(Value As Boolean)
+
+  $softDelete = value
+
+End
