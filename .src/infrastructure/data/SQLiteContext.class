@@ -191,29 +191,29 @@ Private Sub CreatePhotosTable()
   Dim table As Table
 
   table = $db.Tables.Add(Constants.TABLE_PHOTOS)
-  table.Fields.Add("id", db.Serial)                       ' identificador del registro
-  table.Fields.Add("file_name", db.String, 255)           ' Nombre original del archivo
-  table.Fields.Add("width_pixels", db.Integer)            ' Ancho en píxeles
-  table.Fields.Add("height_pixels", db.Integer)           ' Alto en píxeles
-  table.Fields.Add("creation_date", db.Date)              ' Fecha de creación de la foto
-  table.Fields.Add("import_date", db.Date)                ' Fecha de importación a Gacela
-  table.Fields.Add("description", db.String)              ' Descripción de la foto
-  table.Fields.Add("stars", db.Integer)                   ' Cantidad de estrellas
-  table.Fields.Add("import_user", db.String, 50)          ' Usuario que la importó
-  table.Fields.Add("image_path", db.String, 255)          ' Ruta completa para obtencion de la imagen original
-  Table.Fields.Add("hash256", db.String, 255)             ' Hash 256 de la imagen para validar existencia
-  table.Fields.Add("thumbnail", db.Blob)                  ' MINIATURA (BLOB)
-  table.Fields.Add("last_sync_date", db.Date)             ' Fecha de ultima sincronizacion a Gacela (para futura sync con nube)
-  Table.Fields.Add("sync_status", db.Integer)             ' Indicador del estado de la sincronizacion
-  table.Fields.Add("soft_delete", db.Boolean)             ' Soft delete (garbage collector)
-  table.Fields.Add("soft_deleted_date", db.date)          ' Indica la fecha en que eliminada
-  table.Fields.Add("soft_deleted_by", db.String, 50)      ' Indica el usuario que elimino
-  Table.Fields.Add("soft_deleted_auto", db.Date)          ' Fecha en que debe ser eliminada fisicamente
-  table.Fields.Add("is_locked", db.Boolean)               ' Indica si esta bloquedad para eliminacion
-  table.Fields.Add("locked_by", db.String, 50)            ' Indica usuario que bloqueo la foto
-  table.Fields.Add("locked_date", db.date)                ' Indica la fecha en que fue bloqueada
-  table.Fields.Add("lock_reason", db.String, 200)         ' Razon por la que fue bloqueada
-  table.PrimaryKey = ["id"]                               ' Crea primary key
+  table.Fields.Add("id", db.Serial)                       '' identificador del registro
+  table.Fields.Add("file_name", db.String, 255)           '' Nombre original del archivo
+  table.Fields.Add("width_pixels", db.Integer)            '' Ancho en píxeles
+  table.Fields.Add("height_pixels", db.Integer)           '' Alto en píxeles
+  table.Fields.Add("creation_date", db.Date)              '' Fecha de creación de la foto
+  table.Fields.Add("import_date", db.Date)                '' Fecha de importación a Gacela
+  table.Fields.Add("description", db.String)              '' Descripción de la foto
+  table.Fields.Add("stars", db.Integer)                   '' Cantidad de estrellas
+  table.Fields.Add("import_user", db.String, 50)          '' Usuario que la importó
+  table.Fields.Add("image_path", db.String, 255)          '' Ruta completa para obtencion de la imagen original
+  Table.Fields.Add("hash256", db.String, 255)             '' Hash 256 de la imagen para validar existencia
+  table.Fields.Add("thumbnail", db.Blob)                  '' MINIATURA (BLOB)
+  table.Fields.Add("last_sync_date", db.Date)             '' Fecha de ultima sincronizacion a Gacela (para futura sync con nube)
+  Table.Fields.Add("sync_status", db.Integer)             '' Indicador del estado de la sincronizacion
+  table.Fields.Add("soft_delete", db.Boolean)             '' Soft delete (garbage collector)
+  table.Fields.Add("soft_deleted_date", db.date)          '' Indica la fecha en que eliminada
+  table.Fields.Add("soft_deleted_by", db.String, 50)      '' Indica el usuario que elimino
+  Table.Fields.Add("soft_deleted_auto", db.Date)          '' Fecha en que debe ser eliminada fisicamente
+  table.Fields.Add("is_locked", db.Boolean)               '' Indica si esta bloquedad para eliminacion
+  table.Fields.Add("locked_by", db.String, 50)            '' Indica usuario que bloqueo la foto
+  table.Fields.Add("locked_date", db.date)                '' Indica la fecha en que fue bloqueada
+  table.Fields.Add("lock_reason", db.String, 200)         '' Razon por la que fue bloqueada
+  table.PrimaryKey = ["id"]                               '' Crea primary key
   ' table.Indexes.Add("hashx", ["hash256"])                   ' Crea indice por Hash256
   ' table.Indexes.Add("softx", ["soft_delete"])               ' Crea indice por Soft_delete
   table.Update()
@@ -228,14 +228,14 @@ Private Sub CreateAlbumsTable()
   Dim table As Table
 
   table = $db.Tables.Add(Constants.TABLE_ALBUMS)
-  table.Fields.Add("id", db.Serial)                      ' Identificador del registro
-  table.Fields.Add("name", db.String, 255)                ' Nombre corto para el album
-  table.Fields.Add("description", db.String)              ' Descripcion identificadora del album
-  table.Fields.Add("creation_date", db.Date)              ' Fecha de creación del album
-  table.Fields.Add("creation_user", db.String, 50)        ' Usuario que creo el album
-  table.Fields.Add("thumbnail", db.Blob)                  ' ← MINIATURA (BLOB)
-  table.Fields.Add("soft_delete", db.Boolean)             ' Soft delete
-  table.PrimaryKey = ["id"]
+  table.Fields.Add("id", db.Serial)                       '' Identificador del registro
+  table.Fields.Add("name", db.String, 255)                '' Nombre corto para el album
+  table.Fields.Add("description", db.String)              '' Descripcion identificadora del album
+  table.Fields.Add("creation_date", db.Date)              '' Fecha de creación del album
+  table.Fields.Add("creation_user", db.String, 50)        '' Usuario que creo el album
+  table.Fields.Add("thumbnail", db.Blob)                  '' ← MINIATURA (BLOB)
+  table.Fields.Add("soft_delete", db.Boolean)             '' Soft delete
+  table.PrimaryKey = ["id"]                               '' Crea primary key
   table.Update()
 
   $log4gambas.Debug("Tabla '" & Constants.TABLE_ALBUMS & "' creada")

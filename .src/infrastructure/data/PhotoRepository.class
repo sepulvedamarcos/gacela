@@ -119,7 +119,7 @@ Catch
 
 End
 
-Public Function createAlbum(album As AlbumEntity) As Integer
+Public Function CreateAlbum(album As AlbumEntity) As Integer
 
   Dim result As Result
 
@@ -139,10 +139,32 @@ Public Function createAlbum(album As AlbumEntity) As Integer
 
 Catch
   $dbContext.DBConnection.Rollback
-  $log4gambas.Error($titulo & "Problemas al crear un album, se hace Rollback")
+  $log4gambas.Error($titulo & ("Problemas al crear un album, se hace Rollback"))
   Error.Propagate
 
 End
+
+
+Public Function DeleteAlbum(id As Integer) As Integer
+
+  Dim result As Result
+
+  $dbContext.DBConnection.Begin()
+  result = $dbContext.DBConnection.Edit(Constants.TABLE_ALBUMS)
+  result["id"] = id
+  result["soft_delete"] = 1
+  result.Update()
+
+  $dbContext.DBConnection.Commit
+  Return $dbContext.DBConnection.LastInsertId
+
+Catch
+  $dbContext.DBConnection.Rollback
+  $log4gambas.Error($titulo & ("Problemas al eliminarr un album, se hace Rollback"))
+  Error.Propagate
+
+End
+
 
 Public Function createPhoto(photo As PhotoEntity, Optional photoAlbumEntity As PhotoAlbumEntity) As Boolean
 
@@ -177,19 +199,19 @@ Public Function createPhoto(photo As PhotoEntity, Optional photoAlbumEntity As P
   result.Update()
 
   photoId = $dbContext.DBConnection.LastInsertId
-  $log4Gambas.Debug($titulo & "Codigo de foto creado [" & photoId & "]")
+  $log4Gambas.Debug($titulo & ("Codigo de foto creado") & " [" & photoId & "]")
 
   If photoAlbumEntity <> Null Then
     result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS_ALBUMS)
     result["photo_id"] = photoId
     result["album_id"] = photoAlbumEntity.AlbumId
-    result["order_in_album"] = photoAlbumEntity.Order
-    result["added_date"] = Now
+    result["order_in_album"] = photoAlbumEntity.OrderInAlbum
+    result["added_date"] = Now()
     result["added_user"] = photoAlbumEntity.AddedUser
     result.Update()
 
     photoAlbumId = $dbContext.DBConnection.LastInsertId
-    $log4Gambas.Debug($titulo & "Codigo de foto-album creado [" & photoAlbumId & "]")
+    $log4Gambas.Debug($titulo & ("Codigo de foto-album creado") & " [" & photoAlbumId & "]")
 
   End If
 
@@ -252,7 +274,7 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
   $log4Gambas.Debug($titulo & "Query [" & query & "]")
   result = $dbContext.DBConnection.Exec(query)
   If result.Available Then
-    Return MapAlbumEntity(result)
+    Return MapAlbumEntitys(result)
   Endif
 
   Return New AlbumEntity[]
@@ -312,12 +334,12 @@ Catch
 
 End
 
-Private Sub MapAlbumEntity(result As Result) As AlbumEntity[] '' Mapeo de albums
+Private Sub MapAlbumEntitys(result As Result) As AlbumEntity[] '' Mapeo de albums
 
   Dim album As AlbumEntity
   Dim albums As New AlbumEntity[]
 
-  For Each result
+  While (result.Available)
     album = New AlbumEntity
 
     ' Mapeo todos los campos
@@ -328,9 +350,10 @@ Private Sub MapAlbumEntity(result As Result) As AlbumEntity[] '' Mapeo de albums
     album.CreationUser = result["creation_user"]
     album.Thumbnail = result["thumbnail"]
     album.SoftDelete = result["soft_delete"]
-
     albums.Add(album)
-  Next
+
+    result.MoveNext()
+  Wend
 
   Return albums
 

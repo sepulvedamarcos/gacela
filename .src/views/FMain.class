@@ -27,6 +27,9 @@ Public Sub Form_Open()
     ToggleButtonPersonal.Picture = Picture.Load("icon:/medium/apply")
   Endif
 
+  ExpanderAlbum.Hidden = True
+  ExpanderTags.Hidden = True
+  
   ToggleButtonCompartida.Value = IIf($configuration.whichLibrary = Enumeration.LibraryType_Private, False, True)
   If $configuration.whichLibrary = Enumeration.LibraryType_Shared Then
     ToggleButtonCompartida.Picture = Picture.Load("icon:/medium/apply")

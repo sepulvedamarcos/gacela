@@ -1,24 +1,51 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,137,72)
+  MoveScaled(0,0,138,81)
   Drop = True
   Expand = True
   Arrangement = Arrange.Vertical
   { buscar Menu
     Toggle = True
+    Visible = False
     { nombre Menu
       Text = ("nombre")
       Checked = True
     }
   }
+  { Configuration Menu
+    Text = ("Opciones")
+    Visible = False
+    { Configuration_Option Menu
+      Text = ("Opciones")
+    }
+    { Configuration_Abour Menu
+      Text = ("Acerca de ") & "..."
+    }
+  }
+  { HBox4 HBox
+    MoveScaled(0,0,137,8)
+    Spacing = True
+    Padding = 2
+    { Panel2 Panel
+      MoveScaled(105,0,8,8)
+      Expand = True
+      AutoResize = True
+    }
+    { ToolButton1 ToolButton
+      MoveScaled(127,1,8,6)
+      PopupMenu = "Configuration"
+      Picture = Picture["icon:/32/menu"]
+    }
+  }
   { HBox1 HBox
-    MoveScaled(0,0,137,72)
+    MoveScaled(0,8,137,72)
     Expand = True
     Spacing = True
     { PanelIzquierdo Panel
       MoveScaled(1,1,27,69)
       Arrangement = Arrange.Row
+      Spacing = True
       Padding = 4
       { Label2 Label
         MoveScaled(2,2,13,3)
@@ -55,7 +82,7 @@
           MoveScaled(3,12,16,4)
         }
       }
-      { Expander2 Expander
+      { ExpanderTags Expander
         MoveScaled(1,47,24,21)
         Font = Font["Poppins,16"]
         Expand = True

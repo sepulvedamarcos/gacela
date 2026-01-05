@@ -139,6 +139,50 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
 
 End
 
+Public Function AddAlbum(name As String, description As String) As Boolean
+  
+  Dim album As New AlbumEntity
+  Dim key As Integer
+  
+  album.Name = name
+  album.Description = description
+  album.CreationUser = User.Name
+  
+  $log4gambas.Debug($titulo & ("Creacion de entidad album para enviar grabar"))
+  key = $photoRepository.CreateAlbum(album)
+  If key Then 
+    Return True
+  Endif
+
+  Return False
+
+Catch
+  $log4gambas.Error($titulo & ("Problemas al crear un album"))
+  Error.Propagate
+
+End
+
+
+Public Function RemoveAlbum(id As Integer) As Boolean
+
+  Dim key As Integer
+
+  $log4gambas.Debug($titulo & ("Eliminacion de entidad album") & Str(id))
+  key = $photoRepository.DeleteAlbum(id)
+  
+  If key Then 
+    Return True
+  Endif
+
+  Return False
+
+Catch
+  $log4gambas.Error($titulo & ("Problemas al eliminar un album"))
+  Error.Propagate
+
+End
+
+
 ' ==================================================
 '
 '          Metodos privados
@@ -261,7 +305,7 @@ Private Function SavePhoto(imagenPath As String, Optional albumId As Integer, Op
 
   If albumId <> 0 Then
     photoAlbumEntity.AlbumId = albumId
-    photoAlbumEntity.Order = index
+    photoAlbumEntity.OrderInAlbum = index
     photoAlbumEntity.AddedUser = User.Name
 
     resp = $photoRepository.createPhoto(photoEntity, photoAlbumEntity)

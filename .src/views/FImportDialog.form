@@ -1,46 +1,120 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,73,39)
+  MoveScaled(0,0,108,61)
+  Text = ("Dialogo de importación de fotos")
   Resizable = False
   Spacing = True
   Margin = True
-  { Label1 Label
-    MoveScaled(1,1,33,3)
-    Text = ("Agregar un album o crea uno nuevo")
+  Padding = 4
+  { PanelList Panel
+    MoveScaled(0,0,108,52)
+    { PictureBoxPreview PictureBox
+      MoveScaled(75,4,32,32)
+      Alignment = Align.Center
+      Border = Border.Plain
+      Mode = PictureBox.Contain
+    }
+    { Label4 Label
+      MoveScaled(75,1,18,3)
+      Text = ("Pre visualización")
+    }
+    { Label3 Label
+      MoveScaled(1,1,25,3)
+      Text = ("Lista de fotos a importar")
+    }
+    { ListEditorPhotos ListEditor
+      MoveScaled(1,4,73,40)
+      Moveable = False
+    }
+    { CheckBoxEnableAlbum CheckBox
+      MoveScaled(1,45,72,4)
+      Text = ("Importar las fotos en un album")
+    }
+    { LabelAlbumDescriptionSelected Label
+      MoveScaled(4,49,102,3)
+      Font = Font["-2"]
+    }
   }
-  { ListBoxCollections ListBox
-    MoveScaled(1,13,46,20)
-  }
-  { HBox1 HBox
-    MoveScaled(1,34,71,4)
-    Spacing = True
-    { Panel1 Panel
-      MoveScaled(4,0,4,4)
+  { VBoxButtons VBox
+    MoveScaled(0,52,108,9)
+    Margin = True
+    Padding = 4
+    { Separator1 Separator
+      MoveScaled(1,0,104,2)
       Expand = True
     }
-    { btnOK Button
-      MoveScaled(13,0,16,4)
-      Text = ("OK")
-      Default = True
+    { HBox1 HBox
+      MoveScaled(0,2,107,7)
+      Expand = True
+      AutoResize = True
+      Spacing = True
+      Padding = 4
+      { ButtonDefault Button
+        MoveScaled(2,1,20,4)
+        Text = ("Predeterminados")
+      }
+      { Panel1 Panel
+        MoveScaled(35,1,4,4)
+        Expand = True
+      }
+      { btnOK Button
+        MoveScaled(52,1,16,4)
+        Text = ("OK")
+      }
+      { btnCancel Button
+        MoveScaled(73,1,16,4)
+        Text = ("Cancel")
+      }
     }
-    { btnCancel Button
-      MoveScaled(30,0,16,4)
-      Text = ("Cancel")
-      Cancel = True
+  }
+  { PanelAssociateAlbum Panel
+    MoveScaled(26,2,51,56)
+    Background = Color.Background
+    Border = Border.Sunken
+    { TextAreaAlbumDescription TextArea
+      MoveScaled(2,41,48,8)
     }
-  }
-  { ButtonBoxFilter ButtonBox
-    MoveScaled(1,5,46,4)
-    Button = False
-    ClearButton = True
-    Filter = True
-  }
-  { TextAreaDescription TextArea
-    MoveScaled(48,5,24,28)
-  }
-  { Label2 Label
-    MoveScaled(1,10,16,3)
-    Text = ("Lista de albumes")
+    { ListEditorAvailabeAlbums ListEditor
+      MoveScaled(2,12,48,20)
+    }
+    { ButtonBoxFilter ButtonBox
+      MoveScaled(2,7,48,4)
+      Placeholder = ("Album a buscar")
+      Button = False
+      ClearButton = True
+      Filter = True
+    }
+    { Label1 Label
+      MoveScaled(2,2,48,3)
+      Font = Font["+4"]
+      Text = ("Selección de Album")
+    }
+    { HBox2 HBox
+      MoveScaled(1,50,49,6)
+      Expand = True
+      AutoResize = True
+      Spacing = True
+      Padding = 4
+      { Panel2 Panel
+        MoveScaled(1,1,4,4)
+        Expand = True
+      }
+      { btnOkAlbum Button
+        MoveScaled(8,1,16,4)
+        Text = ("OK")
+      }
+      { btnCancelAlbum Button
+        MoveScaled(29,1,16,4)
+        Text = ("Cancel")
+      }
+    }
+    { TextBoxAlbum TextBox
+      MoveScaled(2,36,48,4)
+    }
+    { Label2 Label
+      MoveScaled(2,33,47,3)
+      Text = ("Nombre y descripción del album")
+    }
   }
 }

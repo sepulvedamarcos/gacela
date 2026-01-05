@@ -27,55 +27,55 @@ Property AddedDate As Date                 '' Fecha de agregacion al album
 Property AddedUser As String               '' Usuario que agrego la foto al album
 Property SoftDelete As Boolean             '' Indicador para saber si fue borrado
 
-Private Function Id_Read() As Integer
+ Function Id_Read() As Integer
 
   Return $id
 
 End
 
-Private Sub Id_Write(Value As Integer)
+ Sub Id_Write(Value As Integer)
 
   $id = value
 
 End
 
-Private Function PhotoId_Read() As Integer
+ Function PhotoId_Read() As Integer
 
   Return $photoId
 
 End
 
-Private Sub PhotoId_Write(Value As Integer)
+ Sub PhotoId_Write(Value As Integer)
 
   $photoId = value
 
 End
 
-Private Function AlbumId_Read() As Integer
+ Function AlbumId_Read() As Integer
 
   Return $albumId
 
 End
 
-Private Sub AlbumId_Write(Value As Integer)
+ Sub AlbumId_Write(Value As Integer)
 
   $albumId = value
 
 End
 
-Private Function OrderInAlbum_Read() As Integer
+ Function OrderInAlbum_Read() As Integer
 
   Return $orderInAlbum
 
 End
 
-Private Sub OrderInAlbum_Write(Value As Integer)
+ Sub OrderInAlbum_Write(Value As Integer)
 
   $orderInAlbum = value
 
 End
 
-Private Function AddedDate_Read() As Date
+ Function AddedDate_Read() As Date
 
 Return $addedDate  
 
@@ -87,24 +87,24 @@ Private Sub AddedDate_Write(Value As Date)
 
 End
 
-Private Function AddedUser_Read() As String
+ Function AddedUser_Read() As String
 
   Return $addedUser
 End
 
-Private Sub AddedUser_Write(Value As String)
+ Sub AddedUser_Write(Value As String)
 
   $addedUser = value
 
 End
 
-Private Function SoftDelete_Read() As Boolean
+ Function SoftDelete_Read() As Boolean
 
   Return $softDelete
 
 End
 
-Private Sub SoftDelete_Write(Value As Boolean)
+ Sub SoftDelete_Write(Value As Boolean)
 
   $softDelete = value
 
