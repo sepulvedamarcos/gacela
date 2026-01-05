@@ -7,6 +7,8 @@ Private $log4Gambas As Log4Gambas3
 Private $connDB As SQLiteContext
 Private $photorepository As PhotoRepository
 Private $photoService As PhotoService
+Private $titulo As String = "[Main] "
+
 
 Public Sub Main()
 
@@ -16,7 +18,7 @@ Public Sub Main()
 
   $configuration = New Configuration
   $log4Gambas = $configuration.InitializeLogger()
-  $log4Gambas.Info("Iniciando Gacela v" & Application.Version)
+  $log4Gambas.Info($titulo & ("Iniciando Gacela") & " V" & Application.Version)
 
   ' Inicializa el entorno segun lo definido en el settings
   $configuration.InitializeEnvironment()
@@ -38,7 +40,7 @@ Public Sub Main()
   formMain.Show()
 
 Catch
-  Print "Se detecto un problema grave y se detendra la aplicación " & Error.Text
-  Message.Error("Se detecto un problema grave y se detendra la aplicación " & Error.Text)
+  Print $titulo & ("Se detecto un problema grave y se detendra la aplicación : ") & Error.Text
+  Message.Error("Se detecto un problema grave y se detendra la aplicación : " & Error.Text)
 
 End

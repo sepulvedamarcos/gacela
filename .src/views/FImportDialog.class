@@ -123,8 +123,9 @@ End
 
 Public Sub btnOkAlbum_Click()
 
-  If TextBoxAlbum.Text = "" Then
+  If TextBoxAlbum.Text = "" Or ListEditorAvailabeAlbums.List.Count = 0 Then
     Message.Warning(("Debe seleccionar un album para continuar"))
+    ListEditorAvailabeAlbums.SetFocus()
     Return
   Endif
 
@@ -157,7 +158,7 @@ Public Sub ListEditorAvailabeAlbums_Add()
     TextBoxAlbum.SetFocus()
     Return 
   Endif
-  
+
   albums = ListEditorAvailabeAlbums.Tag
   For Each album In albums
     If album.Name = TextBoxAlbum.Text Then 

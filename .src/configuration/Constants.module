@@ -17,8 +17,8 @@ Public Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"     '' Tabla de rela
 Public Const TABLE_PHOTOS_TAGS As String = "photos_tags"        '' Tabla de relacion Foto-Tag
 
 ' Fotos semilla para iniciar la aplicacion
-Public Const PHOTO_SEED_1 As String = "./img-126.png"           '' Foto para iniciar aplicacion
-Public Const PHOTO_SEED_2 As String = "./img-125.png"           '' Foto para iniciar aplicacion
+Public Const PHOTO_SEED_1 As String = "images/img-126.png"           '' Foto para iniciar aplicacion
+Public Const PHOTO_SEED_2 As String = "images/img-125.png"           '' Foto para iniciar aplicacion
 
 ' Textos para indicar estado de sincronizacion
 Public Const SYNC_PENDING As String = "Pendiente"               '' Estado de sincronizacion pendiente

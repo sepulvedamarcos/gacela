@@ -9,6 +9,7 @@ Private $db As Connection
 Private $log4gambas As Log4Gambas3
 Private $configuration As Configuration
 Private $dbLibraryDirectory As String
+Private $titulo As String = "[SQLiteContext] "
 
 ' Property para acceso a la conexión
 Property Read DBConnection As Connection
@@ -185,119 +186,6 @@ Private Sub ConnectDatabase()
 
 End
 
-' Crea tabla principal de fotos usando método nativo - NUEVA ESTRUCTURA CON BLOBS
-Private Sub CreatePhotosTable()
-
-  Dim table As Table
-
-  table = $db.Tables.Add(Constants.TABLE_PHOTOS)
-  table.Fields.Add("id", db.Serial)                       '' identificador del registro
-  table.Fields.Add("file_name", db.String, 255)           '' Nombre original del archivo
-  table.Fields.Add("width_pixels", db.Integer)            '' Ancho en píxeles
-  table.Fields.Add("height_pixels", db.Integer)           '' Alto en píxeles
-  table.Fields.Add("creation_date", db.Date)              '' Fecha de creación de la foto
-  table.Fields.Add("import_date", db.Date)                '' Fecha de importación a Gacela
-  table.Fields.Add("description", db.String)              '' Descripción de la foto
-  table.Fields.Add("stars", db.Integer)                   '' Cantidad de estrellas
-  table.Fields.Add("import_user", db.String, 50)          '' Usuario que la importó
-  table.Fields.Add("image_path", db.String, 255)          '' Ruta completa para obtencion de la imagen original
-  Table.Fields.Add("hash256", db.String, 255)             '' Hash 256 de la imagen para validar existencia
-  table.Fields.Add("thumbnail", db.Blob)                  '' MINIATURA (BLOB)
-  table.Fields.Add("last_sync_date", db.Date)             '' Fecha de ultima sincronizacion a Gacela (para futura sync con nube)
-  Table.Fields.Add("sync_status", db.Integer)             '' Indicador del estado de la sincronizacion
-  table.Fields.Add("soft_delete", db.Boolean)             '' Soft delete (garbage collector)
-  table.Fields.Add("soft_deleted_date", db.date)          '' Indica la fecha en que eliminada
-  table.Fields.Add("soft_deleted_by", db.String, 50)      '' Indica el usuario que elimino
-  Table.Fields.Add("soft_deleted_auto", db.Date)          '' Fecha en que debe ser eliminada fisicamente
-  table.Fields.Add("is_locked", db.Boolean)               '' Indica si esta bloquedad para eliminacion
-  table.Fields.Add("locked_by", db.String, 50)            '' Indica usuario que bloqueo la foto
-  table.Fields.Add("locked_date", db.date)                '' Indica la fecha en que fue bloqueada
-  table.Fields.Add("lock_reason", db.String, 200)         '' Razon por la que fue bloqueada
-  table.PrimaryKey = ["id"]                               '' Crea primary key
-  ' table.Indexes.Add("hashx", ["hash256"])                   ' Crea indice por Hash256
-  ' table.Indexes.Add("softx", ["soft_delete"])               ' Crea indice por Soft_delete
-  table.Update()
-
-  $log4gambas.Debug("Tabla '" & Constants.TABLE_PHOTOS & "' creada")
-
-End
-
-' Crea tabla de álbumes
-Private Sub CreateAlbumsTable()
-
-  Dim table As Table
-
-  table = $db.Tables.Add(Constants.TABLE_ALBUMS)
-  table.Fields.Add("id", db.Serial)                       '' Identificador del registro
-  table.Fields.Add("name", db.String, 255)                '' Nombre corto para el album
-  table.Fields.Add("description", db.String)              '' Descripcion identificadora del album
-  table.Fields.Add("creation_date", db.Date)              '' Fecha de creación del album
-  table.Fields.Add("creation_user", db.String, 50)        '' Usuario que creo el album
-  table.Fields.Add("thumbnail", db.Blob)                  '' ← MINIATURA (BLOB)
-  table.Fields.Add("soft_delete", db.Boolean)             '' Soft delete
-  table.PrimaryKey = ["id"]                               '' Crea primary key
-  table.Update()
-
-  $log4gambas.Debug("Tabla '" & Constants.TABLE_ALBUMS & "' creada")
-
-End
-
-' Crea tabla de relación fotos-álbumes
-Private Sub CreatePhotosAlbumsTable()
-
-  Dim table As Table
-
-  table = $db.Tables.Add(Constants.TABLE_PHOTOS_ALBUMS)
-  table.Fields.Add("id", db.Serial)                      ' Identificador del registro
-  table.Fields.Add("photo_id", db.Integer)                ' Identificador de foto asociada
-  table.Fields.Add("album_id", db.Integer)                ' Identificador de album asociado
-  table.Fields.Add("order_in_album", db.Integer)          ' Indicador de orden de la foto dentro del album
-  table.Fields.Add("added_date", db.Date)                 ' Fecha de agregación al album
-  table.Fields.Add("added_user", db.String, 50)           ' Usuario que agrego la relacion
-  table.PrimaryKey = ["id"]
-  table.Update()
-
-  $log4gambas.Debug("Tabla '" & Constants.TABLE_PHOTOS_ALBUMS & "' creada")
-
-End
-
-' Crea tabla de tags/etiquetas
-Private Sub CreateTagsTable()
-
-  Dim table As Table
-
-  table = $db.Tables.Add(Constants.TABLE_TAGS)
-  table.Fields.Add("id", db.Serial)                    ' Identificador del registro
-  table.Fields.Add("name", db.String, 100)              ' Nombre del tag
-  table.Fields.Add("description", db.String)            ' Descripcion del tag
-  table.Fields.Add("color", db.String, 7)               ' Color de despliegue del tag
-  table.Fields.Add("creation_date", db.Date)            ' Fecha de creación
-  table.Fields.Add("creation_user", db.String, 50)      ' Usuario que creo el tag
-  table.PrimaryKey = ["id"]
-  table.Update()
-
-  $log4gambas.Debug("Tabla '" & Constants.TABLE_TAGS & "' creada")
-
-End
-
-Private Sub CreatePhotosTagsTable()
-
-  Dim table As Table
-
-  table = $db.Tables.Add(Constants.TABLE_PHOTOS_TAGS)
-  With table
-    .Fields.Add("id", db.Serial)                    ' Identificador del registro
-    .Fields.Add("photo_id", db.Integer)              ' Identificador de foto relacionada
-    .Fields.Add("tag_id", db.Integer)                ' Identificador de tag relacionado
-    .Fields.Add("added_date", db.Date)               ' Fecha de agregacion
-    .Fields.Add("added_user", db.String, 50)         ' Usuario que agrego la relacion
-    .PrimaryKey = ["id"]
-    .Update()
-  End With
-
-  $log4gambas.Debug("Tabla '" & Constants.TABLE_PHOTOS_TAGS & "' creada")
-
-End
 
 Private Sub CheckAndCreateTables()
 
@@ -342,6 +230,127 @@ Catch
   Error.Raise("Fallo en la comprobación/creación de tablas: " & Error.Text)
 
 End
+
+
+' Crea tabla principal de fotos usando método nativo - NUEVA ESTRUCTURA CON BLOBS
+Private Sub CreatePhotosTable()
+
+  Dim table As Table
+  Dim query As String 
+  
+  ' query = "Create If NO EXIST TABLE "
+  ' query &= Constants.TABLE_PHOTOS & "("
+  ' query &= " id " INTEGER PRIMARY KEY AUTOINCREMENT Not Null, " file_name " VARCHAR(255), " width_pixels " INT4, " height_pixels " INT4, " creation_date " DATETIME, " import_date " DATETIME, " description " TEXT, " stars " INT4, " import_user " VARCHAR(50), " image_path " VARCHAR(255), " hash256 " VARCHAR(255), " thumbnail " BLOB, " last_sync_date " DATETIME, " sync_status " INT4, " soft_delete " BOOL, " soft_deleted_date " DATETIME, " soft_deleted_by " VARCHAR(50), " soft_deleted_auto " DATETIME, " is_locked " BOOL, " locked_by " VARCHAR(50), " locked_date " DATETIME, " lock_reason " VARCHAR(200))""
+
+  table = $db.Tables.Add(Constants.TABLE_PHOTOS)
+  table.Fields.Add("photo_id", db.Serial)                 '' identificador del registro
+  table.Fields.Add("file_name", db.String, 255)           '' Nombre original del archivo
+  table.Fields.Add("width_pixels", db.Integer)            '' Ancho en píxeles
+  table.Fields.Add("height_pixels", db.Integer)           '' Alto en píxeles
+  table.Fields.Add("creation_date", db.Date)              '' Fecha de creación de la foto
+  table.Fields.Add("import_date", db.Date)                '' Fecha de importación a Gacela
+  table.Fields.Add("description", db.String)              '' Descripción de la foto
+  table.Fields.Add("stars", db.Integer)                   '' Cantidad de estrellas
+  table.Fields.Add("import_user", db.String, 50)          '' Usuario que la importó
+  table.Fields.Add("image_path", db.String, 255)          '' Ruta completa para obtencion de la imagen original
+  Table.Fields.Add("hash256", db.String, 255)             '' Hash 256 de la imagen para validar existencia
+  table.Fields.Add("thumbnail", db.Blob)                  '' MINIATURA (BLOB)
+  table.Fields.Add("last_sync_date", db.Date)             '' Fecha de ultima sincronizacion a Gacela (para futura sync con nube)
+  Table.Fields.Add("sync_status", db.Integer)             '' Indicador del estado de la sincronizacion
+  table.Fields.Add("soft_delete", db.Boolean)             '' Soft delete (garbage collector)
+  table.Fields.Add("soft_deleted_date", db.date)          '' Indica la fecha en que eliminada
+  table.Fields.Add("soft_deleted_by", db.String, 50)      '' Indica el usuario que elimino
+  Table.Fields.Add("soft_deleted_auto", db.Date)          '' Fecha en que debe ser eliminada fisicamente
+  table.Fields.Add("is_locked", db.Boolean)               '' Indica si esta bloquedad para eliminacion
+  table.Fields.Add("locked_by", db.String, 50)            '' Indica usuario que bloqueo la foto
+  table.Fields.Add("locked_date", db.date)                '' Indica la fecha en que fue bloqueada
+  table.Fields.Add("lock_reason", db.String, 200)         '' Razon por la que fue bloqueada
+  table.PrimaryKey = ["id"]                               '' Crea primary key
+  ' table.Indexes.Add("hashx", ["hash256"])                   ' Crea indice por Hash256
+  ' table.Indexes.Add("softx", ["soft_delete"])               ' Crea indice por Soft_delete
+  table.Update()
+
+  $log4gambas.Debug("Tabla '" & Constants.TABLE_PHOTOS & "' creada")
+
+End
+
+' Crea tabla de álbumes
+Private Sub CreateAlbumsTable()
+
+  Dim table As Table
+
+  table = $db.Tables.Add(Constants.TABLE_ALBUMS)
+  table.Fields.Add("album_id", db.Serial)                 '' Identificador del registro
+  table.Fields.Add("name", db.String, 255)                '' Nombre corto para el album
+  table.Fields.Add("description", db.String)              '' Descripcion identificadora del album
+  table.Fields.Add("creation_date", db.Date)              '' Fecha de creación del album
+  table.Fields.Add("creation_user", db.String, 50)        '' Usuario que creo el album
+  table.Fields.Add("thumbnail", db.Blob)                  '' ← MINIATURA (BLOB)
+  table.Fields.Add("soft_delete", db.Boolean)             '' Soft delete
+  table.PrimaryKey = ["id"]                               '' Crea primary key
+  table.Update()
+
+  $log4gambas.Debug("Tabla '" & Constants.TABLE_ALBUMS & "' creada")
+
+End
+
+' Crea tabla de relación fotos-álbumes
+Private Sub CreatePhotosAlbumsTable()
+
+  Dim table As Table
+
+  table = $db.Tables.Add(Constants.TABLE_PHOTOS_ALBUMS)
+  table.Fields.Add("pho_alb_id", db.Serial)               '' Identificador del registro
+  table.Fields.Add("photo_id", db.Integer)                '' Identificador de foto asociada
+  table.Fields.Add("album_id", db.Integer)                '' Identificador de album asociado
+  table.Fields.Add("order_in_album", db.Integer)          '' Indicador de orden de la foto dentro del album
+  table.Fields.Add("added_date", db.Date)                 '' Fecha de agregación al album
+  table.Fields.Add("added_user", db.String, 50)           '' Usuario que agrego la relacion
+  table.PrimaryKey = ["id"]
+  table.Update()
+
+  $log4gambas.Debug("Tabla '" & Constants.TABLE_PHOTOS_ALBUMS & "' creada")
+
+End
+
+' Crea tabla de tags/etiquetas
+Private Sub CreateTagsTable()
+
+  Dim table As Table
+
+  table = $db.Tables.Add(Constants.TABLE_TAGS)
+  table.Fields.Add("tag_id", db.Serial)                 '' Identificador del registro
+  table.Fields.Add("name", db.String, 100)              '' Nombre del tag
+  table.Fields.Add("description", db.String)            '' Descripcion del tag
+  table.Fields.Add("color", db.String, 7)               '' Color de despliegue del tag
+  table.Fields.Add("creation_date", db.Date)            '' Fecha de creación
+  table.Fields.Add("creation_user", db.String, 50)      '' Usuario que creo el tag
+  table.PrimaryKey = ["id"]
+  table.Update()
+
+  $log4gambas.Debug("Tabla '" & Constants.TABLE_TAGS & "' creada")
+
+End
+
+Private Sub CreatePhotosTagsTable()
+
+  Dim table As Table
+
+  table = $db.Tables.Add(Constants.TABLE_PHOTOS_TAGS)
+  With table
+    .Fields.Add("pho_tag_id", db.Serial)             '' Identificador del registro
+    .Fields.Add("photo_id", db.Integer)              '' Identificador de foto relacionada
+    .Fields.Add("tag_id", db.Integer)                '' Identificador de tag relacionado
+    .Fields.Add("added_date", db.Date)               '' Fecha de agregacion
+    .Fields.Add("added_user", db.String, 50)         '' Usuario que agrego la relacion
+    .PrimaryKey = ["id"]
+    .Update()
+  End With
+
+  $log4gambas.Debug("Tabla '" & Constants.TABLE_PHOTOS_TAGS & "' creada")
+
+End
+
 
 Private Sub CloseConnection()
 

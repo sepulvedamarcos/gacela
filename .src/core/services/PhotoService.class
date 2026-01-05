@@ -29,9 +29,10 @@ Public Function GetAllPhotos() As PhotoEntity[]
 
   Dim photosEntity As PhotoEntity[]
 
+  $log4gambas.Debug($titulo & ("Obtencion de todas las fotos"))
   Try photosEntity = $photoRepository.getPhotos()
   If Error Then
-    $log4gambas.Error("Error al leer las fotos " & Error.Text)
+    $log4gambas.Error(("Error al leer las fotos : ") & Error.Text)
     error.Propagate
   Endif
 
@@ -65,16 +66,16 @@ End
 
 Public Sub InsertSeedData() '' Metodo que permite inicializar la base de datos con 2 fotos
 
-  $log4gambas.Info("Insertando datos de prueba en tabla photos...")
+  $log4gambas.Info($titulo & ("Carga inicial insertando datos de prueba en tabla photos..."))
 
-  If SavePhoto(Constants.PHOTO_SEED_1, "Foto 1") Then Error.Raise("Error al insertar foto 1")
+  If Not SavePhoto(Constants.PHOTO_SEED_1) Then Error.Raise("Error al insertar foto 1")
   Wait 1 ' esperamos un poco para generacion de codigo
-  If SavePhoto(Constants.PHOTO_SEED_2, "Foto 2") Then Error.Propagate
+  If Not SavePhoto(Constants.PHOTO_SEED_2) Then Error.Raise("Error al insertar foto 2")
 
-  $log4gambas.Info("Datos de prueba insertados exitosamente")
+  $log4gambas.Info($titulo & ("Datos de prueba insertados exitosamente"))
 
 Catch
-  $log4gambas.Error("Error insertando foto de prueba " & Error.Text)
+  $log4gambas.Error($titulo & ("Error insertando foto de prueba") & ", " & Error.Text)
 
 End
 
@@ -308,9 +309,9 @@ Private Function SavePhoto(imagenPath As String, Optional albumId As Integer, Op
     photoAlbumEntity.OrderInAlbum = index
     photoAlbumEntity.AddedUser = User.Name
 
-    resp = $photoRepository.createPhoto(photoEntity, photoAlbumEntity)
+    resp = $photoRepository.CreatePhoto(photoEntity, photoAlbumEntity)
   Else
-    resp = $photoRepository.createPhoto(photoEntity)
+    resp = $photoRepository.CreatePhoto(photoEntity)
 
   Endif
 

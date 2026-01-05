@@ -166,7 +166,7 @@ Catch
 End
 
 
-Public Function createPhoto(photo As PhotoEntity, Optional photoAlbumEntity As PhotoAlbumEntity) As Boolean
+Public Function CreatePhoto(photo As PhotoEntity, Optional photoAlbumEntity As PhotoAlbumEntity) As Boolean
 
   Dim result As Result
   Dim photoId As Integer
@@ -300,7 +300,7 @@ Private Function MapResultToEntities(result As Result) As PhotoEntity[] '' Mapeo
     photo = New PhotoEntity
 
     ' Mapear todos los campos
-    photo.Id = result["id"]
+    photo.Id = result["photo_id"]
     photo.FileName = result["file_name"]
     photo.WidthPixels = IIf(result["width_pixels"] <> Null, result["width_pixels"], 0)
     photo.HeightPixels = IIf(result["height_pixels"] <> Null, result["height_pixels"], 0)
@@ -329,7 +329,7 @@ Private Function MapResultToEntities(result As Result) As PhotoEntity[] '' Mapeo
   Return photos
 
 Catch
-  $log4gambas.Error($titulo & "Problema en el mapeo de datos photo")
+  $log4gambas.Error($titulo & "Problema en el mapeo de datos photo: " & Error.Text)
   Error.Propagate
 
 End
@@ -343,7 +343,7 @@ Private Sub MapAlbumEntitys(result As Result) As AlbumEntity[] '' Mapeo de album
     album = New AlbumEntity
 
     ' Mapeo todos los campos
-    album.Id = result["id"]
+    album.Id = result["album_id"]
     album.Name = result["name"]
     album.Description = result["description"]
     album.CreationDate = result["creation_date"]
