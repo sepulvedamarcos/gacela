@@ -122,6 +122,7 @@ End
 Public Function CreateAlbum(album As AlbumEntity) As Integer
 
   Dim result As Result
+  Dim lastRecord As Integer
 
   $dbContext.DBConnection.Begin()
 
@@ -135,7 +136,10 @@ Public Function CreateAlbum(album As AlbumEntity) As Integer
   result.Update()
 
   $dbContext.DBConnection.Commit
-  Return $dbContext.DBConnection.LastInsertId
+  lastRecord = $dbContext.DBConnection.LastInsertId
+  
+  $log4gambas.Debug($titulo & ("Codigo de album creado [" & lastRecord & "]"))
+  Return lastRecord
 
 Catch
   $dbContext.DBConnection.Rollback
@@ -166,7 +170,7 @@ Catch
 End
 
 
-Public Function CreatePhoto(photo As PhotoEntity, Optional photoAlbumEntity As PhotoAlbumEntity) As Boolean
+Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean
 
   Dim result As Result
   Dim photoId As Integer
@@ -175,17 +179,17 @@ Public Function CreatePhoto(photo As PhotoEntity, Optional photoAlbumEntity As P
   $dbContext.DBConnection.Begin()
 
   result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS)
-  result["file_name"] = photo.FileName
-  result["width_pixels"] = photo.WidthPixels
-  result["height_pixels"] = photo.HeightPixels
+  result["file_name"] = photoE.FileName
+  result["width_pixels"] = photoE.WidthPixels
+  result["height_pixels"] = photoE.HeightPixels
   result["creation_date"] = Now()
-  result["import_date"] = photo.ImportDate
-  result["description"] = photo.Description
-  result["stars"] = photo.Stars
-  result["import_user"] = photo.ImportUser
-  result["image_path"] = photo.ImagePath
-  result["hash256"] = photo.Hash256
-  result["thumbnail"] = photo.Thumbnail
+  result["import_date"] = photoE.ImportDate
+  result["description"] = photoE.Description
+  result["stars"] = photoE.Stars
+  result["import_user"] = photoE.ImportUser
+  result["image_path"] = photoE.ImagePath
+  result["hash256"] = photoE.Hash256
+  result["thumbnail"] = photoE.Thumbnail
   result["last_sync_date"] = Null
   result["sync_status"] = 0
   result["soft_delete"] = False
@@ -201,13 +205,13 @@ Public Function CreatePhoto(photo As PhotoEntity, Optional photoAlbumEntity As P
   photoId = $dbContext.DBConnection.LastInsertId
   $log4Gambas.Debug($titulo & ("Codigo de foto creado") & " [" & photoId & "]")
 
-  If photoAlbumEntity <> Null Then
+  If photoAlbumE <> Null Then
     result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS_ALBUMS)
     result["photo_id"] = photoId
-    result["album_id"] = photoAlbumEntity.AlbumId
-    result["order_in_album"] = photoAlbumEntity.OrderInAlbum
+    result["album_id"] = photoAlbumE.AlbumId
+    result["order_in_album"] = photoAlbumE.OrderInAlbum
     result["added_date"] = Now()
-    result["added_user"] = photoAlbumEntity.AddedUser
+    result["added_user"] = photoAlbumE.AddedUser
     result.Update()
 
     photoAlbumId = $dbContext.DBConnection.LastInsertId
@@ -232,6 +236,7 @@ Public Function ValidateHash256Exist(hash256 As String) As Boolean
   Dim total As Integer
   Dim result As Result
 
+  $log4gambas.Debug($titulo & ("Validacion en tabla con el Hash256 enviado") & " [" & hash256 & "]")
   query = "SELECT COUNT(*) as total FROM " & Constants.TABLE_PHOTOS &
     " WHERE hash256 = &1"
   result = $dbContext.DBConnection.Exec(query, hash256)
@@ -239,14 +244,16 @@ Public Function ValidateHash256Exist(hash256 As String) As Boolean
   If result.Available Then
     total = result["total"]
     If total >= 1 Then
+      $log4gambas.Debug($titulo & ("Existe ya la imagen con ese Hash256"))
       Return True
     End If
   End If
 
+  $log4gambas.Debug($titulo & ("No existe la imagen"))
   Return False
 
 Catch
-  $log4gambas.Error($titulo & "Error al buscar foto por hash256")
+  $log4gambas.Error($titulo & ("Error al buscar foto por hash256"))
   Error.Propagate
 
 End

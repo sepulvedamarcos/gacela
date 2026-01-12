@@ -4,6 +4,7 @@
 ' Gambas class file - PhotoEntity
 ' Modelo de dominio para representar una foto en Gacela
 '
+'  recordar que los nombre de las variables para las clases no deben llamarse igual aunque sea en minusculas por que las toma como si fueran iguales
 
 ' Propiedades privadas del modelo
 Private $id As Integer = 0
@@ -60,139 +61,139 @@ Property Read HasThumbnail As Boolean     '' Indicador para saber si tiene minia
 '
 '=================================================
 
-Function Id_Read() As Integer
+Private Function Id_Read() As Integer
 
   Return $id
 
 End
 
-Sub Id_Write(value As Integer)
+Private Sub Id_Write(value As Integer)
 
   $id = value
 
 End
 
-Function FileName_Read() As String
+Private Function FileName_Read() As String
 
   Return $fileName
 
 End
 
-Sub FileName_Write(value As String)
+Private Sub FileName_Write(value As String)
 
   $fileName = value
 
 End
 
-Function WidthPixels_Read() As Integer
+Private Function WidthPixels_Read() As Integer
 
   Return $widthPixels
 
 End
 
-Sub WidthPixels_Write(value As Integer)
+Private Sub WidthPixels_Write(value As Integer)
 
   $widthPixels = value
 
 End
 
-Function HeightPixels_Read() As Integer
+Private Function HeightPixels_Read() As Integer
 
   Return $heightPixels
 
 End
 
-Sub HeightPixels_Write(value As Integer)
+Private Sub HeightPixels_Write(value As Integer)
 
   $heightPixels = value
 
 End
 
-Function CreationDate_Read() As Date
+Private Function CreationDate_Read() As Date
 
   Return $creationDate
 
 End
 
-Sub CreationDate_Write(value As Date)
+Private Sub CreationDate_Write(value As Date)
 
   $creationDate = value
 
 End
 
-Function ImportDate_Read() As Date
+Private Function ImportDate_Read() As Date
 
   Return $importDate
 
 End
 
-Sub ImportDate_Write(value As Date)
+Private Sub ImportDate_Write(value As Date)
 
   $importDate = value
 
 End
 
-Function LastSyncDate_Read() As Date
+Private Function LastSyncDate_Read() As Date
 
   Return $lastSyncDate
 
 End
 
-Sub LastSyncDate_Write(LastSync As Date)
+Private Sub LastSyncDate_Write(LastSync As Date)
 
   $lastSyncDate = LastSync
 
 End
 
-Function Description_Read() As String
+Private Function Description_Read() As String
 
   Return $description
 
 End
 
-Sub Description_Write(value As String)
+Private Sub Description_Write(value As String)
 
   $description = value
 
 End
 
-Function ImportUser_Read() As String
+Private Function ImportUser_Read() As String
 
   Return $importUser
 
 End
 
-Sub ImportUser_Write(value As String)
+Private Sub ImportUser_Write(value As String)
 
   $importUser = value
 
 End
 
-Function SoftDelete_Read() As Boolean
+Private Function SoftDelete_Read() As Boolean
 
   Return $softDelete
 
 End
 
-Sub SoftDelete_Write(value As Boolean)
+Private Sub SoftDelete_Write(value As Boolean)
 
   $SoftDelete = value
 
 End
 
-Function Thumbnail_Read() As String
+Private Function Thumbnail_Read() As String
 
   Return $thumbnail
 
 End
 
-Sub Thumbnail_Write(value As String)
+Private Sub Thumbnail_Write(value As String)
 
   $thumbnail = value
 
 End
 
-Function HasThumbnail_Read() As Boolean
+Private Function HasThumbnail_Read() As Boolean
 
   Return $thumbnail <> Null And $thumbnail.Len > 0
 

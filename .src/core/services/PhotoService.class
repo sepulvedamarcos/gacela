@@ -96,15 +96,15 @@ Public Sub ImportPhotos(imagesPath As String[], Optional albumNam As String, Opt
   Dim photo As String
   Dim I As Integer
   Dim albumEntity As New AlbumEntity
-  Dim photoAlbumEntity As New PhotoAlbumEntity
-  Dim photoErrors As New String[]
+  Dim photoResume As New String[]
+  Dim resp As String
 
   If albumId = 0 Then
     If albumNam <> "" Then
       albumEntity.Name = albumNam
       albumEntity.Description = albumDes
       albumEntity.CreationUser = User.Name
-      albumId = $photoRepository.createAlbum(albumEntity)
+      albumId = $photoRepository.CreateAlbum(albumEntity)
     End If
 
   End If
@@ -112,14 +112,18 @@ Public Sub ImportPhotos(imagesPath As String[], Optional albumNam As String, Opt
   For Each photo In imagesPath
     i += 1
     $log4gambas.Debug($titulo & "Archivo a procesar " & photo)
-    If Not SavePhoto(photo, albumId, i) Then
-      $log4gambas.Error($titulo & "Imagen presenta error para importar : " & photo)
-      photoErrors.Add(File.BaseName(photo) & "." & File.Ext(photo))
+    resp = SavePhoto(photo, albumId, i)
+    If resp <> "" Then
+      $log4gambas.Debug($titulo & "Imagen presenta error para importar : " & photo)
+      photoResume.Add("NOK" & File.BaseName(photo) & "." & File.Ext(photo))
+    Else 
+      $log4gambas.Debug($titulo & "Imagen grabada con exito : " & photo)
+      photoResume.Add("OK" & File.BaseName(photo) & "." & File.Ext(photo))
     End If
 
   Next
 
-  Return photoErrors
+  Return photoResume
 
 Catch
   $log4gambas.Error("Error insertando foto " & Error.Text)
@@ -141,17 +145,17 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
 End
 
 Public Function AddAlbum(name As String, description As String) As Boolean
-  
+
   Dim album As New AlbumEntity
   Dim key As Integer
-  
+
   album.Name = name
   album.Description = description
   album.CreationUser = User.Name
-  
+
   $log4gambas.Debug($titulo & ("Creacion de entidad album para enviar grabar"))
   key = $photoRepository.CreateAlbum(album)
-  If key Then 
+  If key Then
     Return True
   Endif
 
@@ -195,16 +199,19 @@ Private Function SaveImageIO(originalImage As String) As String
   Dim filename As String = File.BaseName(originalImage) & "." & File.Ext(originalImage)
   Dim newPath As String = $configuration.LibraryPath &/ Format(Now, "yyyymmdd")
 
+  $log4gambas.Debug($titulo & ("Validación de existencia de imagen y directorio de destino"))
   If Not Exist(newPath) Then
     Mkdir newPath
   Endif
 
+  $log4gambas.Debug($titulo & ("Intento de copia de imagen en el directorio"))
   Copy originalImage To newPath &/ filename
+  $log4gambas.Debug($titulo & ("Copia de la imagen realizada con exito en el directorio"))
 
   Return newPath
 
 Catch
-  $log4gambas.Error($titulo & "Problema al intentar grabar la foto " & filename)
+  $log4gambas.Error($titulo & ("Problema al intentar grabar la foto") & " [" & filename & "] : " & Error.Text)
   Error.Propagate
 
 End
@@ -213,6 +220,7 @@ Private Function Hash256Calculate(originalImage As String) As String
 
   Dim hash256 As String
 
+  $log4gambas.Debug($titulo & "Calculamos el HASH256")
   hash256 = Hash.Sha256(originalImage)
 
   Return hash256
@@ -225,14 +233,18 @@ End
 
 Private Function ValidateFileExist(filename As String) As Boolean
 
+  $log4gambas.Debug($titulo & ("valida existencia del archivo fisico en la importacion") & $configuration.LibraryPath &/ Format(Now, "yyyymmdd") &/ filename)
   If Exist($configuration.LibraryPath &/ Format(Now, "yyyymmdd") &/ filename) Then
+    $log4gambas.Debug($titulo & ("Existe el archivo fisico en la importacion") & $configuration.LibraryPath &/ Format(Now, "yyyymmdd") &/ filename)
     Return True
+
   Endif
 
+  $log4gambas.Debug($titulo & ("No existe el archivo fisico en la importacion") & $configuration.LibraryPath &/ Format(Now, "yyyymmdd") &/ filename)
   Return False
 
 Catch
-  $log4gambas.Error($titulo & "Problema al valida existencia del archivo " & filename)
+  $log4gambas.Error($titulo & ("Problema al valida existencia del archivo") & "[" & filename & "] : " & Error.Text)
   Error.Propagate
 
 End
@@ -266,59 +278,61 @@ Catch
 
 End
 
-Private Function SavePhoto(imagenPath As String, Optional albumId As Integer, Optional index As Integer) As Boolean
+Private Function SavePhoto(imagenPath As String, Optional albumId As Integer, Optional index As Integer) As String
 
-  Dim photoEntity As New PhotoEntity
-  Dim photoAlbumEntity As New PhotoAlbumEntity
+  Dim photoE As New PhotoEntity
+  Dim photoAlbumE As New PhotoAlbumEntity
   Dim originalPhoto As Image
   Dim imageString As String
   Dim hash256 As String
   Dim filename As String = File.BaseName(imagenPath) & "." & File.Ext(imagenPath)
   Dim newPath As String
-
-  Dim resp As Boolean
+  Dim resp As String 
 
   ' Cargar imagen original
   originalPhoto = Image.Load(imagenPath)
   imageString = File.Load(imagenPath)
 
-  hash256 = hash256Calculate(imageString)
 
+  $log4gambas.Debug($titulo & ("Chequeo de existencia del archivo fisico en la importacion"))
   If ValidateFileExist(filename) Then
-    Return False
+    Return ("El archivo ya existe")
   End If
+  
+  hash256 = hash256Calculate(imageString)
+  $log4gambas.Debug($titulo & ("Chequeo de existencia del archivo por hash256 dentro de la BD"))
   If $photoRepository.ValidateHash256Exist(hash256) Then
-    Return False
+    Return ("El archivo ya existe")
   End If
 
+  $log4gambas.Debug($titulo & ("Vamos a grabar la imagen en el directorio de importación"))
   newPath = SaveImageIO(imagenPath)
 
-  photoEntity.FileName = filename
-  photoEntity.WidthPixels = originalPhoto.Width
-  photoEntity.HeightPixels = originalPhoto.Height
-  photoEntity.ImportDate = Now()
-  photoEntity.Description = ""
-  photoEntity.Stars = 0
-  photoEntity.ImportUser = User.Name
-  photoEntity.ImagePath = newPath
-  photoEntity.Hash256 = hash256
-  photoEntity.Thumbnail = CreateThumbnail(originalPhoto, imagenPath)
+  photoE.FileName = filename
+  photoE.WidthPixels = originalPhoto.Width
+  photoE.HeightPixels = originalPhoto.Height
+  photoE.ImportDate = Now()
+  photoE.Description = ""
+  photoE.Stars = 0
+  photoE.ImportUser = User.Name
+  photoE.ImagePath = newPath
+  photoE.Hash256 = hash256
+  photoE.Thumbnail = CreateThumbnail(originalPhoto, imagenPath)
 
   If albumId <> 0 Then
-    photoAlbumEntity.AlbumId = albumId
-    photoAlbumEntity.OrderInAlbum = index
-    photoAlbumEntity.AddedUser = User.Name
-
-    resp = $photoRepository.CreatePhoto(photoEntity, photoAlbumEntity)
-  Else
-    resp = $photoRepository.CreatePhoto(photoEntity)
-
+    photoAlbumE.AlbumId = albumId
+    photoAlbumE.OrderInAlbum = index
+    photoAlbumE.AddedUser = User.Name
   Endif
 
-  Return resp
+  If Not $photoRepository.CreatePhoto(photoE, photoAlbumE) Then
+    Return ("Error al intentar grabar en la foto en la BD")
+  Endif
 
 Catch
-  Kill newPath &/ filename
+  If Exist(newPath &/ filename) Then
+    Kill newPath &/ filename
+  Endif
   $log4gambas.Error("Error importando foto: " & Error.Text)
   Error.Propagate
 

@@ -25,12 +25,11 @@
   }
   { HBox4 HBox
     MoveScaled(0,0,137,8)
+    Background = &HC0C0C0
     Spacing = True
     Padding = 2
-    { Panel2 Panel
-      MoveScaled(105,0,8,8)
-      Expand = True
-      AutoResize = True
+    { Spring1 Spring
+      MoveScaled(119,2,4,4)
     }
     { ToolButton1 ToolButton
       MoveScaled(127,1,8,6)

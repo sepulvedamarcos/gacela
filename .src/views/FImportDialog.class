@@ -55,21 +55,21 @@ Public Sub btnOK_Click()
   Dim resp As Integer
   Dim al As AlbumEntity[]
   Dim id As Integer
-  Dim photoErrors As String[]
+  Dim photoResume As String[]
 
   If ListEditorPhotos.List.Count = 0 Then
     Message.Warning(("Debe seleccionar fotos para procesar"))
     Return
   Else 
-    resp = Message.Question(("Estas seguro de importar las fotos seleccionadas en el album?"), ("Si"), ("No"))
+    resp = Message.Question(("Estas seguro de importar las fotos seleccionadas en el album con las opciones seleccionadas?"), ("Si"), ("No"))
 
     If resp = 2 Then
       Return
 
     Else
       $log4gambas.Info($titulo & ("Comienza procesamiento de importacion de fotos"))
-      photoErrors = $photoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $idAlbum)
-      If photoErrors.Count > 0 Then
+      photoResume = $photoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $idAlbum)
+      If photoResume.Count > 0 Then
         Message.Error(("No se pudieron impotar algunas imagenes"))
 
       Endif
@@ -123,10 +123,24 @@ End
 
 Public Sub btnOkAlbum_Click()
 
+  Dim item As String
+  Dim cuenta As Integer
+  
   If TextBoxAlbum.Text = "" Or ListEditorAvailabeAlbums.List.Count = 0 Then
     Message.Warning(("Debe seleccionar un album para continuar"))
     ListEditorAvailabeAlbums.SetFocus()
     Return
+  Else
+    If TextBoxAlbum.Text <> "" Then 
+      For Each item In ListEditorAvailabeAlbums.List
+        If item = TextBoxAlbum.Text Then 
+          cuenta += 1
+        Endif
+      Next
+      If cuenta = 0 Then
+        ListEditorAvailabeAlbums_Add()
+      Endif
+    Endif
   Endif
 
   PanelAssociateAlbum.Visible = False
@@ -168,7 +182,7 @@ Public Sub ListEditorAvailabeAlbums_Add()
 
   $log4gambas.Debug($titulo & ("Nuevo album :" & "{" & TextBoxAlbum.Text & "}{" & TextAreaAlbumDescription.Text & "}"))
   If $photoService.AddAlbum(TextBoxAlbum.Text, TextAreaAlbumDescription.Text) Then
-    $log4gambas.Debug($titulo & ("Nuevo album agregado con exito"))
+    $log4gambas.Debug($titulo & ("Nuevo album agregado con exito, lo cargamos a la lista"))
     FindAlbums()
 
   Else

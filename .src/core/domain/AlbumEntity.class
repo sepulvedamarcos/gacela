@@ -2,8 +2,9 @@
 
 '
 ' Gambas class file - AlbumEntity
-' Modelo de dominio para representar una foto en Gacela
+' Modelo de dominio para representar una album en Gacela
 '
+'  recordar que los nombre de las variables para las clases no deben llamarse igual aunque sea en minusculas por que las toma como si fueran iguales
 
 ' Propiedades privadas del modelo
 Private $id As Integer = 0

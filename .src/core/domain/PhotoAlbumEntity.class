@@ -2,8 +2,9 @@
 
 '
 ' Gambas class file - PhotoAlbumEntity
-' Modelo de dominio para representar una foto en Gacela
+' Modelo de dominio para representar una asociacion de foto con album en Gacela
 '
+'  recordar que los nombre de las variables para las clases no deben llamarse igual aunque sea en minusculas por que las toma como si fueran iguales
 
 ' Propiedades privadas del modelo
 Private $id As Integer = 0
@@ -19,63 +20,63 @@ Private $softDelete As Boolean
 '            PROPIEDADES PÚBLICAS
 '
 '==============================================
-Property Id As Integer                     ''Id Unico de la relacion photo album
+Property Id As Integer                     '' Id Unico de la relacion photo album
 Property PhotoId As Integer                '' Identificador de la photo
 Property AlbumId As Integer                '' Identificador del album
-Property OrderInAlbum As Integer            '' Indicador de posicion dentro del album
+Property OrderInAlbum As Integer           '' Indicador de posicion dentro del album
 Property AddedDate As Date                 '' Fecha de agregacion al album
 Property AddedUser As String               '' Usuario que agrego la foto al album
 Property SoftDelete As Boolean             '' Indicador para saber si fue borrado
 
- Function Id_Read() As Integer
+Private Function Id_Read() As Integer
 
   Return $id
 
 End
 
- Sub Id_Write(Value As Integer)
+Private Sub Id_Write(Value As Integer)
 
   $id = value
 
 End
 
- Function PhotoId_Read() As Integer
+Private Function PhotoId_Read() As Integer
 
   Return $photoId
 
 End
 
- Sub PhotoId_Write(Value As Integer)
+Private Sub PhotoId_Write(Value As Integer)
 
   $photoId = value
 
 End
 
- Function AlbumId_Read() As Integer
+Private Function AlbumId_Read() As Integer
 
   Return $albumId
 
 End
 
- Sub AlbumId_Write(Value As Integer)
+Private Sub AlbumId_Write(Value As Integer)
 
   $albumId = value
 
 End
 
- Function OrderInAlbum_Read() As Integer
+Private Function OrderInAlbum_Read() As Integer
 
   Return $orderInAlbum
 
 End
 
- Sub OrderInAlbum_Write(Value As Integer)
+Private Sub OrderInAlbum_Write(Value As Integer)
 
   $orderInAlbum = value
 
 End
 
- Function AddedDate_Read() As Date
+ Private Function AddedDate_Read() As Date
 
 Return $addedDate  
 
@@ -87,24 +88,24 @@ Private Sub AddedDate_Write(Value As Date)
 
 End
 
- Function AddedUser_Read() As String
+Private Function AddedUser_Read() As String
 
   Return $addedUser
 End
 
- Sub AddedUser_Write(Value As String)
+Private Sub AddedUser_Write(Value As String)
 
   $addedUser = value
 
 End
 
- Function SoftDelete_Read() As Boolean
+Private Function SoftDelete_Read() As Boolean
 
   Return $softDelete
 
 End
 
- Sub SoftDelete_Write(Value As Boolean)
+Private Sub SoftDelete_Write(Value As Boolean)
 
   $softDelete = value
 
