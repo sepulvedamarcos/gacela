@@ -26,3 +26,6 @@ Public Const SYNC_SYNCED As String = "Sincronizado"             '' Estado de sin
 
 Public Const USE_SOFT_TRUE As Integer = 1                           '' Valor para indicar que se usa el softDelete
 Public Const USE_SOFT_FALSE As Integer = 0                          '' Valor para indicar que se no usa el softDelete
+
+Public Const COLLECTION_PRIVATE As String = ("Private")         '' Indica coleccion privada
+Public Const COLLECTION_SHARE As String = ("Shared")

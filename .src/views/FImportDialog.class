@@ -19,13 +19,13 @@ Private $idAlbum As Integer '' id de album seleccionado
 '
 ' ==================================================
 Public Sub _new(photoService As PhotoService, logger As Log4Gambas3, filesDrop As String[])
-
+  
   $photoService = photoService
   $log4gambas = logger
   $filesDrop = filesDrop
-
+  
   $log4gambas.Info($titulo & ("Creando la ventana de dialogo y la lista de albumes"))
-
+  
   ListEditorPhotos.ReadOnly = True
   ListEditorPhotos.List = $filesDrop
   ListEditorPhotos.Unique = True
@@ -38,72 +38,76 @@ Public Sub _new(photoService As PhotoService, logger As Log4Gambas3, filesDrop A
   ListEditorAvailabeAlbums.Unique = True
   
   CheckBoxEnableAlbum.Text = $textCheckFalse
-
+  
   FindAlbums()
-
+  
 End
 
 Public Sub Run() As Boolean
-
+  
   $log4gambas.Debug($titulo & "metodo run")
   Return Not Me.ShowModal()
-
+  
 End
 
 Public Sub btnOK_Click()
-
+  
   Dim resp As Integer
   Dim al As AlbumEntity[]
   Dim id As Integer
-  Dim photoResume As String[]
-
+  Dim photoSummary As String[]
+  
   If ListEditorPhotos.List.Count = 0 Then
     Message.Warning(("Debe seleccionar fotos para procesar"))
     Return
   Else 
     resp = Message.Question(("Estas seguro de importar las fotos seleccionadas en el album con las opciones seleccionadas?"), ("Si"), ("No"))
-
+    
     If resp = 2 Then
       Return
-
+      
     Else
       $log4gambas.Info($titulo & ("Comienza procesamiento de importacion de fotos"))
-      photoResume = $photoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $idAlbum)
-      If photoResume.Count > 0 Then
-        Message.Error(("No se pudieron impotar algunas imagenes"))
-
+      photoSummary = $photoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $idAlbum, CheckBoxDeletePhoto.Value)
+      If photoSummary.Count > 0 Then
+        Message.Info(("Proceso terminado, para ver el resumen da click en la barra de estados"))
+        
       Endif
     Endif
   Endif
-
-  Me.Close(Enumeration.DLG_OK)
-
+  
+  Me.Close()
+  
+Catch
+  $log4gambas.Error(("Se presento un problema al intentar importar las imagenes") & " [" & Error.Text & "]")
+  Message.Error(("Se presento un problema al intentar iomportar las imagenes") & " [" & Error.Text & "]")
+  
 End
 
 Public Sub btnCancel_Click()
-
+  
   Me.Close
-
+  
 End
 
 Public Sub ButtonBoxFilter_Filter()
-
+  
   $log4gambas.Debug($titulo & "Filter escribe [" & ButtonBoxFilter.Text & "]")
   TextAreaAlbumDescription.Text = ""
   FindAlbums(ButtonBoxFilter.Text)
-
+  
 End
 
 Public Sub ButtonBoxFilter_Click()
-
+  
   $log4gambas.Debug($titulo & "Click filter con texto [" & ButtonBoxFilter.Text & "]")
   TextAreaAlbumDescription.Text = ""
   FindAlbums(ButtonBoxFilter.Text)
-
+  
 End
 
 Public Sub CheckBoxEnableAlbum_Click()
-
+  
   $log4gambas.Debug($titulo & ("Click en checkbox para asociar album ") & "[" & Str(CheckBoxEnableAlbum.Value) & "]")
   If CheckBoxEnableAlbum.Value Then
     PanelList.Enabled = False
@@ -122,7 +126,7 @@ Public Sub CheckBoxEnableAlbum_Click()
 End
 
 Public Sub btnOkAlbum_Click()
-
+  
   Dim item As String
   Dim cuenta As Integer
   
@@ -142,65 +146,65 @@ Public Sub btnOkAlbum_Click()
       Endif
     Endif
   Endif
-
+  
   PanelAssociateAlbum.Visible = False
   PanelList.Enabled = True
   VBoxButtons.Enabled = True
-
+  
   $log4gambas.Debug($titulo & ("Selecciona un album para asociar") & " [" & TextBoxAlbum.Text & "]")
   CheckBoxEnableAlbum.Text = $textCheckTrue & " [" & TextBoxAlbum.Text & "]"
   LabelAlbumDescriptionSelected.Text = TextAreaAlbumDescription.Text
-
+  
 End
 
 Public Sub btnCancelAlbum_Click()
-
+  
   $log4gambas.Debug($titulo & ("Cancela la asociación de album, vuelve todo atras"))
   CheckBoxEnableAlbum.Value = False
   CheckBoxEnableAlbum.Text = $textCheckFalse
-
+  
 End
 
-
 Public Sub ListEditorAvailabeAlbums_Add()
+  
   Dim album As AlbumEntity
   Dim albums As AlbumEntity[]
-
+  
   $log4gambas.Debug($titulo & ("Intento de agrega nuevo album"))
   If TextBoxAlbum.Text = "" Then 
     Message.Warning(("Debe ingresar un nombre de album para continuar"))
     TextBoxAlbum.SetFocus()
     Return 
   Endif
-
+  
   albums = ListEditorAvailabeAlbums.Tag
   For Each album In albums
     If album.Name = TextBoxAlbum.Text Then 
       Return 
     Endif
   Next
-
+  
   $log4gambas.Debug($titulo & ("Nuevo album :" & "{" & TextBoxAlbum.Text & "}{" & TextAreaAlbumDescription.Text & "}"))
   If $photoService.AddAlbum(TextBoxAlbum.Text, TextAreaAlbumDescription.Text) Then
     $log4gambas.Debug($titulo & ("Nuevo album agregado con exito, lo cargamos a la lista"))
     FindAlbums()
-
+    
   Else
     $log4gambas.Error($titulo & ("Nuevo album agregado con exito"))
     Message.Error(("Error al intentar agregar un nuevo album"))
-
+    
   Endif
-
+  
 Catch
   $log4gambas.Error($titulo & ("Problemas al crear un album"))
   Message.Error(("Problemas al crear un album"))
-
+  
 End
 
 Public Sub ListEditorPhotos_Add()
-
+  
   Dim img As Variant
-
+  
   Dialog.Title = "Seleccione un archivo"
   Dialog.Filter = ["*.png; *.jpg", "Archivos de imagen"]
   Dialog.FilterIndex = 0
@@ -208,23 +212,24 @@ Public Sub ListEditorPhotos_Add()
   If Dialog.OpenFile(True) Then
     Return ' Proceso cancelado por el usuario
   Endif
-
+  
   $log4gambas.Debug($titulo & ("Agregar una nuevas fotos"))
-
+  
   For Each img In Dialog.Paths
     $log4gambas.Debug($titulo & ("Agregando una nueva foto") & "[" & img & "]")
     ListEditorPhotos.Add(img)
   Next
-
+  
 End
 
 Public Sub ListEditorPhotos_Select()
-
+  
   PictureBoxPreview.Image = Image.Load(ListEditorPhotos.Text)
-
+  
 End
 
 Public Sub ListEditorAvailabeAlbums_Select()
+  
   Dim albums As AlbumEntity[]
   Dim alb As AlbumEntity
   
@@ -251,11 +256,10 @@ Public Sub ListEditorAvailabeAlbums_Select()
   TextBoxAlbum.Text = albums[ListEditorAvailabeAlbums.Index].Name
   TextAreaAlbumDescription.Text = albums[ListEditorAvailabeAlbums.Index].Description
   $idAlbum = albums[ListEditorAvailabeAlbums.Index].Id
-
+  
   $log4gambas.Debug($titulo & ("Selección de album") & "[" & TextBoxAlbum.Text & "][" & Str($idAlbum) & "]")
-
+  
 End
-
 
 ' ==================================================
 '
@@ -263,20 +267,20 @@ End
 '
 ' ==================================================
 Private Sub FindAlbums(Optional text As String)
-
+  
   Dim albums As AlbumEntity[]
   Dim album As AlbumEntity
-
+  
   $log4gambas.Debug($titulo & "Buscando un album [" & text & "]")
   albums = $photoService.FindAlbums(text, 0, Constants.USE_SOFT_FALSE)
-
+  
   ListEditorAvailabeAlbums.Clear
   ListEditorAvailabeAlbums.Index = -1
   ListEditorAvailabeAlbums.Tag = albums
   For Each album In albums
-   
-     ListEditorAvailabeAlbums.Add(album.Name)
-   
+    
+    ListEditorAvailabeAlbums.Add(album.Name)
+    
   Next
-
+  
 End

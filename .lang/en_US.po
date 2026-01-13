@@ -2,10 +2,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gacela 3.21.1\n"
-"POT-Creation-Date: 2026-01-13 00:51 UTC\n"
-"PO-Revision-Date: 2026-01-12 23:35 UTC\n"
+"POT-Creation-Date: 2026-01-12 23:34 UTC\n"
+"PO-Revision-Date: 2026-01-12 22:38 UTC\n"
 "Last-Translator: sepulvedamarcos <sepulvedamarcos@gmail.com>\n"
-"Language: es\n"
+"Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,11 +20,11 @@ msgstr ""
 
 #: Constants.module:30
 msgid "Private"
-msgstr "Privada"
+msgstr ""
 
 #: Constants.module:31
 msgid "Shared"
-msgstr "Compartida"
+msgstr ""
 
 #: FImportDialog.class:12
 msgid "Importar las fotos en un album"
@@ -194,68 +194,80 @@ msgstr ""
 msgid "Cancelar"
 msgstr ""
 
-#: FMain.class:84
+#: FMain.class:90
 msgid "Algunos de los archivos que se intenta importar no son validos"
 msgstr ""
 
-#: FMain.form:52
+#: FMain.form:54
 msgid "File"
-msgstr "Archivo"
+msgstr ""
 
-#: FMain.form:56
+#: FMain.form:58
 msgid "Private collection"
-msgstr "Colección privada"
+msgstr ""
 
-#: FMain.form:62
+#: FMain.form:64
 msgid "Shared collection"
-msgstr "Colección compartida"
+msgstr ""
 
-#: FMain.form:71
+#: FMain.form:73
 msgid "Import images"
 msgstr ""
 
-#: FMain.form:79
+#: FMain.form:81
 msgid "Exit"
 msgstr ""
 
-#: FMain.form:85
+#: FMain.form:87
 msgid "Options"
 msgstr ""
 
-#: FMain.form:88
+#: FMain.form:90
 msgid "Gazelle configurations"
 msgstr ""
 
-#: FMain.form:93
+#: FMain.form:95
 msgid "About gazelle"
 msgstr ""
 
-#: FMain.form:98
+#: FMain.form:100
 msgid "CollectionTool"
 msgstr ""
 
-#: FMain.form:146
-msgid "Albums"
+#: FMain.form:122
+msgid "hole"
 msgstr ""
 
 #: FMain.form:151
+msgid "Libreria"
+msgstr ""
+
+#: FMain.form:156
+msgid "Personal"
+msgstr ""
+
+#: FMain.form:162
+msgid "Compartida"
+msgstr ""
+
+#: FMain.form:171
+msgid "Albums"
+msgstr ""
+
+#: FMain.form:176
 msgid "ererer"
 msgstr ""
 
-#: FMain.form:157
+#: FMain.form:182
 msgid "asdad"
 msgstr ""
 
-#: FMain.form:169
+#: FMain.form:194
 msgid "Tags"
 msgstr ""
 
-#: FMain.form:185
+#: FMain.form:209
 msgid ",mn,mn,nm"
-msgstr ""
-
-#: FMain.form:271
-msgid "hola mundo!!"
 msgstr ""
 
 #: Main.module:21
@@ -417,3 +429,6 @@ msgstr ""
 #: PhotoService.class:361
 msgid "Error al intentar grabar en la foto en la BD"
 msgstr ""
+
+#~ msgid "Acerca de "
+#~ msgstr "About"

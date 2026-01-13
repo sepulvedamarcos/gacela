@@ -1,0 +1,60 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,64,64)
+  Text = ("Resumen de importación")
+  Resizable = False
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  Margin = True
+  { LabelTotalAmount Label
+    MoveScaled(43,3,8,3)
+  }
+  { Label1 Label
+    MoveScaled(2,3,38,3)
+    Text = ("Cantidad de imagenes importadas")
+  }
+  { LabelSuccessful Label
+    MoveScaled(43,7,8,3)
+  }
+  { Label2 Label
+    MoveScaled(2,7,37,3)
+    Text = ("Cantidad de imagenes subidas con exito")
+  }
+  { LabelFailed Label
+    MoveScaled(43,11,8,3)
+  }
+  { Label3 Label
+    MoveScaled(2,11,39,3)
+    Text = ("Cantidad de imagenes que fallaron")
+  }
+  { ListViewSummary ListView
+    MoveScaled(2,16,60,37)
+  }
+  { CheckBox1 CheckBox
+    MoveScaled(2,54,60,4)
+    Text = ("No mostar esta ventana de sialogo en cada importación")
+  }
+  { HBox1 HBox
+    MoveScaled(1,59,62,4)
+    Spacing = True
+    { ButtonDefault Button
+      MoveScaled(1,0,16,4)
+      Text = ("Predefinido")
+    }
+    { Panel1 Panel
+      MoveScaled(21,0,4,4)
+      Expand = True
+    }
+    { btnOK Button
+      MoveScaled(29,0,16,4)
+      Text = ("OK")
+      Default = True
+    }
+    { btnCancel Button
+      MoveScaled(46,0,16,4)
+      Text = ("Cancelar")
+      Cancel = True
+    }
+  }
+}

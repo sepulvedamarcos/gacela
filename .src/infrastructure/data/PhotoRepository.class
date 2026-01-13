@@ -155,7 +155,7 @@ Public Function DeleteAlbum(id As Integer) As Integer
 
   $dbContext.DBConnection.Begin()
   result = $dbContext.DBConnection.Edit(Constants.TABLE_ALBUMS)
-  result["id"] = id
+  result["album_id"] = id
   result["soft_delete"] = 1
   result.Update()
 
@@ -164,10 +164,34 @@ Public Function DeleteAlbum(id As Integer) As Integer
 
 Catch
   $dbContext.DBConnection.Rollback
-  $log4gambas.Error($titulo & ("Problemas al eliminarr un album, se hace Rollback"))
+  $log4gambas.Error($titulo & ("Problemas al eliminar un album, se hace Rollback"))
   Error.Propagate
 
 End
+
+Public Function DeletePhoto(id As Integer) As Boolean
+  
+  Dim res As Result
+  
+  ' FIXME : aqui debe ir la eliminacion en cascada de las tablas asociadas TAGS, Albums. Ademas en la capa anterior debe hacer la revision de lockeo
+  
+  $dbContext.DBConnection.Begin()
+  res = $dbContext.DBConnection.Edit(Constants.TABLE_PHOTOS)
+  res["photo_id"] = id
+  res["soft_delete"] = 1
+    result.Update()
+
+  $dbContext.DBConnection.Commit
+  Return $dbContext.DBConnection.LastInsertId
+
+  
+Catch
+  $dbContext.DBConnection.Rollback
+  $log4gambas.Error($titulo & ("Problemas al eliminar una imagen de la bd, se hace Rollback"))
+  Error.Propagate
+  
+End
+
 
 
 Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean

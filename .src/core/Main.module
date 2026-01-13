@@ -38,7 +38,7 @@ Public Sub Main()
   ' Creamos e inyectamos en el formulario
   formMain = New FMain($configuration, $log4gambas, $photoService)
   formMain.Show()
-
+  
 Catch
   Print $titulo & ("Se detecto un problema grave y se detendra la aplicación : ") & Error.Text
   Message.Error("Se detecto un problema grave y se detendra la aplicación : " & Error.Text)

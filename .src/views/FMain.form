@@ -1,68 +1,95 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,138,81)
+  MoveScaled(0,0,137,87)
   Drop = True
   Expand = True
   Arrangement = Arrange.Vertical
-  { buscar Menu
-    Toggle = True
-    Visible = False
-    { nombre Menu
-      Text = ("nombre")
-      Checked = True
+  { MainMenu Menu
+    Text = ("File")
+    Radio = True
+    { MainMenu_PrivateCollection Menu
+      Text = ("Private collection")
+      Picture = Picture["icon:/medium/folder-home"]
+      Radio = True
+    }
+    { MainMenu_ShareCollection Menu
+      Text = ("Shared collection")
+      Picture = Picture["icon:/medium/user-group"]
+      Radio = True
+    }
+    { Menu1 Menu
+    }
+    { MainMenu_ImportImages Menu
+      Text = ("Import images")
+      Picture = Picture["icon:/medium/insert-image"]
+    }
+    { Menu2 Menu
+    }
+    { MainMenu_Exit Menu
+      Text = ("Exit")
+      Picture = Picture["icon:/medium/quit"]
     }
   }
-  { Configuration Menu
-    Text = ("Opciones")
-    Visible = False
-    { Configuration_Option Menu
-      Text = ("Opciones")
+  { OptionsMenu Menu
+    Text = ("Options")
+    { OptionsMenu_Configuration Menu
+      Text = ("Gazelle configurations")
+      Picture = Picture["icon:/medium/options"]
     }
-    { Configuration_Abour Menu
-      Text = ("Acerca de ") & "..."
+    { OptionsMenu_About Menu
+      Text = ("About gazelle")
+    }
+  }
+  { CollectionToolMenu Menu
+    Text = ("CollectionTool")
+    Visible = False
+    { CollectionToolMenu_Private Menu
+      Text = ("Private collection")
+      Radio = True
+    }
+    { CollectionToolMenu_Share Menu
+      Text = ("Shared collection")
+      Radio = True
     }
   }
   { HBox4 HBox
     MoveScaled(0,0,137,8)
-    Background = &HC0C0C0
     Spacing = True
     Padding = 2
-    { Spring1 Spring
-      MoveScaled(119,2,4,4)
+    { MenuButtonCollection MenuButton
+      MoveScaled(1,0,16,8)
+      Arrow = False
+      Menu = "CollectionToolMenu"
     }
     { ToolButton1 ToolButton
-      MoveScaled(127,1,8,6)
-      PopupMenu = "Configuration"
-      Picture = Picture["icon:/32/menu"]
+      MoveScaled(18,0,12,8)
+      Text = ("Shared")
+    }
+    { ToolButtonImport ToolButton
+      MoveScaled(31,0,8,8)
+      Picture = Picture["icon:/medium/insert-image"]
+    }
+    { Spring1 Spring
+      MoveScaled(115,1,4,5)
+      Direction = Direction.LeftToRight
+    }
+    { ToolButton2 ToolButton
+      MoveScaled(130,2,4,4)
     }
   }
   { HBox1 HBox
-    MoveScaled(0,8,137,72)
+    MoveScaled(0,8,137,70)
     Expand = True
     Spacing = True
     { PanelIzquierdo Panel
-      MoveScaled(1,1,27,69)
+      MoveScaled(0,0,27,70)
+      Background = Color.ButtonBackground
       Arrangement = Arrange.Row
       Spacing = True
       Padding = 4
-      { Label2 Label
-        MoveScaled(2,2,13,3)
-        Font = Font["Poppins,16"]
-        Text = ("Libreria")
-      }
-      { ToggleButtonPersonal ToggleButton
-        MoveScaled(0,6,27,5)
-        Text = ("Personal")
-        Radio = True
-      }
-      { ToggleButtonCompartida ToggleButton
-        MoveScaled(0,11,27,5)
-        Text = ("Compartida")
-        Radio = True
-      }
       { ExpanderAlbum Expander
-        MoveScaled(1,18,25,27)
+        MoveScaled(0,2,25,27)
         Font = Font["Poppins,16"]
         Expand = True
         Border = False
@@ -88,9 +115,10 @@
         Text = ("Tags")
       }
     }
-    { PanelDerecho VBox
-      MoveScaled(29,1,102,69)
+    { PanelDerecho Panel
+      MoveScaled(32,2,97,65)
       Expand = True
+      Arrangement = Arrange.Vertical
       { PanelBusqueda Panel
         MoveScaled(1,1,90,7)
         Arrangement = Arrange.Horizontal
@@ -157,9 +185,21 @@
         Spacing = True
         Margin = True
         Padding = 4
+        Border = False
         ScrollBar = Scroll.Vertical
         Shadow = True
       }
+    }
+  }
+  { HBox5 Panel
+    MoveScaled(0,78,137,5)
+    Arrangement = Arrange.Horizontal
+    { Label1 Label
+      MoveScaled(2,1,26,3)
+      Expand = True
+      Border = Border.Etched
+      Text = ("hola mundo!!")
+      Trim = True
     }
   }
 }
