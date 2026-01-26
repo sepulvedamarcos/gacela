@@ -22,7 +22,6 @@
     }
     { MainMenu_ImportImages Menu
       Text = ("Import images")
-      Picture = Picture["icon:/medium/insert-image"]
     }
     { Menu2 Menu
     }
@@ -31,8 +30,14 @@
       Picture = Picture["icon:/medium/quit"]
     }
   }
+  { ViewMenu Menu
+    Text = ("View")
+  }
   { OptionsMenu Menu
     Text = ("Options")
+    { ToolbarConfigurationMenu Menu
+      Text = ("Toolbar configuration")
+    }
     { OptionsMenu_Configuration Menu
       Text = ("Gazelle configurations")
       Picture = Picture["icon:/medium/options"]
@@ -65,17 +70,18 @@
     { ToolButton1 ToolButton
       MoveScaled(18,0,12,8)
       Text = ("Shared")
+      Border = True
     }
     { ToolButtonImport ToolButton
       MoveScaled(31,0,8,8)
-      Picture = Picture["icon:/medium/insert-image"]
     }
     { Spring1 Spring
       MoveScaled(115,1,4,5)
       Direction = Direction.LeftToRight
     }
-    { ToolButton2 ToolButton
-      MoveScaled(130,2,4,4)
+    { ToolButtonConfiguration ToolButton
+      MoveScaled(127,0,8,8)
+      Picture = Picture["icons/64x64/package_settings.png"]
     }
   }
   { HBox1 HBox
@@ -195,10 +201,10 @@
     MoveScaled(0,78,137,5)
     Arrangement = Arrange.Horizontal
     { Label1 Label
-      MoveScaled(2,1,26,3)
+      MoveScaled(2,1,34,3)
       Expand = True
       Border = Border.Etched
-      Text = ("hola mundo!!")
+      Text = ("Hello word, this is the Status bar!!")
       Trim = True
     }
   }

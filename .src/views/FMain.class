@@ -171,6 +171,12 @@ Public Sub MainMenu_ImportImages_Click()
   
 End
 
+Public Sub ToolButtonImport_Click()
+  
+  ImportProcess()
+  
+End
+
 ' ==================================================
 '
 '          Metodos privados
@@ -212,6 +218,7 @@ Private Sub ClearPhotoGallery()
 End
 
 Private Sub ImportProcess(Optional listFiles As String[])
+
   Dim resp As Variant
   Dim selector As FImportDialog
   
