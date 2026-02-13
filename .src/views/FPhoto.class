@@ -1,28 +1,27 @@
 ' Gambas class file
 
-Private $photo As PhotoEntity
-Private $pictureBox As PictureBox
+Private $cPhoto As PhotoEntity
+Private $oPictureBox As PictureBox
 
-Public Sub _new(photo As PhotoEntity)
-
-  $photo = photo
+Public Sub _new(cPhoto As PhotoEntity)
+  $cPhoto = cPhoto
 
   ButtonSeleccionar.Top = 4
   ButtonSeleccionar.Left = 4
 
-  $pictureBox = New PictureBox(Me)
-  $pictureBox.X = 0
-  $pictureBox.Y = 0
-  $pictureBox.Width = Me.Width
-  $pictureBox.Height = Me.Height
-  $pictureBox.Padding = 8
-  $pictureBox.Mode = PictureBox.Contain
-  $pictureBox.Expand = True
-  $pictureBox.Alignment = Align.Center
-  If photo.HasThumbnail Then
-    $pictureBox.Image = Image.FromString($photo.Thumbnail)
+  $oPictureBox = New PictureBox(Me)
+  $oPictureBox.X = 0
+  $oPictureBox.Y = 0
+  $oPictureBox.Width = Me.Width
+  $oPictureBox.Height = Me.Height
+  $oPictureBox.Padding = 8
+  $oPictureBox.Mode = PictureBox.Contain
+  $oPictureBox.Expand = True
+  $oPictureBox.Alignment = Align.Center
+  If cPhoto.HasThumbnail Then
+    $oPictureBox.Image = Image.FromString(cPhoto.Thumbnail)
   Else
-    $pictureBox.Image = Image.Load($photo.ImagePath &/ $photo.FileName)
+    $oPictureBox.Image = Image.Load(cPhoto.ImagePath &/ cPhoto.FileName)
   Endif
 
 End
@@ -35,8 +34,8 @@ Public Sub Form_Resize()
 
   Me.Height = Me.Parent.Height
   Me.Width = Me.Parent.Width
-  $pictureBox.Height = Me.Height
-  $pictureBox.Width = Me.Width
+  $oPictureBox.Height = Me.Height
+  $oPictureBox.Width = Me.Width
 
 End
 

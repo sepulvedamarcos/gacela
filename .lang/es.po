@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gacela 3.21.1\n"
-"POT-Creation-Date: 2026-01-13 00:51 UTC\n"
+"POT-Creation-Date: 2026-02-10 21:02 UTC\n"
 "PO-Revision-Date: 2026-01-12 23:35 UTC\n"
 "Last-Translator: sepulvedamarcos <sepulvedamarcos@gmail.com>\n"
 "Language: es\n"
@@ -18,11 +18,23 @@ msgstr ""
 msgid "Gestor de álbumes de fotos familiares compartidos en computadores con linux"
 msgstr ""
 
-#: Constants.module:30
+#: Configuration.class:66
+msgid "creando archivo ini con datos del log4gambas3"
+msgstr ""
+
+#: Configuration.class:94
+msgid "creando archivo ini con datos iniciales"
+msgstr ""
+
+#: Configuration.class:111
+msgid "Error detectado al intentar crear directorio de archivo settings"
+msgstr ""
+
+#: Constants.module:46
 msgid "Private"
 msgstr "Privada"
 
-#: Constants.module:31
+#: Constants.module:47 FMain.form:130
 msgid "Shared"
 msgstr "Compartida"
 
@@ -34,100 +46,100 @@ msgstr ""
 msgid "Importar las fotos en el album"
 msgstr ""
 
-#: FImportDialog.class:27
+#: FImportDialog.class:26
 msgid "Creando la ventana de dialogo y la lista de albumes"
 msgstr ""
 
-#: FImportDialog.class:61
+#: FImportDialog.class:60
 msgid "Debe seleccionar fotos para procesar"
 msgstr ""
 
-#: FImportDialog.class:64
-msgid "Estas seguro de importar las fotos seleccionadas en el album con las opciones seleccionadas?"
+#: FImportDialog.class:63
+msgid "Estas seguro de importar las fotos seleccionadas en el cAlbum con las opciones seleccionadas?"
 msgstr ""
 
-#: FImportDialog.class:64
+#: FImportDialog.class:63
 msgid "No"
 msgstr ""
 
-#: FImportDialog.class:64
+#: FImportDialog.class:63
 msgid "Si"
 msgstr ""
 
-#: FImportDialog.class:70
+#: FImportDialog.class:69
 msgid "Comienza procesamiento de importacion de fotos"
 msgstr ""
 
-#: FImportDialog.class:73
+#: FImportDialog.class:72
 msgid "Proceso terminado, para ver el resumen da click en la barra de estados"
 msgstr ""
 
+#: FImportDialog.class:81
+msgid "Se presento un problema aAl intentar importar las imagenes"
+msgstr ""
+
 #: FImportDialog.class:82
-msgid "Se presento un problema al intentar importar las imagenes"
+msgid "Se presento un problema aAl intentar iomportar las imagenes"
 msgstr ""
 
-#: FImportDialog.class:83
-msgid "Se presento un problema al intentar iomportar las imagenes"
+#: FImportDialog.class:110
+msgid "Click en checkbox para asociar cAlbum "
 msgstr ""
 
-#: FImportDialog.class:111
-msgid "Click en checkbox para asociar album "
+#: FImportDialog.class:133
+msgid "Debe seleccionar un cAlbum para continuar"
 msgstr ""
 
-#: FImportDialog.class:134
-msgid "Debe seleccionar un album para continuar"
+#: FImportDialog.class:153
+msgid "Selecciona un cAlbum para asociar"
 msgstr ""
 
-#: FImportDialog.class:154
-msgid "Selecciona un album para asociar"
+#: FImportDialog.class:161
+msgid "Cancela la asociación de cAlbum, vuelve todo atras"
 msgstr ""
 
-#: FImportDialog.class:162
-msgid "Cancela la asociación de album, vuelve todo atras"
+#: FImportDialog.class:172
+msgid "Intento de agrega nuevo cAlbum"
 msgstr ""
 
-#: FImportDialog.class:173
-msgid "Intento de agrega nuevo album"
+#: FImportDialog.class:174
+msgid "Debe ingresar un nombre de cAlbum para continuar"
 msgstr ""
 
-#: FImportDialog.class:175
-msgid "Debe ingresar un nombre de album para continuar"
+#: FImportDialog.class:188
+msgid "Nuevo cAlbum agregado con exito, lo cargamos a la lista"
 msgstr ""
 
-#: FImportDialog.class:189
-msgid "Nuevo album agregado con exito, lo cargamos a la lista"
+#: FImportDialog.class:192
+msgid "Nuevo cAlbum agregado con exito"
 msgstr ""
 
 #: FImportDialog.class:193
-msgid "Nuevo album agregado con exito"
+msgid "Error aAl intentar agregar un nuevo cAlbum"
 msgstr ""
 
-#: FImportDialog.class:194
-msgid "Error al intentar agregar un nuevo album"
+#: FImportDialog.class:198
+msgid "Problemas aAl crear un cAlbum"
 msgstr ""
 
-#: FImportDialog.class:199 PhotoService.class:182
-msgid "Problemas al crear un album"
-msgstr ""
-
-#: FImportDialog.class:216
+#: FImportDialog.class:215
 msgid "Agregar una nuevas fotos"
 msgstr ""
 
-#: FImportDialog.class:219
+#: FImportDialog.class:218
 msgid "Agregando una nueva foto"
 msgstr ""
 
-#: FImportDialog.class:237
-msgid "Se detecto una eliminacion de un album"
+#: FImportDialog.class:236
+msgid "Se detecto una eliminacion de un cAlbum"
 msgstr ""
 
-#: FImportDialog.class:242
+#: FImportDialog.class:241
 msgid "Datos de eliminacion coinciden se envia codigo"
 msgstr ""
 
-#: FImportDialog.class:260
-msgid "Selección de album"
+#: FImportDialog.class:259
+msgid "Selección de cAlbum"
 msgstr ""
 
 #: FImportDialog.form:32
@@ -194,68 +206,80 @@ msgstr ""
 msgid "Cancelar"
 msgstr ""
 
-#: FMain.class:84
+#: FMain.class:65
 msgid "Algunos de los archivos que se intenta importar no son validos"
 msgstr ""
 
-#: FMain.form:52
+#: FMain.form:56
 msgid "File"
 msgstr "Archivo"
 
-#: FMain.form:56
+#: FMain.form:60
 msgid "Private collection"
 msgstr "Colección privada"
 
-#: FMain.form:62
+#: FMain.form:66
 msgid "Shared collection"
 msgstr "Colección compartida"
 
-#: FMain.form:71
+#: FMain.form:75
 msgid "Import images"
 msgstr ""
 
-#: FMain.form:79
+#: FMain.form:82
 msgid "Exit"
 msgstr ""
 
-#: FMain.form:85
+#: FMain.form:88
+msgid "View"
+msgstr ""
+
+#: FMain.form:92
 msgid "Options"
 msgstr ""
 
-#: FMain.form:88
+#: FMain.form:95
+msgid "Toolbar configuration"
+msgstr ""
+
+#: FMain.form:99
 msgid "Gazelle configurations"
 msgstr ""
 
-#: FMain.form:93
+#: FMain.form:104
 msgid "About gazelle"
 msgstr ""
 
-#: FMain.form:98
+#: FMain.form:109
 msgid "CollectionTool"
 msgstr ""
 
-#: FMain.form:146
+#: FMain.form:166
 msgid "Albums"
 msgstr ""
 
-#: FMain.form:151
+#: FMain.form:171
 msgid "ererer"
 msgstr ""
 
-#: FMain.form:157
+#: FMain.form:177
 msgid "asdad"
 msgstr ""
 
-#: FMain.form:169
+#: FMain.form:189
 msgid "Tags"
 msgstr ""
 
-#: FMain.form:185
+#: FMain.form:205
 msgid ",mn,mn,nm"
 msgstr ""
 
-#: FMain.form:271
-msgid "hola mundo!!"
+#: FMain.form:291
+msgid "Hello word, this is the Status bar!!"
+msgstr ""
+
+#: ImageMetadataAdapter.class:50
+msgid "Error extrayendo metadata de imagen: "
 msgstr ""
 
 #: Main.module:21
@@ -267,11 +291,11 @@ msgid "Se detecto un problema grave y se detendra la aplicación : "
 msgstr ""
 
 #: PhotoRepository.class:146
-msgid "Problemas al crear un album, se hace Rollback"
+msgid "Problemas al crear un cAlbum, se hace Rollback"
 msgstr ""
 
 #: PhotoRepository.class:167
-msgid "Problemas al eliminar un album, se hace Rollback"
+msgid "Problemas al eliminar un cAlbum, se hace Rollback"
 msgstr ""
 
 #: PhotoRepository.class:190
@@ -283,15 +307,15 @@ msgid "Codigo de foto creado"
 msgstr ""
 
 #: PhotoRepository.class:242
-msgid "Codigo de foto-album creado"
+msgid "Codigo de foto-cAlbum creado"
 msgstr ""
 
 #: PhotoRepository.class:263
-msgid "Validacion en tabla con el Hash256 enviado"
+msgid "Validacion en tabla sCon el Hash256 enviado"
 msgstr ""
 
 #: PhotoRepository.class:271
-msgid "Existe ya la imagen con ese Hash256"
+msgid "Existe ya la imagen sCon ese Hash256"
 msgstr ""
 
 #: PhotoRepository.class:276
@@ -302,118 +326,126 @@ msgstr ""
 msgid "Error al buscar foto por hash256"
 msgstr ""
 
-#: PhotoService.class:32
+#: PhotoService.class:34
 msgid "Obtencion de todas las fotos"
 msgstr ""
 
-#: PhotoService.class:35
+#: PhotoService.class:37
 msgid "Error al leer las fotos : "
 msgstr ""
 
-#: PhotoService.class:61
+#: PhotoService.class:63
 msgid "Se envio a eliminar la imagen"
 msgstr ""
 
-#: PhotoService.class:64
+#: PhotoService.class:66
 msgid "Se obtuvo el path de la imagen"
 msgstr ""
 
-#: PhotoService.class:71
+#: PhotoService.class:73
 msgid "No se encontro imagen para elimianr"
 msgstr ""
 
-#: PhotoService.class:84
+#: PhotoService.class:86
 msgid "Carga inicial insertando datos de prueba en tabla photos..."
 msgstr ""
 
-#: PhotoService.class:90
+#: PhotoService.class:92
 msgid "Datos de prueba insertados exitosamente"
 msgstr ""
 
-#: PhotoService.class:93
+#: PhotoService.class:95
 msgid "Error insertando foto de prueba"
 msgstr ""
 
-#: PhotoService.class:173
-msgid "Creacion de entidad album para enviar grabar"
+#: PhotoService.class:175
+msgid "Creacion de entidad oAlbum para enviar grabar"
 msgstr ""
 
-#: PhotoService.class:191
-msgid "Eliminacion de entidad album"
+#: PhotoService.class:184
+msgid "Problemas al crear un oAlbum"
 msgstr ""
 
-#: PhotoService.class:201
-msgid "Problemas al eliminar un album"
+#: PhotoService.class:193
+msgid "Eliminacion de entidad oAlbum"
 msgstr ""
 
-#: PhotoService.class:217
+#: PhotoService.class:203
+msgid "Problemas al eliminar un oAlbum"
+msgstr ""
+
+#: PhotoService.class:219
 msgid "Validación de existencia de imagen y directorio de destino"
 msgstr ""
 
-#: PhotoService.class:222
+#: PhotoService.class:224
 msgid "Intento de copia de imagen en el directorio"
 msgstr ""
 
-#: PhotoService.class:224
+#: PhotoService.class:226
 msgid "Copia de la imagen realizada con exito en el directorio"
 msgstr ""
 
-#: PhotoService.class:229
+#: PhotoService.class:231
 msgid "Problema al intentar grabar imagen"
 msgstr ""
 
-#: PhotoService.class:236
+#: PhotoService.class:238
 msgid "Intento de eliminación de imagen en el directorio"
 msgstr ""
 
-#: PhotoService.class:238
+#: PhotoService.class:240
 msgid "Eliminación de imagen realizada con exito en el directorio"
 msgstr ""
 
-#: PhotoService.class:241
+#: PhotoService.class:243
 msgid "Problema al intentar eliminar imagen original"
 msgstr ""
 
-#: PhotoService.class:263
+#: PhotoService.class:265
 msgid "valida existencia del archivo fisico en la importacion"
 msgstr ""
 
-#: PhotoService.class:265
+#: PhotoService.class:267
 msgid "Existe el archivo fisico en la importacion"
 msgstr ""
 
-#: PhotoService.class:270
+#: PhotoService.class:272
 msgid "No existe el archivo fisico en la importacion"
 msgstr ""
 
-#: PhotoService.class:274
+#: PhotoService.class:276
 msgid "Problema al valida existencia del archivo"
 msgstr ""
 
-#: PhotoService.class:323
+#: PhotoService.class:325
 msgid "Chequeo de existencia del archivo fisico en la importacion"
 msgstr ""
 
-#: PhotoService.class:325
+#: PhotoService.class:327
 msgid "El archivo ya existe"
 msgstr ""
 
-#: PhotoService.class:329
-msgid "Chequeo de existencia del archivo por hash256 dentro de la BD"
+#: PhotoService.class:331
+msgid "Chequeo de existencia del archivo por sHash256 dentro de la BD"
 msgstr ""
 
-#: PhotoService.class:334
+#: PhotoService.class:336
 msgid "Vamos a grabar la imagen en el directorio de importación"
 msgstr ""
 
-#: PhotoService.class:337
+#: PhotoService.class:339
 msgid "Evaluamos condicion verdadera para eliminar imagen original"
 msgstr ""
 
-#: PhotoService.class:339
+#: PhotoService.class:341
 msgid "Condicion verdadera, eliminar imagen original"
 msgstr ""
 
-#: PhotoService.class:361
+#: PhotoService.class:364
 msgid "Error al intentar grabar en la foto en la BD"
+msgstr ""
+
+#: PhotoService.class:371
+msgid "Error importando foto: "
 msgstr ""

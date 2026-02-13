@@ -2,111 +2,111 @@
 
 '
 ' Gambas class file - PhotoAlbumEntity
-' Modelo de dominio para representar una asociacion de foto con album en Gacela
+' Domain model for representing a photo-album association in Gacela
 '
-'  recordar que los nombre de las variables para las clases no deben llamarse igual aunque sea en minusculas por que las toma como si fueran iguales
+'  Remember that variable names should not match class names, even in lowercase, because Gambas treats them as the same.
 
-' Propiedades privadas del modelo
-Private $id As Integer = 0
-Private $photoId As Integer
-Private $albumId As Integer
-Private $orderInAlbum As Integer = 0
-Private $addedDate As Date
-Private $addedUser As String
-Private $softDelete As Boolean
+' Private model properties
+Private $iId As Integer = 0
+Private $iPhotoId As Integer
+Private $iAlbumId As Integer
+Private $iOrderInAlbum As Integer = 0
+Private $dAddedDate As Date
+Private $sAddedUser As String
+Private $bSoftDelete As Boolean
 
 ' =============================================
 '
-'            PROPIEDADES PÚBLICAS
+'            PUBLIC PROPERTIES
 '
 '==============================================
-Property Id As Integer                     '' Id Unico de la relacion photo album
-Property PhotoId As Integer                '' Identificador de la photo
-Property AlbumId As Integer                '' Identificador del album
-Property OrderInAlbum As Integer           '' Indicador de posicion dentro del album
-Property AddedDate As Date                 '' Fecha de agregacion al album
-Property AddedUser As String               '' Usuario que agrego la foto al album
-Property SoftDelete As Boolean             '' Indicador para saber si fue borrado
+Property Id As Integer                     '' Unique ID for the photo-album relation
+Property PhotoId As Integer                '' Photo identifier
+Property AlbumId As Integer                '' Album identifier
+Property OrderInAlbum As Integer           '' Position within the album
+Property AddedDate As Date                 '' Date added to the album
+Property AddedUser As String               '' User who added the photo to the album
+Property SoftDelete As Boolean             '' Indicates if it was deleted
 
 Private Function Id_Read() As Integer
 
-  Return $id
+  Return $iId
 
 End
 
 Private Sub Id_Write(Value As Integer)
 
-  $id = value
+  $iId = value
 
 End
 
 Private Function PhotoId_Read() As Integer
 
-  Return $photoId
+  Return $iPhotoId
 
 End
 
 Private Sub PhotoId_Write(Value As Integer)
 
-  $photoId = value
+  $iPhotoId = value
 
 End
 
 Private Function AlbumId_Read() As Integer
 
-  Return $albumId
+  Return $iAlbumId
 
 End
 
 Private Sub AlbumId_Write(Value As Integer)
 
-  $albumId = value
+  $iAlbumId = value
 
 End
 
 Private Function OrderInAlbum_Read() As Integer
 
-  Return $orderInAlbum
+  Return $iOrderInAlbum
 
 End
 
 Private Sub OrderInAlbum_Write(Value As Integer)
 
-  $orderInAlbum = value
+  $iOrderInAlbum = value
 
 End
 
  Private Function AddedDate_Read() As Date
 
-Return $addedDate  
+Return $dAddedDate  
 
 End
 
 Private Sub AddedDate_Write(Value As Date)
 
-  $addedDate = value
+  $dAddedDate = value
 
 End
 
 Private Function AddedUser_Read() As String
 
-  Return $addedUser
+  Return $sAddedUser
 End
 
 Private Sub AddedUser_Write(Value As String)
 
-  $addedUser = value
+  $sAddedUser = value
 
 End
 
 Private Function SoftDelete_Read() As Boolean
 
-  Return $softDelete
+  Return $bSoftDelete
 
 End
 
 Private Sub SoftDelete_Write(Value As Boolean)
 
-  $softDelete = value
+  $bSoftDelete = value
 
 End

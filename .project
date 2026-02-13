@@ -1,13 +1,12 @@
 # Gambas Project File 3.0
 Title=Gestor de Álbumes Compartidos en Linux Avanzado
 Startup=Main
-Icon=camera.png
+Icon=icons/app/camera.png
 Version=0.0.3
 Component=gb.image
 Component=gb.gui
 Component=gb.form
 Component=gb.db2
-Component=gb.db2.form
 Component=gb.db2.sqlite3
 Component=gb.desktop
 Component=gb.settings

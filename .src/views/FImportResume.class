@@ -1,8 +1,8 @@
 ' Gambas class file
 
-Public Sub _new(amout As Integer)
+Public Sub _new(iAmout As Integer)
   
-  LabelTotalAmount.Text = "" & Str(amout)
+  LabelTotalAmount.Text = "" & Str(iAmout)
   LabelSuccessful.Text = ""
   LabelFailed.Text = ""
   
@@ -14,13 +14,13 @@ Public Sub Run() As Boolean
   
 End
 
-Public Sub btnOK_Click()
+Public Sub BtnOK_Click()
   
   Me.Close(True)
   
 End
 
-Public Sub btnCancel_Click()
+Public Sub BtnCancel_Click()
   
   Me.Close
   

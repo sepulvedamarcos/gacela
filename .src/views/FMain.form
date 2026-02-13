@@ -4,17 +4,18 @@
   MoveScaled(0,0,137,87)
   Drop = True
   Expand = True
+  Text = ("Gacela")
   Arrangement = Arrange.Vertical
   { MainMenu Menu
     Text = ("File")
     Radio = True
     { MainMenu_PrivateCollection Menu
-      Text = ("Private collection")
+      Text = ("Private gallery")
       Picture = Picture["icon:/medium/folder-home"]
       Radio = True
     }
     { MainMenu_ShareCollection Menu
-      Text = ("Shared collection")
+      Text = ("Shared gallery")
       Picture = Picture["icon:/medium/user-group"]
       Radio = True
     }
@@ -39,22 +40,24 @@
       Text = ("Toolbar configuration")
     }
     { OptionsMenu_Configuration Menu
-      Text = ("Gazelle configurations")
+      Text = ("Gacela settings")
       Picture = Picture["icon:/medium/options"]
     }
     { OptionsMenu_About Menu
-      Text = ("About gazelle")
+      Text = ("About Gacela")
     }
   }
   { CollectionToolMenu Menu
-    Text = ("CollectionTool")
+    Text = ("Gallery")
     Visible = False
     { CollectionToolMenu_Private Menu
-      Text = ("Private collection")
+      Text = ("Private gallery")
+      Picture = Picture["icon:/medium/folder-home"]
       Radio = True
     }
     { CollectionToolMenu_Share Menu
-      Text = ("Shared collection")
+      Text = ("Shared gallery")
+      Picture = Picture["icon:/medium/user-group"]
       Radio = True
     }
   }
@@ -62,26 +65,19 @@
     MoveScaled(0,0,137,8)
     Spacing = True
     Padding = 2
-    { MenuButtonCollection MenuButton
-      MoveScaled(1,0,16,8)
-      Arrow = False
-      Menu = "CollectionToolMenu"
-    }
-    { ToolButton1 ToolButton
-      MoveScaled(18,0,12,8)
-      Text = ("Shared")
-      Border = True
-    }
-    { ToolButtonImport ToolButton
-      MoveScaled(31,0,8,8)
-    }
     { Spring1 Spring
-      MoveScaled(115,1,4,5)
+      MoveScaled(106,1,4,5)
       Direction = Direction.LeftToRight
     }
     { ToolButtonConfiguration ToolButton
-      MoveScaled(127,0,8,8)
+      MoveScaled(121,0,8,8)
       Picture = Picture["icons/64x64/package_settings.png"]
+      Border = True
+    }
+    { ToolButtonExit ToolButton
+      MoveScaled(129,0,8,8)
+      Picture = Picture["icon:/medium/logout"]
+      Border = True
     }
   }
   { HBox1 HBox
@@ -103,19 +99,19 @@
         { CheckBox1 CheckBox
           MoveScaled(2,2,16,4)
           Font = Font["Poppins,-1"]
-          Text = ("ererer")
+          Text = ("Filter 1")
         }
         { CheckBox2 CheckBox
           MoveScaled(2,6,16,4)
           Font = Font["Poppins,+1"]
-          Text = ("asdad")
+          Text = ("Filter 2")
         }
         { Button5 Button
           MoveScaled(3,12,16,4)
         }
       }
       { ExpanderTags Expander
-        MoveScaled(1,47,24,21)
+        MoveScaled(1,29,24,21)
         Font = Font["Poppins,16"]
         Expand = True
         Text = ("Tags")
@@ -131,7 +127,7 @@
         Padding = 8
         { MenuButton1 MenuButton
           MoveScaled(25,1,20,5)
-          Text = (",mn,mn,nm")
+          Text = ("Search")
           Picture = Picture["icon:/medium/find"]
           Menu = "buscar"
         }
@@ -184,8 +180,9 @@
         }
       }
       { !PanelGalleryContent ScrollView
-        MoveScaled(1,16,90,27)
+        MoveScaled(1,16,90,36)
         #Public = True
+        Background = Color.SelectedBackground
         Expand = True
         Arrangement = Arrange.Row
         Spacing = True
@@ -200,11 +197,20 @@
   { HBox5 Panel
     MoveScaled(0,78,137,5)
     Arrangement = Arrange.Horizontal
+    { MenuButtonCollection MenuButton
+      MoveScaled(0,0,25,5)
+      Text = ("Shared gallery")
+      Picture = Picture["icon:/medium/hue"]
+      Arrow = False
+      Menu = "CollectionToolMenu"
+    }
     { Label1 Label
-      MoveScaled(2,1,34,3)
+      MoveScaled(25,0,58,5)
       Expand = True
+      Padding = 4
+      Spacing = True
       Border = Border.Etched
-      Text = ("Hello word, this is the Status bar!!")
+      Text = ("Status bar")
       Trim = True
     }
   }

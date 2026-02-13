@@ -2,400 +2,408 @@
 
 '
 '
-' Clase de acceso a datos en BD
+' Data access class for DB
 '
 '
-Private $log4Gambas As Log4Gambas3
-Private $dbContext As SQLiteContext
-Private $configuration As Configuration
-Private $titulo As String = "[PhotoRepository] "
+Private $Log4Gambas As Log4Gambas3
+Private $DbContext As SQLiteContext
+Private $Configuration As Configuration
+Private $Titulo As String = "[PhotoRepository] "
 
 Property Read DBContext As SQLiteContext
 
 ' ==================================================
 '
-'          Metodos publicos
+'          Public methods
 '
 ' ==================================================
-Public Sub _new(configuration As Configuration, logger As Log4Gambas3, context As SQLiteContext)
-
-  $log4Gambas = logger
-  $dbContext = context
-  $configuration = configuration
-
+Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3, cContext As SQLiteContext)
+  
+  $Log4Gambas = oLogger
+  $DbContext = cContext
+  $Configuration = cConfiguration
+  
 End
 
-Public Function getPhotos(Optional id As Integer) As PhotoEntity[]
-
-  ' Dim photo As PhotoEntity
-  ' Dim photos As PhotoEntity[]
-  Dim photoResult As Result
-  Dim query As String
-
-  $log4Gambas.Debug($titulo & "Extraccion de fotos")
-
-  query = "soft_delete = &1"
-  If id > 0 Then
-    query = "AND id = " & id
-  End If
-
-  photoResult = $dbContext.DBConnection.Find(Constants.TABLE_PHOTOS, query, False)
-
-  If photoResult.Available Then
-    $log4Gambas.Debug($titulo & "Extraccion de " & photoResult.Count & " fotos de la respuesta")
-
-    Return MapResultToEntities(photoResult)
-
-  Endif
-
+Public Function SwitchGallery() As Boolean
+  
+  $DbContext.SwitchGallery()
+  
 Catch
-  $log4Gambas.Error($titulo & "Problemas para recuperar las fotos " & Error.Text)
-  Error.Propagate
+  Error.Propagate()
 
 End
 
-Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrder As String, limit As Integer, offset As Integer) As PhotoEntity[] '' Metodo para obtener los registros con filtros
+Public Function IsNewDatabase() As Boolean
+  
+  Return $DbContext.IsNewDatabase
+  
+End
 
-  Dim result As Result
-  Dim query As String
-  Dim orderBy As String = "import_date"
-  Dim orderType As String = "desc"
+Public Function GetPhotos(Optional id As Integer) As PhotoEntity[]
+  
+  ' Dim cPhoto As PhotoEntity
+  ' Dim oPhotos As PhotoEntity[]
+  Dim oPhotoResult As Result
+  Dim sQuery As String
+  
+  $Log4Gambas.Debug($Titulo & "Photo extraction")
+  
+  sQuery = "soft_delete = &1"
+  If id > 0 Then
+    sQuery &= " AND photo_id = " & id
+  End If
+  
+  oPhotoResult = $DbContext.DBConnection.Find(Constants.TABLE_PHOTOS, sQuery, False)
+  
+  If oPhotoResult.Available Then
+    $Log4Gambas.Debug($Titulo & "Extracted " & oPhotoResult.Count & " photos from response")
+    
+    Return MapResultToEntities(oPhotoResult)
+    
+  Endif
+  
+Catch
+  $Log4Gambas.Error($Titulo & "Problems retrieving photos " & Error.Text)
+  Error.Propagate
+  
+End
 
-  $log4gambas.Debug($titulo & "Ejecutando query con filtros")
-
+Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrder As String, limit As Integer, offset As Integer) As PhotoEntity[] '' Get records with filters
+  
+  Dim oResult As Result
+  Dim sQuery As String
+  Dim sOrderBy As String = "import_date"
+  Dim sOrderType As String = "desc"
+  
+  $Log4Gambas.Debug($Titulo & "Executing query with filters")
+  
   If sortBy <> "" Then
-    orderBy = orderBy
+    sOrderBy = sortBy
   Endif
   If sortOrder <> "" Then
-    orderType = sortOrder
+    sOrderType = sortOrder
   Endif
-  orderBy &= " " & orderType
-
-  ' Ejecutar query con LIMIT y OFFSET
-  ' En Gambas, Find no soporta directamente LIMIT/OFFSET
-  ' Debemos usar Exec con SQL
-  query = "SELECT * FROM " & Constants.TABLE_PHOTOS &
+  sOrderBy &= " " & sOrderType
+  
+  ' Execute query with LIMIT and OFFSET
+  ' In Gambas, Find does not directly support LIMIT/OFFSET
+  ' We must use Exec with SQL
+  sQuery = "SELECT * FROM " & Constants.TABLE_PHOTOS &
     " WHERE " & whereClause &
-    " ORDER BY " & orderBy &
+    " ORDER BY " & sOrderBy &
     " LIMIT " & limit &
     " OFFSET " & offset
-
-  $log4gambas.Debug($titulo & query)
-  ' Convertir params a array para Exec
-  result = $dbContext.DBConnection.Exec(query)
-
-  If result.Available Then
-    Return MapResultToEntities(result)
-  Endif
-  Return New PhotoEntity[]
-
-Catch
-  $log4gambas.Error($titulo & "Problema en FindWithFilters: " & Error.Text)
-
-  Return New PhotoEntity[]
-
-End
-
-Public Function CountWithFilters(whereClause As String) As Integer '' Metodo para contar los regsitros que tiene la tabla de fotos
-
-  Dim result As Result
-  Dim query As String
-
-  $log4gambas.Info($titulo & "Cuenta cantidad de fotos en la base actual")
-
-  query = "SELECT COUNT(*) as total FROM " & Constants.TABLE_PHOTOS &
-    " WHERE " & whereClause
-  result = $dbContext.DBConnection.Exec(query)
-
-  If result.Available Then
-    Return result["total"]
-  Endif
-
-  Return 0
-
-Catch
-  $log4gambas.Error($titulo & "Problema en CountWithFilters: " & Error.Text)
-  Error.Propagate
-
-End
-
-Public Function CreateAlbum(album As AlbumEntity) As Integer
-
-  Dim result As Result
-  Dim lastRecord As Integer
-
-  $dbContext.DBConnection.Begin()
-
-  result = $dbContext.DBConnection.Create(Constants.TABLE_ALBUMS)
-  result["name"] = album.Name
-  result["description"] = album.Description
-  result["creation_date"] = Now
-  result["creation_user"] = album.CreationUser
-  result["thumbnail"] = ""
-  result["soft_delete"] = False
-  result.Update()
-
-  $dbContext.DBConnection.Commit
-  lastRecord = $dbContext.DBConnection.LastInsertId
   
-  $log4gambas.Debug($titulo & ("Codigo de album creado [" & lastRecord & "]"))
-  Return lastRecord
-
+  $Log4Gambas.Debug($Titulo & sQuery)
+  ' Convert params to array for Exec
+  oResult = $DbContext.DBConnection.Exec(sQuery)
+  
+  If oResult.Available Then
+    Return MapResultToEntities(oResult)
+  Endif
+  Return New PhotoEntity[]
+  
 Catch
-  $dbContext.DBConnection.Rollback
-  $log4gambas.Error($titulo & ("Problemas al crear un album, se hace Rollback"))
-  Error.Propagate
-
+  $Log4Gambas.Error($Titulo & "Problem in FindWithFilters: " & Error.Text)
+  
+  Return New PhotoEntity[]
+  
 End
 
+Public Function CountWithFilters(whereClause As String) As Integer '' Count records in the photos table
+  
+  Dim oResult As Result
+  Dim sQuery As String
+  
+  $Log4Gambas.Info($Titulo & "Counting photos in the current database")
+  
+  sQuery = "SELECT COUNT(*) as iTotal FROM " & Constants.TABLE_PHOTOS &
+    " WHERE " & whereClause
+  oResult = $DbContext.DBConnection.Exec(sQuery)
+  
+  If oResult.Available Then
+    Return oResult["iTotal"]
+  Endif
+  
+  Return 0
+  
+Catch
+  $Log4Gambas.Error($Titulo & "Problem in CountWithFilters: " & Error.Text)
+  Error.Propagate
+  
+End
+
+Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer
+  
+  Dim oResult As Result
+  Dim iLastRecord As Integer
+  
+  $DbContext.DBConnection.Begin()
+  
+  oResult = $DbContext.DBConnection.Create(Constants.TABLE_ALBUMS)
+  oResult["name"] = cAlbum.Name
+  oResult["description"] = cAlbum.Description
+  oResult["creation_date"] = Now
+  oResult["creation_user"] = cAlbum.CreationUser
+  oResult["thumbnail"] = ""
+  oResult["soft_delete"] = False
+  oResult.Update()
+  
+  $DbContext.DBConnection.Commit
+  iLastRecord = $DbContext.DBConnection.LastInsertId
+  
+  $Log4Gambas.Debug($Titulo & ("Album code created [" & iLastRecord & "]"))
+  Return iLastRecord
+  
+Catch
+  $DbContext.DBConnection.Rollback
+  $Log4Gambas.Error($Titulo & ("Problems creating album, rolling back"))
+  Error.Propagate
+  
+End
 
 Public Function DeleteAlbum(id As Integer) As Integer
-
-  Dim result As Result
-
-  $dbContext.DBConnection.Begin()
-  result = $dbContext.DBConnection.Edit(Constants.TABLE_ALBUMS)
-  result["album_id"] = id
-  result["soft_delete"] = 1
-  result.Update()
-
-  $dbContext.DBConnection.Commit
-  Return $dbContext.DBConnection.LastInsertId
-
+  
+  Dim oResult As Result
+  
+  $DbContext.DBConnection.Begin()
+  oResult = $DbContext.DBConnection.Edit(Constants.TABLE_ALBUMS)
+  oResult["album_id"] = id
+  oResult["soft_delete"] = 1
+  oResult.Update()
+  
+  $DbContext.DBConnection.Commit
+  Return $DbContext.DBConnection.LastInsertId
+  
 Catch
-  $dbContext.DBConnection.Rollback
-  $log4gambas.Error($titulo & ("Problemas al eliminar un album, se hace Rollback"))
+  $DbContext.DBConnection.Rollback
+  $Log4Gambas.Error($Titulo & ("Problems deleting album, rolling back"))
   Error.Propagate
-
+  
 End
 
 Public Function DeletePhoto(id As Integer) As Boolean
   
-  Dim res As Result
+  Dim oRes As Result
   
-  ' FIXME : aqui debe ir la eliminacion en cascada de las tablas asociadas TAGS, Albums. Ademas en la capa anterior debe hacer la revision de lockeo
+  ' FIXME : cascade delete should remove related TAGS and Albums. The layer above should also check locking.
   
-  $dbContext.DBConnection.Begin()
-  res = $dbContext.DBConnection.Edit(Constants.TABLE_PHOTOS)
-  res["photo_id"] = id
-  res["soft_delete"] = 1
-    result.Update()
-
-  $dbContext.DBConnection.Commit
-  Return $dbContext.DBConnection.LastInsertId
-
+  $DbContext.DBConnection.Begin()
+  oRes = $DbContext.DBConnection.Edit(Constants.TABLE_PHOTOS)
+  oRes["photo_id"] = id
+  oRes["soft_delete"] = 1
+  oRes.Update()
+  
+  $DbContext.DBConnection.Commit
+  Return $DbContext.DBConnection.LastInsertId
   
 Catch
-  $dbContext.DBConnection.Rollback
-  $log4gambas.Error($titulo & ("Problemas al eliminar una imagen de la bd, se hace Rollback"))
+  $DbContext.DBConnection.Rollback
+  $Log4Gambas.Error($Titulo & ("Problems deleting image from DB, rolling back"))
   Error.Propagate
   
 End
-
-
 
 Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean
-
-  Dim result As Result
-  Dim photoId As Integer
-  Dim photoAlbumId As Integer
-
-  $dbContext.DBConnection.Begin()
-
-  result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS)
-  result["file_name"] = photoE.FileName
-  result["width_pixels"] = photoE.WidthPixels
-  result["height_pixels"] = photoE.HeightPixels
-  result["creation_date"] = Now()
-  result["import_date"] = photoE.ImportDate
-  result["description"] = photoE.Description
-  result["stars"] = photoE.Stars
-  result["import_user"] = photoE.ImportUser
-  result["image_path"] = photoE.ImagePath
-  result["hash256"] = photoE.Hash256
-  result["thumbnail"] = photoE.Thumbnail
-  result["last_sync_date"] = Null
-  result["sync_status"] = 0
-  result["soft_delete"] = False
-  result["soft_deleted_date"] = Null
-  result["soft_deleted_by"] = Null
-  result["soft_deleted_auto"] = Null
-  result["is_locked"] = False
-  result["locked_by"] = Null
-  result["locked_date"] = Null
-  result["lock_reason"] = Null
-  result.Update()
-
-  photoId = $dbContext.DBConnection.LastInsertId
-  $log4Gambas.Debug($titulo & ("Codigo de foto creado") & " [" & photoId & "]")
-
+  
+  Dim oResult As Result
+  Dim iPhotoId As Integer
+  Dim iPhotoAlbumId As Integer
+  
+  $DbContext.DBConnection.Begin()
+  
+  oResult = $DbContext.DBConnection.Create(Constants.TABLE_PHOTOS)
+  oResult["file_name"] = photoE.FileName
+  oResult["width_pixels"] = photoE.WidthPixels
+  oResult["height_pixels"] = photoE.HeightPixels
+  oResult["creation_date"] = Now()
+  oResult["import_date"] = photoE.ImportDate
+  oResult["description"] = photoE.Description
+  oResult["stars"] = photoE.Stars
+  oResult["import_user"] = photoE.ImportUser
+  oResult["image_path"] = photoE.ImagePath
+  oResult["Hash256"] = photoE.Hash256
+  oResult["thumbnail"] = photoE.Thumbnail
+  oResult["last_sync_date"] = Null
+  oResult["sync_status"] = 0
+  oResult["soft_delete"] = False
+  oResult["soft_deleted_date"] = Null
+  oResult["soft_deleted_by"] = Null
+  oResult["soft_deleted_auto"] = Null
+  oResult["is_locked"] = False
+  oResult["locked_by"] = Null
+  oResult["locked_date"] = Null
+  oResult["lock_reason"] = Null
+  oResult.Update()
+  
+  iPhotoId = $DbContext.DBConnection.LastInsertId
+  $Log4Gambas.Debug($Titulo & ("Photo code created") & " [" & iPhotoId & "]")
+  
   If photoAlbumE <> Null Then
-    result = $dbContext.DBConnection.Create(Constants.TABLE_PHOTOS_ALBUMS)
-    result["photo_id"] = photoId
-    result["album_id"] = photoAlbumE.AlbumId
-    result["order_in_album"] = photoAlbumE.OrderInAlbum
-    result["added_date"] = Now()
-    result["added_user"] = photoAlbumE.AddedUser
-    result.Update()
-
-    photoAlbumId = $dbContext.DBConnection.LastInsertId
-    $log4Gambas.Debug($titulo & ("Codigo de foto-album creado") & " [" & photoAlbumId & "]")
-
+    oResult = $DbContext.DBConnection.Create(Constants.TABLE_PHOTOS_ALBUMS)
+    oResult["photo_id"] = iPhotoId
+    oResult["album_id"] = photoAlbumE.AlbumId
+    oResult["order_in_album"] = photoAlbumE.OrderInAlbum
+    oResult["added_date"] = Now()
+    oResult["added_user"] = photoAlbumE.AddedUser
+    oResult.Update()
+    
+    iPhotoAlbumId = $DbContext.DBConnection.LastInsertId
+    $Log4Gambas.Debug($Titulo & ("Photo-album code created") & " [" & iPhotoAlbumId & "]")
+    
   End If
-
-  $dbContext.DBConnection.Commit
-
+  
+  $DbContext.DBConnection.Commit
+  
   Return True
-
+  
 Catch
-  $dbContext.DBConnection.Rollback
-  $log4gambas.Error($titulo & "Problemas al crear una foto, se hace Rollback")
+  $DbContext.DBConnection.Rollback
+  $Log4Gambas.Error($Titulo & "Problems creating photo, rolling back")
   Error.Propagate
-
+  
 End
 
-Public Function ValidateHash256Exist(hash256 As String) As Boolean
-
-  Dim query As String
-  Dim total As Integer
-  Dim result As Result
-
-  $log4gambas.Debug($titulo & ("Validacion en tabla con el Hash256 enviado") & " [" & hash256 & "]")
-  query = "SELECT COUNT(*) as total FROM " & Constants.TABLE_PHOTOS &
-    " WHERE hash256 = &1"
-  result = $dbContext.DBConnection.Exec(query, hash256)
-
-  If result.Available Then
-    total = result["total"]
-    If total >= 1 Then
-      $log4gambas.Debug($titulo & ("Existe ya la imagen con ese Hash256"))
+Public Function ValidateHash256Exist(sHash256 As String) As Boolean
+  
+  Dim sQuery As String
+  Dim iTotal As Integer
+  Dim oResult As Result
+  
+  $Log4Gambas.Debug($Titulo & ("Validating in table with Hash256") & " [" & sHash256 & "]")
+  sQuery = "SELECT COUNT(*) as iTotal FROM " & Constants.TABLE_PHOTOS &
+    " WHERE Hash256 = &1"
+  oResult = $DbContext.DBConnection.Exec(sQuery, sHash256)
+  
+  If oResult.Available Then
+    iTotal = oResult["iTotal"]
+    If iTotal >= 1 Then
+      $Log4Gambas.Debug($Titulo & ("Image already exists with that Hash256"))
       Return True
     End If
   End If
-
-  $log4gambas.Debug($titulo & ("No existe la imagen"))
+  
+  $Log4Gambas.Debug($Titulo & ("Image does not exist"))
   Return False
-
+  
 Catch
-  $log4gambas.Error($titulo & ("Error al buscar foto por hash256"))
+  $Log4Gambas.Error($Titulo & ("Error searching photo by Hash256"))
   Error.Propagate
-
+  
 End
 
 Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[]
-
-  Dim query As String
-  Dim result As Result
-  Dim con As String = " WHERE "
-
-  query = "SELECT * FROM " & Constants.TABLE_ALBUMS
+  
+  Dim sQuery As String
+  Dim oResult As Result
+  Dim sCon As String = " WHERE "
+  
+  sQuery = "SELECT * FROM " & Constants.TABLE_ALBUMS
   If useSoftDelete <> -1 Then
-    query &= " WHERE soft_delete = " & useSoftDelete
-    con = " AND "
+    sQuery &= " WHERE soft_delete = " & useSoftDelete
+    sCon = " AND "
   Endif
-
+  
   If id <> 0 Then
-    query &= con & " id = " & id
+    sQuery &= sCon & " album_id = " & id
   Endif
-
+  
   If text <> "" Then
-    query &= con & " LOWER(name) LIKE '%" & Lower(text) & "%'"
+    sQuery &= sCon & " LOWER(name) LIKE '%" & Lower(text) & "%'"
   Endif
-
-  $log4Gambas.Debug($titulo & "Query [" & query & "]")
-  result = $dbContext.DBConnection.Exec(query)
-  If result.Available Then
-    Return MapAlbumEntitys(result)
+  
+  $Log4Gambas.Debug($Titulo & "Query [" & sQuery & "]")
+  oResult = $DbContext.DBConnection.Exec(sQuery)
+  If oResult.Available Then
+    Return MapAlbumEntitys(oResult)
   Endif
-
+  
   Return New AlbumEntity[]
-
+  
 Catch
-  $log4gambas.Error($titulo & "Problema al leer los albums")
+  $Log4Gambas.Error($Titulo & "Problem reading albums")
   Error.Propagate
-
+  
 End
 
 ' ==================================================
 '
-'          Metodos privados
+'          Private methods
 '
 ' ==================================================
 
-Private Function MapResultToEntities(result As Result) As PhotoEntity[] '' Mapeo de fotos
-
-  Dim photo As PhotoEntity
-  Dim photos As New PhotoEntity[]
-
-  For Each Result
-    photo = New PhotoEntity
-
-    ' Mapear todos los campos
-    photo.Id = result["photo_id"]
-    photo.FileName = result["file_name"]
-    photo.WidthPixels = IIf(result["width_pixels"] <> Null, result["width_pixels"], 0)
-    photo.HeightPixels = IIf(result["height_pixels"] <> Null, result["height_pixels"], 0)
-    photo.CreationDate = result["creation_date"]
-    photo.ImportDate = result["import_date"]
-    photo.Description = result["description"]
-    photo.Stars = result["stars"]
-    photo.ImportUser = result["import_user"]
-    photo.ImagePath = Result["image_path"]
-    photo.Hash256 = result["hash256"]
-    photo.Thumbnail = result["thumbnail"]
-    photo.LastSyncDate = result["last_sync_date"]
-    photo.SyncStatus = result["sync_status"]
-    photo.SoftDelete = result["soft_delete"]
-    photo.SoftDeleteDate = result["soft_deleted_date"]
-    photo.SoftDeleteBy = result["soft_deleted_by"]
-    photo.SoftDeleteAuto = result["soft_deleted_auto"]
-    photo.IsLocked = result["is_locked"]
-    photo.LockedBy = result["locked_by"]
-    photo.Lockreason = result["lock_reason"]
-
-    photos.Add(photo)
-
+Private Function MapResultToEntities(oResult As Result) As PhotoEntity[]
+  
+  Dim cPhoto As PhotoEntity
+  Dim oPhotos As New PhotoEntity[]
+  
+  For Each oResult
+    cPhoto = New PhotoEntity
+    cPhoto.Id = oResult["photo_id"]
+    cPhoto.FileName = oResult["file_name"]
+    cPhoto.WidthPixels = IIf(oResult["width_pixels"] <> Null, oResult["width_pixels"], 0)
+    cPhoto.HeightPixels = IIf(oResult["height_pixels"] <> Null, oResult["height_pixels"], 0)
+    cPhoto.CreationDate = oResult["creation_date"]
+    cPhoto.ImportDate = oResult["import_date"]
+    cPhoto.Description = oResult["description"]
+    cPhoto.Stars = oResult["stars"]
+    cPhoto.ImportUser = oResult["import_user"]
+    cPhoto.ImagePath = oResult["image_path"]
+    cPhoto.Hash256 = oResult["Hash256"]
+    cPhoto.Thumbnail = oResult["thumbnail"]
+    cPhoto.LastSyncDate = oResult["last_sync_date"]
+    cPhoto.SyncStatus = oResult["sync_status"]
+    cPhoto.SoftDelete = oResult["soft_delete"]
+    cPhoto.SoftDeleteDate = oResult["soft_deleted_date"]
+    cPhoto.SoftDeleteBy = oResult["soft_deleted_by"]
+    cPhoto.SoftDeleteAuto = oResult["soft_deleted_auto"]
+    cPhoto.IsLocked = oResult["is_locked"]
+    cPhoto.LockedBy = oResult["locked_by"]
+    cPhoto.Lockreason = oResult["lock_reason"]
+    
+    oPhotos.Add(cPhoto)
   Next
-
-  Return photos
-
+  
+  Return oPhotos
+  
 Catch
-  $log4gambas.Error($titulo & "Problema en el mapeo de datos photo: " & Error.Text)
+  $Log4Gambas.Error($Titulo & "Problem mapping Photo data: " & Error.Text)
   Error.Propagate
-
+  
 End
 
-Private Sub MapAlbumEntitys(result As Result) As AlbumEntity[] '' Mapeo de albums
-
-  Dim album As AlbumEntity
-  Dim albums As New AlbumEntity[]
-
-  While (result.Available)
-    album = New AlbumEntity
-
-    ' Mapeo todos los campos
-    album.Id = result["album_id"]
-    album.Name = result["name"]
-    album.Description = result["description"]
-    album.CreationDate = result["creation_date"]
-    album.CreationUser = result["creation_user"]
-    album.Thumbnail = result["thumbnail"]
-    album.SoftDelete = result["soft_delete"]
-    albums.Add(album)
-
-    result.MoveNext()
+Private Sub MapAlbumEntitys(oResult As Result) As AlbumEntity[] '' Map albums
+  
+  Dim cAlbum As AlbumEntity
+  Dim oAlbums As New AlbumEntity[]
+  
+  While (oResult.Available)
+    cAlbum = New AlbumEntity
+    
+    ' Map all fields
+    cAlbum.Id = oResult["album_id"]
+    cAlbum.Name = oResult["name"]
+    cAlbum.Description = oResult["description"]
+    cAlbum.CreationDate = oResult["creation_date"]
+    cAlbum.CreationUser = oResult["creation_user"]
+    cAlbum.Thumbnail = oResult["thumbnail"]
+    cAlbum.SoftDelete = oResult["soft_delete"]
+    oAlbums.Add(cAlbum)
+    
+    oResult.MoveNext()
   Wend
-
-  Return albums
-
+  
+  Return oAlbums
+  
 Catch
-  $log4gambas.Error($titulo & "Problema en el mapeo de datos album")
+  $Log4Gambas.Error($Titulo & "Problem mapping cAlbum data")
   Error.Propagate
-
+  
 End
 
 Private Function DBContext_Read() As SQLiteContext
-
-  Return $dbContext
-
+  
+  Return $DbContext
+  
 End

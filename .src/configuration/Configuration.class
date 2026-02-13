@@ -1,234 +1,253 @@
 ' Gambas class file
 
-' Clase Configuration - Gacela
-' Maneja la configuración de la aplicación usando Settings de Gambas
+'
+' Class Configuration
+' 
+'
+Private $Settings As Settings                                                 '' Settings file handler
+Private $IsFirstRun As Boolean = False                                        '' First run indicator
+Private $WhichGallery As Integer = Enumeration.GalleryType_Private            '' Active gallery type
+Private $AppPath As String                                                    '' Application files path
+Private $LogPath As String                                                    '' Log file path
+Private $SettingPath As String                                                '' Settings file path
+Private $Log4gambas As New Log4Gambas3                                        '' Logger instance
+Private $OsTheme As Integer                                                   '' Current OS theme
+Private $AppTheme As Integer                                                  '' Application theme
+Private $IsSharedEnabled As Boolean                                           '' Shared gallery directory enabled
+Private $Titulo As String = "[Configuration] "
 
-' Constantes que definen la sección de Settings globales
-Private Const GLOBAL_VERSION As String = "Global/Version"
-Private Const GLOBAL_LIBRARY_TYPE As String = "Global/LibraryType"
-Private Const GLOBAL_LIBRARY_DIRECTORY As String = "Global/LibraryDirectory"
-Private Const GLOBAL_LIBRARY_PHOTOS_PER_VIEW As String = "Global/PhotosPerView"
-Private Const GLOBAL_APPLICATION_THEME As String = "Global/Theme"
-
-' Constantes que definen la seccion de Log4Gambas
-Private Const LOG4GAMBAS_LEVEL As String = "Log4Gambas/Level"
-Private Const LOG4GAMBAS_OUTPUT As String = "Log4Gambas/Output"
-Private Const LOG4GAMBAS_MAXFILES As String = "Log4Gambas/MaxFiles"
-Private Const LOG4GAMBAS_SIZELOG As String = "Log4Gambas/SizeLog"
-Private Const LOG4GAMBAS_LOGFILE As String = "Log4Gambas/LogFile"
-Private Const LOG4GAMBAS_MAXFILESIZE As String = "Log4Gambas/MaxFilesSize"
-
-' Variable privadas
-Private $settings As Settings                                                 '' Objeto que referencia al archivo de settings
-Private $isFirstRun As Boolean = False                                        '' Indicador de primera ejecucion
-Private $whichLibrary As Integer = Enumeration.LibraryType_Private            '' Indicador de tipo de libreria activa
-Private $appPath As String                                                    '' Ruta de los archivos de la aplicación
-Private $log4gambas As New Log4Gambas3                                        '' Objeto para hacer logger
-Private $soTheme As Integer                                                   '' Indica el tema activo del SO
-Private $appTheme As Integer                                                  '' Indica el tema que usa la aplicacion
-
-' Propiedades
-Property Read IsFirstRun As Boolean                                           '' Indicador de primera ejecución
-Property Read LibraryPath As String                                           '' Entrega path a la biblioteca actualmente activa
-Property Read whichLibrary As Integer                                         '' Entrega indicador de biblioteca seleccionada por el usuario
-Property Read IsSharedLibraryAvailable As Boolean                              '' Indicador de biblioteca compartida disponible para trabajar
-
+Property Read WhichGallery As Integer                                              '' Which gallery is active
+Property Read IsFirstRun As Boolean                                           '' First execution indicator
+Property Read GalleryPath As String                                           '' Gallery path
+Property Read IsSharedGalleryAvailable As Boolean                             '' Shared gallery is available
 '============================================
 '
-'      Métodos publicos
+'      Public methods
 '
 '============================================
+
 Public Sub _new()
-
-  ' Cargamos la ruta de la bilioteca privada como valor inicial y detectar primera vez
-  $appPath = User.Home &/ Constants.GACELA_DIRECTORY
-  'Revisamos cual es el tema definido por el sistema operativo
-  $soTheme = FindSOTheme()
-
-  $settings = New Settings($appPath &/ Constants.CONFIG_NAME)
-  If $settings.Count = 0 Then
-    'Cargamos variable para indicar que es primera vez que se ingresa
-    $isFirstRun = True
-    'Inicializamos el arvhivo settings
+  
+  $SettingPath = User.Home &/ Constants.GACELA_SETTING_DIRECTORY
+  $LogPath = User.Home &/ Constants.GACELA_LOG_DIRECTORY
+  $OsTheme = FindOSTheme()
+  
+  $Settings = New Settings($SettingPath &/ Constants.CONFIG_NAME)
+  If $Settings.Count = 0 Then
+    $Log4gambas.Info($Titulo & ("First launch detected. The application will be configured in private mode."))
+    $IsFirstRun = True
     FirstInitializeSettings()
-    'Inicializamos la seccion Log4Gambas
     FirstInitializeLogger()
-
-    $log4Gambas.Info("Se detecto que es el primer inicio. Se configurara la aplicacion privada y se detectara el sector compartido")
   Endif
-
+  
+  $IsSharedEnabled = DetectShareEnabled()
+  
 Catch
-  $log4gambas.Error("Error inicializando configuración: " & Error.Text)
-  Error.Raise("Error inicializando configuración: " & Error.Text)
-
+  $Log4gambas.Error($Titulo & ("Error initializing configuration: ") & Error.Text)
+  Error.Raise($Titulo & ("Error initializing configuration: ") & Error.Text)
+  
 End
 
-Public Sub InitializeEnvironment() ''Carga ambiente  definido en la configuracion
-
-  $log4gambas.info("Inicializando entorno")
-
-  If $settings[GLOBAL_LIBRARY_TYPE, Null] = Null Then
-    Error.Raise("Problemas al cargar configuraciones iniciales")
-  Else
-    $whichLibrary = $settings[GLOBAL_LIBRARY_TYPE]
-    $appTheme = $settings[GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_SO]
+Public Sub InitializeEnvironment()
+  
+  $Log4gambas.info($Titulo & "Initializing environment")
+  
+  If $Settings[Constants.GLOBAL_GALLERY_TYPE, Null] = Null Then
+    If $Settings["Global/LibraryType", Null] <> Null Then
+      $Settings[Constants.GLOBAL_GALLERY_TYPE] = $Settings["Global/LibraryType"]
+      $Settings.Save()
+    Else
+      Error.Raise($Titulo & "Problems loading initial configuration")
+    Endif
   Endif
-
+  
+  If $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED, Null] = Null Then
+    If $Settings["Global/Shared", Null] <> Null Then
+      $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED] = $Settings["Global/Shared"]
+      $Settings.Save()
+    Endif
+  Endif
+  
+  $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
+  $AppTheme = $Settings[Constants.GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_OS]
+  
 End
 
 Public Function InitializeLogger() As Log4Gambas3
-
-  $log4gambas.warning("creando archivo ini con datos del log4gambas3")
-  ' configuramos el logger
-  $log4gambas.SetAppName(Application.Name)
-  $log4gambas.SetMinLevel($settings[LOG4GAMBAS_LEVEL, $log4gambas.LEVEL_DEBUG])
-  $log4gambas.SetOutput($settings[LOG4GAMBAS_OUTPUT, $log4gambas.OUTPUT_CONSOLE])
-  $log4gambas.SetLogFile($settings[LOG4GAMBAS_LOGFILE, $log4gambas.GetLogFile()])
-  $log4gambas.SetMaxFileSize($settings[LOG4GAMBAS_MAXFILESIZE, $log4gambas.GetMaxFileSize()])
-  $log4gambas.SetMaxFiles($settings[LOG4GAMBAS_MAXFILES, $log4gambas.GetMaxFiles()])
-
-  Return $log4gambas
-
+  
+  $Log4gambas.Info($Titulo & ("Creating ini file with Log4Gambas3 data"))
+  
+  $Log4gambas.SetAppName(Application.Name)
+  $Log4gambas.SetMinLevel($Settings[Constants.LOG4GAMBAS_LEVEL, $Log4gambas.LEVEL_DEBUG])
+  $Log4gambas.SetOutput($Settings[Constants.LOG4GAMBAS_OUTPUT, $Log4gambas.OUTPUT_BOTH])
+  $Log4gambas.SetLogFile($Settings[Constants.LOG4GAMBAS_LOGFILE, $Log4gambas.GetLogFile()])
+  $Log4gambas.SetMaxFileSize($Settings[Constants.LOG4GAMBAS_MAXFILESIZE, $Log4gambas.GetMaxFileSize()])
+  $Log4gambas.SetMaxFiles($Settings[Constants.LOG4GAMBAS_MAXFILES, $Log4gambas.GetMaxFiles()])
+  
+  Return $Log4gambas
+  
 End
 
-Public Sub SetWichLibrary(value As Integer)
-
-  $whichLibrary = Value
-  $settings[GLOBAL_LIBRARY_TYPE] = value
-  $settings.Save
-
+Public Sub SetWhichGallery()
+  
+  If Enumeration.GalleryType_Private = $Settings[Constants.GLOBAL_GALLERY_TYPE] Then
+    $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Shared
+  Else 
+    $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Private
+  Endif
+  $Settings.Save()
+  $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
+  
 End
 
-'================================================
-'
-'         Métodos privados
-'
-'================================================
-Private Sub FirstInitializeSettings() ''Creacion de configuraciones iniciales
-
-  $log4gambas.info("creando archivo ini con datos iniciales")
-
-  ' Verificamos que exista el archivo de Settings
-  If Not Exist($appPath &/ Constants.CONFIG_NAME) Then
-    If Not Exist($appPath) Then
-      Mkdir $appPath
+  '================================================
+  '
+  '         Private methods
+  '
+  '================================================
+Private Sub FirstInitializeSettings() '' Initial configuration setup
+  
+  $Log4gambas.info($Titulo & ("Creating ini file with initial data"))
+  
+  If Not Exist($SettingPath &/ Constants.CONFIG_NAME) Then
+    If Not Exist($SettingPath) Then
+      Mkdir $SettingPath
     Endif
   Endif
-
-  ' Sección Global
-  $settings[GLOBAL_VERSION] = Application.Version
-  $settings[GLOBAL_LIBRARY_TYPE] = Enumeration.LibraryType_Private
-  $settings[GLOBAL_LIBRARY_TYPE] = Me.whichLibrary
-  $settings[GLOBAL_APPLICATION_THEME] = $soTheme
-  $settings.Save()
-
+  
+  $Settings[Constants.GLOBAL_VERSION] = Application.Version
+  $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Private
+  $Settings[Constants.GLOBAL_GALLERY_TYPE] = Me.WhichGallery
+  $Settings[Constants.GLOBAL_APPLICATION_THEME] = $OsTheme
+  $Settings.Save()
+  
 Catch
-  $log4gambas.Error("Error detectado al intentar crear directorio de archivo settings" & Error.Text)
-  Error.Raise("Error detectado al intentar crear directorio de archivo settings" & Error.Text)
-
+  $Log4gambas.Error($Titulo & ("Error while creating settings directory") & Error.Text)
+  Error.Raise($Titulo & ("Error while creating settings directory") & Error.Text)
+  
 End
 
 Private Function FirstInitializeLogger() As Log4Gambas3
-
-  $log4gambas.info("creando logger con datos iniciales")
-
-  $settings[LOG4GAMBAS_LEVEL] = $log4gambas.GetMinLevel()
-  $settings[LOG4GAMBAS_OUTPUT] = $log4gambas.GetOutput()
-  $settings[LOG4GAMBAS_LOGFILE] = $appPath
-  $settings[LOG4GAMBAS_MAXFILESIZE] = $log4gambas.GetMaxFileSize()
-  $settings[LOG4GAMBAS_MAXFILES] = $log4gambas.GetMaxFiles()
-  $settings.Save()
-
+  
+  $Log4gambas.info($Titulo & ("Creating logger with initial data"))
+  
+  If Not Exist($LogPath) Then
+    Mkdir $LogPath
+  Endif
+  
+  $Settings[Constants.LOG4GAMBAS_LEVEL] = $Log4gambas.GetMinLevel()
+  $Settings[Constants.LOG4GAMBAS_OUTPUT] = $Log4gambas.OUTPUT_BOTH
+  $Settings[Constants.LOG4GAMBAS_LOGFILE] = $LogPath
+  $Settings[Constants.LOG4GAMBAS_MAXFILESIZE] = $Log4gambas.GetMaxFileSize()
+  $Settings[Constants.LOG4GAMBAS_MAXFILES] = $Log4gambas.GetMaxFiles()
+  $Settings.Save()
+  
 End
 
-Private Function FindSOTheme() As Integer
-
-  Dim bgColor As Integer = Color.Background
-  Dim brightness As Float
-  Dim r, g, b As Integer
-
-  ' Extraer componentes RGB
-  r = Color[bgColor].Red
-  g = Color[bgColor].Green
-  b = Color[bgColor].Blue
-
-  ' Calcular brillo (luminosidad)
-  brightness = (r * 0.299 + g * 0.587 + b * 0.114)
-
-  ' Si el brillo es menor a 128, es tema oscuro
-  If brightness < 128 Then
+Private Function FindOSTheme() As Integer
+  
+  Dim iBgColor As Integer = Color.Background
+  Dim fBrightness As Float
+  Dim vR, vG, iB As Integer
+  
+  ' Extract RGB components
+  vR = Color[iBgColor].Red
+  vG = Color[iBgColor].Green
+  iB = Color[iBgColor].Blue
+  
+  ' Compute brightness (luminance)
+  fBrightness = (vR * 0.299 + vG * 0.587 + iB * 0.114)
+  
+  ' If brightness is below 128, use dark theme
+  If fBrightness < 128 Then
     Return Enumeration.APP_THEME_DARK
   Else
     Return Enumeration.APP_THEME_LIGHT
   Endif
-
+  
   Return 0
+  
+End
 
+Private Function DetectShareEnabled() As Boolean
+  
+  Dim sGroupAvailable As String
+  Dim aGroup As Array
+  Dim aUsers As Array
+  Dim bEncontrado As Boolean
+  Dim cell As String
+  
+  ' Verify the group exists
+  $Log4gambas.Debug($Titulo & ("Checking group existence") & " " & Constants.GRUPO_GACELA)
+  Shell "getent group " & Constants.GRUPO_GACELA To sGroupAvailable
+  If sGroupAvailable = "" Then
+    Return False
+  Endif
+  
+  ' Verify the user is in the group
+  aGroup = Split(sGroupAvailable, ":")
+  aUsers = Split(aGroup[aGroup.Count - 1], ",")
+  For Each cell In aUsers
+    If Replace(cell, "\n", "") = User.name Then
+      bEncontrado = True
+    Endif
+  Next
+  If Not bEncontrado Then
+    Return False
+  Endif
+  
+  ' Verify the directory exists
+  If Not Exist(Constants.GACELA_SHARED_GALLERY_DIRECTORY) Then
+    Return False
+  Endif
+  
+  ' Verify write permissions
+  If Exist(Constants.GACELA_SHARED_GALLERY_DIRECTORY) Then
+    Try File.Save(Constants.GACELA_SHARED_GALLERY_DIRECTORY &/ ".test", "test")
+    If Error Then Return False
+    Try Kill Constants.GACELA_SHARED_GALLERY_DIRECTORY &/ ".test"
+  Endif
+  
+  $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED] = True
+  $Settings.Save()
+  
+  Return True
+  
+Catch 
+  $Log4gambas.Error($Titulo & ("Error detecting whether the shared directory is active") & " " & Error.Text)
+  Error.Propagate
+  
 End
 
 ' =======================================================
 '
-'       Métodos para las propiedades públicas
+'       Methods for public properties
 '
 ' =======================================================
 Function IsFirstRun_Read() As Boolean
-
-  Return $isFirstRun
-
+  
+  Return $IsFirstRun
+  
 End
 
-Private Function whichLibrary_Read() As Integer
-
-  Return $whichLibrary
-
+Function WhichGallery_Read() As Integer
+  
+  Return $WhichGallery
+  
 End
 
-Private Function LibraryPath_Read() As String
-
-  If $whichLibrary = Enumeration.LibraryType_Private Then
-    Return $appPath
+Function GalleryPath_Read() As String
+  
+  If $WhichGallery = Enumeration.GalleryType_Private Then
+    Return User.Home &/ Constants.GACELA_GALLERY_DIRECTORY
   Else
-    Return Constants.GACELA_DIRECTORY_SHARED
+    Return Constants.GACELA_SHARED_GALLERY_DIRECTORY
   Endif
-
+  
 End
 
-Function IsSharedLibraryAvailable_Read() As Boolean
-
-  ' Dim hasGroup As Boolean
-  ' Dim hasDirectory As Boolean
-  ' Dim hasPermissions As Boolean
-  Dim groupAvailable As String
-
-  ' Verificar que existe el grupo
-  Shell "getent group " & Constants.GRUPO_GACELA To groupAvailable
-  If groupAvailable = "" Then
-    Return False
-  Endif
-
-  ' Verificar que el usuario esta en el grupo
-  If InStr(groupAvailable, User.Name) <= 0 Then
-    Return False
-  Endif
-
-  ' Verificar que existe el directorio
-  If Not Exist(Constants.GACELA_DIRECTORY_SHARED) Then
-    Return False
-  Endif
-
-  ' Verificar permisos de escritura
-  If Exist(Constants.GACELA_DIRECTORY_SHARED) Then
-    Try File.Save(Constants.GACELA_DIRECTORY_SHARED &/ ".test", "test")
-    If Error Then Return False
-    Try Kill Constants.GACELA_DIRECTORY_SHARED &/ ".test"
-  Endif
-
-  'sudo Chown -R root:gacela - users/usr/share/gacela && \
-  'sudo Chmod 755 /usr/share/gacela && \
-  'sudo Chmod -R 775 /usr/share/gacela/biblioteca && \
-  'sudo find /usr/share/gacela/biblioteca -type d -exec Chmod g+s {} \; && \
-  'echo "Permisos configurados correctamente"
-
-  Return True
-
+Function IsSharedGalleryAvailable_Read() As Boolean
+  
+  Return $IsSharedEnabled
+  
 End

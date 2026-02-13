@@ -2,112 +2,112 @@
 
 '
 ' Gambas class file - AlbumEntity
-' Modelo de dominio para representar una album en Gacela
+' Domain model for representing an album in Gacela
 '
-'  recordar que los nombre de las variables para las clases no deben llamarse igual aunque sea en minusculas por que las toma como si fueran iguales
+'  Remember that variable names should not match class names, even in lowercase, because Gambas treats them as the same.
 
-' Propiedades privadas del modelo
-Private $id As Integer = 0
-Private $name As String = ""
-Private $description As String = ""
-Private $creationDate As Date
-Private $creationUser As String
-Private $thumbnail As String
-Private $softDelete As Boolean
+' Private model properties
+Private $iId As Integer = 0
+Private $sName As String = ""
+Private $sDescription As String = ""
+Private $dCreationDate As Date
+Private $sCreationUser As String
+Private $sThumbnail As String
+Private $bSoftDelete As Boolean
 
 ' =============================================
 '
-'            PROPIEDADES PÚBLICAS
+'            PUBLIC PROPERTIES
 '
 '==============================================
-Property Id As Integer                      '' Id Unico del album
-Property Name As String                     '' Nombre del album
-Property Description As String              '' Descripcion del album
-Property CreationDate As Date               '' Fecha de creacion del album
-Property CreationUser As String             '' Usuario que crea el album
-Property Thumbnail As String                '' Imagen miniatura del album
-Property SoftDelete As Boolean              '' Indicador para saber si fue borrado
+Property Id As Integer                      '' Unique album ID
+Property Name As String                     '' Album name
+Property Description As String              '' Album description
+Property CreationDate As Date               '' Album creation date
+Property CreationUser As String             '' User who created the album
+Property Thumbnail As String                '' Album thumbnail image
+Property SoftDelete As Boolean              '' Indicates if it was deleted
 
 Private Function Id_Read() As Integer
 
-  Return $id
+  Return $iId
 
 End
 
 Private Sub Id_Write(Value As Integer)
 
-  $id = value
+  $iId = value
 
 End
 
 Private Function Name_Read() As String
 
-  Return $name
+  Return $sName
 
 End
 
 Private Sub Name_Write(Value As String)
 
-  $name = value
+  $sName = value
 
 End
 
 Private Function Description_Read() As String
 
-  Return $description
+  Return $sDescription
 
 End
 
 Private Sub Description_Write(Value As String)
 
-  $description = value
+  $sDescription = value
 
 End
 
 Private Function CreationDate_Read() As Date
 
-  Return $creationDate
+  Return $dCreationDate
 
 End
 
 Private Sub CreationDate_Write(Value As Date)
 
-  $creationDate = value
+  $dCreationDate = value
   
 End
 
 Private Function CreationUser_Read() As String 
 
-  Return $creationUser
+  Return $sCreationUser
 
 End
 
 Private Sub CreationUser_Write(Value As String)
 
-  $creationUser = value
+  $sCreationUser = value
 
 End
 
 Private Function Thumbnail_Read() As String
 
-  Return $thumbnail
+  Return $sThumbnail
 
 End
 
 Private Sub Thumbnail_Write(Value As String)
 
-  $thumbnail = value
+  $sThumbnail = value
 
 End
 
 Private Function SoftDelete_Read() As Boolean
 
-  Return $softDelete
+  Return $bSoftDelete
 
 End
 
 Private Sub SoftDelete_Write(Value As Boolean)
 
-  $softDelete = value
+  $bSoftDelete = value
 
 End

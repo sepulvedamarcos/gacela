@@ -2,7 +2,7 @@
 
 { Form Form
   MoveScaled(0,0,108,67)
-  Text = ("Dialogo de importación de fotos")
+  Text = ("Photo import dialog")
   Resizable = False
   Spacing = True
   Margin = True
@@ -17,11 +17,11 @@
     }
     { Label4 Label
       MoveScaled(75,1,18,3)
-      Text = ("Pre visualización")
+      Text = ("Preview")
     }
     { Label3 Label
       MoveScaled(1,1,25,3)
-      Text = ("Lista de fotos a importar")
+      Text = ("Photos to import")
     }
     { ListEditorPhotos ListEditor
       MoveScaled(1,4,73,40)
@@ -29,7 +29,7 @@
     }
     { CheckBoxEnableAlbum CheckBox
       MoveScaled(1,45,72,4)
-      Text = ("Importar las fotos en un album")
+      Text = ("Import photos into an album")
     }
     { LabelAlbumDescriptionSelected Label
       MoveScaled(4,49,102,3)
@@ -37,7 +37,7 @@
     }
     { CheckBoxDeletePhoto CheckBox
       MoveScaled(1,53,80,4)
-      Text = ("Borrar las imagenes originales y dejar solo las de gacela")
+      Text = ("Delete original images and keep only the Gacela copies")
     }
   }
   { VBoxButtons VBox
@@ -79,7 +79,7 @@
     }
     { ButtonBoxFilter ButtonBox
       MoveScaled(2,7,48,4)
-      Placeholder = ("Album a buscar")
+      Placeholder = ("Album to search")
       Button = False
       ClearButton = True
       Filter = True
@@ -87,7 +87,7 @@
     { Label1 Label
       MoveScaled(2,2,48,3)
       Font = Font["+4"]
-      Text = ("Selección de Album")
+      Text = ("Album selection")
     }
     { HBox2 HBox
       MoveScaled(1,50,49,6)
@@ -112,7 +112,7 @@
     }
     { Label2 Label
       MoveScaled(2,33,47,3)
-      Text = ("Nombre y descripción del album")
+      Text = ("Album name and description")
     }
   }
 }

@@ -1,0 +1,60 @@
+' Gambas class file
+
+'
+'
+' Class that adapts the use of identify from the command line
+'
+'
+
+Private $Log4gambas As Log4Gambas3
+Private $Titulo As String = "[ImageMetadataAdapter] "
+
+' ==================================================
+'
+'          Public methods
+'
+' ==================================================
+Public Sub _new(oLog4gambas As Log4Gambas3)
+  
+  $Log4gambas = oLog4gambas
+  
+End
+
+Public Function GetExifDateTimeOriginal(imagenPath As String) As String
+  
+  Dim sCommandText As String
+  Dim sExifData As String
+  
+  $Log4gambas.info($Titulo & "Extracting metadata with identify")
+  sCommandText = "identify -format \"%[EXIF:DateTimeOriginal]\" " & imagenPath
+  sExifData = ExecShellCommand(sCommandText)
+  
+  Return Trim(sExifData)
+  
+Catch
+  Error.Propagate
+  
+End
+
+' ==================================================
+'
+'          Private methods
+'
+' ==================================================
+
+Private Function ExecShellCommand(sCommandText As String) As String
+  
+  Dim sOutputCommand As String
+  
+  $Log4gambas.Debug($Titulo & "Shell execution [" & sCommandText & "]")
+  Shell sCommandText To sOutputCommand
+  
+  $Log4gambas.Debug($Titulo & "Shell response [" & sOutputCommand & "]")
+  
+  Return sOutputCommand
+  
+Catch 
+  $Log4gambas.Error($Titulo & ("Error extracting image metadata: ") & Error.Text)
+  Error.Propagate
+  
+End

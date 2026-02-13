@@ -1,117 +1,100 @@
 ' Gambas class file
 
-Private $width As Integer = 160
-Private $height As Integer = 90
+Private $Width As Integer = 160
+Private $Height As Integer = 90
 
-Private $configuration As Configuration
-Private $log4Gambas As Log4Gambas3
-Private $photoService As PhotoService
-' Private $formPhotos As FPhoto
-Private $titulo As String = "[FMain] "
+Private $Configuration As Configuration
+Private $Log4Gambas As Log4Gambas3
+Private $PhotoService As PhotoService
+Private $Titulo As String = "[FMain] "
 
-Public Sub _new(configuration As Configuration, logger As Log4Gambas3, photoService As PhotoService)
+Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3, cPhotoService As PhotoService)
   
-  $configuration = configuration
-  $log4Gambas = logger
-  $photoService = photoService
+  $Configuration = cConfiguration
+  $Log4Gambas = oLogger
+  $PhotoService = cPhotoService
   
 End
 
 Public Sub Form_Open()
   
-  Dim btn As Button
+  $Log4Gambas.Debug($Titulo & "On form open we load photo records")
   
-  $log4Gambas.Debug("en formulario open obtenemos los registros de fotos")
-  
-  MainMenu_PrivateCollection.Checked = IIf($configuration.whichLibrary = Enumeration.LibraryType_Private, True, False)
-  MainMenu_ShareCollection.Checked = IIf($configuration.whichLibrary = Enumeration.LibraryType_Private, False, True)
-  CollectionToolMenu_Private.Checked = IIf($configuration.whichLibrary = Enumeration.LibraryType_Private, True, False)
-  CollectionToolMenu_Share.Checked = IIf($configuration.whichLibrary = Enumeration.LibraryType_Private, False, True)
-  
-  MenuButtonCollection.Text = IIf($configuration.whichLibrary = Enumeration.LibraryType_Private, Constants.COLLECTION_PRIVATE, Constants.COLLECTION_SHARE) 
+  SelectGallery($Configuration.WhichGallery)
   
   ExpanderAlbum.Hidden = True
   ExpanderTags.Hidden = True
-  
-  ClearPhotoGallery()
-  ' TODO: aqui deberia levantar los filtros usados la ultima vez
-  CreatePhotoPanels($photoService.loadFirstPage())
-  
-  btn = New Button(ExpanderAlbum)
-  btn.Width = 60
-  btn.Height = 24
-  btn.Text = "hola que tal"
   
 End
 
 Public Sub Form_Drop()
   
-  Dim filedrop As String
-  Dim filesDrop As String[]
-  Dim namesErr As String
+  Dim sFiledrop As String
+  Dim aFilesDrop As String[]
+  Dim sNamesErr As String
   
-  'FIXME: mover este codigo a una fumncion estandar para agregar un boton en la toolbar para importar
+  'FIXME: move this code to a standard function to add an import toolbar button
   
-  $log4Gambas.Debug($titulo & "Drag and drop de archivos")
+  $Log4Gambas.Debug($Titulo & "Drag and drop files")
   
-  filesDrop = Drag.Paste("text/uri-list")
-  For Each fileDrop In filesDrop
-    $log4Gambas.debug($titulo & "archivo : [" & File.BaseName(fileDrop) & "." & File.Ext(fileDrop) & "]")
-    If LCase(File.Ext(fileDrop)) = "jpg" Or LCase(File.Ext(fileDrop)) = "png" Then
+  aFilesDrop = Drag.Paste("text/uri-list")
+  For Each sFileDrop In aFilesDrop
+    $Log4Gambas.debug($Titulo & "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
+    If LCase(File.Ext(sFileDrop)) = "jpg" Or LCase(File.Ext(sFileDrop)) = "png" Then
     Else
-      namesErr = namesErr & File.BaseName(fileDrop) & "." & File.Ext(fileDrop)
+      sNamesErr = sNamesErr & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop)
     Endif
   Next
   
-  If namesErr = "" Then
-    ImportProcess(filesDrop)
+  If sNamesErr = "" Then
+    ImportProcess(aFilesDrop)
   Else
-    Message.Error(("Algunos de los archivos que se intenta importar no son validos"))
+    Message.Error(("Some of the files you are trying to import are not valid"))
   Endif
   
 End
 
 Public Sub ButtonZoomIn_Click()
   
-  Dim pane As Variant
+  Dim vPane As Variant
   
-  For Each pane In PanelGalleryContent.Children
-    pane.Width = pane.Width * 1.25
-    pane.Height = pane.Height * 1.25
+  For Each vPane In PanelGalleryContent.Children
+    vPane.Width = vPane.Width * 1.25
+    vPane.Height = vPane.Height * 1.25
   Next
   
 End
 
 Public Sub ButtonZoomOut_Click()
   
-  Dim pane As Variant
+  Dim vPane As Variant
   
-  For Each pane In PanelGalleryContent.Children
-    pane.Width = pane.Width / 1.25
-    pane.Height = pane.Height / 1.25
+  For Each vPane In PanelGalleryContent.Children
+    vPane.Width = vPane.Width / 1.25
+    vPane.Height = vPane.Height / 1.25
   Next
   
 End
 
 Public Sub PanelGalleryContent_Scroll()
   
-  Dim scrollPos As Float
-  Dim scrollMax As Float
-  Dim threshold As Float = 0.8  ' 80% del scroll
-  Dim newPhotos As PhotoEntity[]
+  Dim fScrollPos As Float
+  Dim fScrollMax As Float
+  Dim fThreshold As Float = 0.8  ' 80% of scroll
+  Dim aNewPhotos As PhotoEntity[]
   
-  ' Calcular posición del scroll (0.0 a 1.0)
-  scrollMax = PanelGalleryContent.ScrollHeight - PanelGalleryContent.ClientHeight
+  ' Calculate scroll position (0.0 to 1.0)
+  fScrollMax = PanelGalleryContent.ScrollHeight - PanelGalleryContent.ClientHeight
   
-  If scrollMax <= 0 Then Return
+  If fScrollMax <= 0 Then Return
   
-  scrollPos = PanelGalleryContent.ScrollY / scrollMax
+  fScrollPos = PanelGalleryContent.ScrollY / fScrollMax
   
-  ' Si llegó al 80% y no está cargando, cargar más
-  If scrollPos >= threshold Then
-    newPhotos = $photoService.loadNextPage()
-    If newPhotos.Count > 0 Then
-      CreatePhotoPanels(newPhotos)
+  ' If it reached 80% and not loading, load more
+  If fScrollPos >= fThreshold Then
+    aNewPhotos = $PhotoService.LoadNextPage()
+    If aNewPhotos.Count > 0 Then
+      CreatePhotoPanels(aNewPhotos)
     End If
   Endif
   
@@ -123,45 +106,33 @@ Public Sub MainMenu_Exit_Click()
   
 End
 
+Public Sub ToolButtonExit_Click()
+  
+  Me.Close
+  
+End
+
 Public Sub MainMenu_ShareCollection_Click()
   
-  MainMenu_PrivateCollection.Checked = False
-  CollectionToolMenu_Private.Checked = False
-  CollectionToolMenu_Share.Checked = True
-  MenuButtonCollection.Text = Constants.COLLECTION_SHARE
+  SelectGallery(Enumeration.GalleryType_Shared)
   
 End
 
 Public Sub MainMenu_PrivateCollection_Click()
   
-  MainMenu_ShareCollection.Checked = False
-  CollectionToolMenu_Share.Checked = False
-  CollectionToolMenu_Private.Checked = True
-  MenuButtonCollection.Text = Constants.COLLECTION_PRIVATE
+  SelectGallery(Enumeration.GalleryType_Private)
   
 End
 
 Public Sub CollectionToolMenu_Private_Click()
   
-  MainMenu_ShareCollection.Checked = False
-  CollectionToolMenu_Share.Checked = False
-  CollectionToolMenu_Private.Checked = True
-  MenuButtonCollection.Text = Constants.COLLECTION_PRIVATE
-  
-  MainMenu_PrivateCollection.Checked = True
-  MainMenu_ShareCollection.Checked = False
+  SelectGallery(Enumeration.GalleryType_Private)
   
 End
 
 Public Sub CollectionToolMenu_Share_Click()
   
-  MainMenu_PrivateCollection.Checked = False
-  CollectionToolMenu_Private.Checked = False
-  CollectionToolMenu_Share.Checked = True
-  MenuButtonCollection.Text = Constants.COLLECTION_SHARE
-  
-  MainMenu_PrivateCollection.Checked = False
-  MainMenu_ShareCollection.Checked = True
+  SelectGallery(Enumeration.GalleryType_Shared)
   
 End
 
@@ -179,38 +150,37 @@ End
 
 ' ==================================================
 '
-'          Metodos privados
+'          Private methods
 '
 ' ==================================================
 
 Private Sub CreatePhotoPanels(photos As PhotoEntity[])
   
-  Dim panelPhoto As Panel
-  Dim formPhoto As FPhoto
-  Dim photo As PhotoEntity
-  ' Dim pictureBox As PictureBox
+  Dim oPanelPhoto As Panel
+  Dim cFormPhoto As FPhoto
+  Dim cPhoto As PhotoEntity
   
-  $log4Gambas.Info("Creacion de paneles iniciales")
-  For Each photo In photos
-    panelPhoto = New Panel(PanelGalleryContent)
-    panelPhoto.Width = $width
-    panelPhoto.Height = $height
-    panelPhoto.Border = Border.Plain
-    panelPhoto.Arrangement = Arrange.Fill
-    panelPhoto.Tag = photo.Id
+  $Log4Gambas.Info("Creating initial panels")
+  For Each cPhoto In photos
+    oPanelPhoto = New Panel(PanelGalleryContent)
+    oPanelPhoto.Width = $Width
+    oPanelPhoto.Height = $Height
+    oPanelPhoto.Border = Border.Plain
+    oPanelPhoto.Arrangement = Arrange.Fill
+    oPanelPhoto.Tag = cPhoto.Id
     
-    formPhoto = New FPhoto(photo, panelPhoto)
-    formPhoto.Width = $width
-    formPhoto.Height = $height
+    cFormPhoto = New FPhoto(cPhoto, oPanelPhoto)
+    cFormPhoto.Width = $Width
+    cFormPhoto.Height = $Height
     
-    panelPhoto.Show()
+    oPanelPhoto.Show()
   Next
   
 End
 
 Private Sub ClearPhotoGallery()
   
-  ' Destruir todos los controles
+  ' Destroy all controls
   For Each ctrl As Control In PanelGalleryContent.Children
     ctrl.Delete()
   Next
@@ -218,19 +188,55 @@ Private Sub ClearPhotoGallery()
 End
 
 Private Sub ImportProcess(Optional listFiles As String[])
-
-  Dim resp As Variant
-  Dim selector As FImportDialog
   
-  selector = New FImportDialog($photoService, $log4Gambas, listFiles)
-  resp = selector.ShowModal()
+  Dim vResp As Variant
+  Dim cSelector As FImportDialog
   
-  If resp = Enumeration.DLG_OK Then
-    CreatePhotoPanels($photoService.loadNextPage())
-    'FIXME: Al final del proceso escribir en la barra de estado y posibilitar que con un click se levante el evento de importacion
-    'TODO: genial seria que la barra de estados lleve una memoria de las cosas que han pasado como un log
-    'FIXME: por ahora pondre la ventana de resumen de importacion aca
+  cSelector = New FImportDialog($PhotoService, $Log4Gambas, listFiles)
+  vResp = cSelector.ShowModal()
+  
+  If vResp = Enumeration.DLG_OK Then
+    CreatePhotoPanels($PhotoService.LoadNextPage())
+    'FIXME: At the end of the process, write to the status bar and allow a click to open the import event
+    'TODO: ideally the status bar would keep a history like a log
+    'FIXME: for now, the import summary window will be opened here
     ' fImportR = New FImportResume(1)
   Endif
+  
+End
+
+Private Sub SelectGallery(iGallery As Integer)
+  
+  Select Case iGallery
+    Case Enumeration.GalleryType_Private
+      CollectionToolMenu_Private.Value = True
+      CollectionToolMenu_Share.Value = False
+      MainMenu_PrivateCollection.Value = CollectionToolMenu_Private.Value
+      MainMenu_ShareCollection.Value = CollectionToolMenu_Share.Value
+      
+      MenuButtonCollection.Picture = CollectionToolMenu_Private.Picture
+      MenuButtonCollection.Text = CollectionToolMenu_Private.Text
+      
+    Case Enumeration.GalleryType_Shared
+      CollectionToolMenu_Private.Value = False
+      CollectionToolMenu_Share.Value = True
+      MainMenu_PrivateCollection.Value = CollectionToolMenu_Private.Value
+      MainMenu_ShareCollection.Value = CollectionToolMenu_Share.Value
+      
+      MenuButtonCollection.Picture = CollectionToolMenu_Share.Picture
+      MenuButtonCollection.Text = CollectionToolMenu_Share.Text
+      
+  End Select
+  
+  $PhotoService.ToggleGallery(iGallery)
+  ReloadGallery()
+  
+End
+
+Private Sub ReloadGallery()
+  
+  ClearPhotoGallery()
+
+  CreatePhotoPanels($PhotoService.LoadFirstPage())
   
 End

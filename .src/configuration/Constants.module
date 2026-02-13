@@ -1,31 +1,48 @@
 ' Gambas module file
 
-' Constantes de la aplicación
-Public Const GACELA_DIRECTORY As String = ".config/gacela"      '' Ruta de la configuracion de gacela
-Public Const GACELA_DIRECTORY_SHARED As String = "/usr/share/gacela"    '' Ruta de la biblioteca compartida
-Public Const DATABASE_NAME As String = "gacela.db"              '' Nombre de la Base de datos
-Public Const DATABASE_SQLITE3 As String = "sqlite3"                 '' Tipo de la base de datos
-Public Const CONFIG_NAME As String = "gacela.conf"              '' Nombre del archivo de settings
+' Constants that define the global Settings section
+Public Const GLOBAL_VERSION As String = "Global/Version"
+Public Const GLOBAL_GALLERY_TYPE As String = "Global/GalleryType"
+Public Const GLOBAL_GALLERY_PHOTOS_PER_VIEW As String = "Global/PhotosPerView"
+Public Const GLOBAL_APPLICATION_THEME As String = "Global/Theme"
+Public Const GLOBAL_SHARED_GALLERY_ENABLED As String = "Global/SharedGallery"
 
-Public Const GRUPO_GACELA As String = "gacela-users"            '' Nombre del grupo de usuarios de gacela
+' Constants that define the Log4Gambas section
+Public Const LOG4GAMBAS_LEVEL As String = "Log4Gambas/Level"
+Public Const LOG4GAMBAS_OUTPUT As String = "Log4Gambas/Output"
+Public Const LOG4GAMBAS_MAXFILES As String = "Log4Gambas/MaxFiles"
+Public Const LOG4GAMBAS_SIZELOG As String = "Log4Gambas/SizeLog"
+Public Const LOG4GAMBAS_LOGFILE As String = "Log4Gambas/LogFile"
+Public Const LOG4GAMBAS_MAXFILESIZE As String = "Log4Gambas/MaxFilesSize"
 
-' Constantes de nombres de tablas
-Public Const TABLE_PHOTOS As String = "photos"                  '' Tabla de Fotos
-Public Const TABLE_ALBUMS As String = "albums"                  '' Tala de Albumes
-Public Const TABLE_TAGS As String = "tags"                      '' Tabla de Tags
-Public Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"     '' Tabla de relacion Fotos-Album
-Public Const TABLE_PHOTOS_TAGS As String = "photos_tags"        '' Tabla de relacion Foto-Tag
+' Application constants
+Public Const GACELA_SETTING_DIRECTORY As String = ".config/gacela"      '' Directory where settings are stored
+Public Const GACELA_LOG_DIRECTORY As String = ".local/state/gacela"     '' Log directory
+Public Const GACELA_GALLERY_DIRECTORY As String = ".local/share/gacela"  '' Gacela gallery directory
+Public Const GACELA_SHARED_GALLERY_DIRECTORY As String = "/var/lib/gacela"    '' Shared gallery directory
+Public Const DATABASE_NAME As String = "gacela.db"                    '' Database name
+Public Const DATABASE_SQLITE3 As String = "sqlite3"                   '' Database type
+Public Const CONFIG_NAME As String = "gacela.conf"                    '' Settings file name
 
-' Fotos semilla para iniciar la aplicacion
-Public Const PHOTO_SEED_1 As String = "images/img-126.png"           '' Foto para iniciar aplicacion
-Public Const PHOTO_SEED_2 As String = "images/img-125.png"           '' Foto para iniciar aplicacion
+Public Const GRUPO_GACELA As String = "gacela-shared"                  '' Gacela users group name
 
-' Textos para indicar estado de sincronizacion
-Public Const SYNC_PENDING As String = "Pendiente"               '' Estado de sincronizacion pendiente
-Public Const SYNC_SYNCED As String = "Sincronizado"             '' Estado de sincronizacion realizada
+' Table name constants
+Public Const TABLE_PHOTOS As String = "photos"                  '' Photos table
+Public Const TABLE_ALBUMS As String = "albums"                  '' Albums table
+Public Const TABLE_TAGS As String = "tags"                      '' Tags table
+Public Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"     '' Photos-Albums relationship table
+Public Const TABLE_PHOTOS_TAGS As String = "photos_tags"        '' Photos-Tags relationship table
 
-Public Const USE_SOFT_TRUE As Integer = 1                           '' Valor para indicar que se usa el softDelete
-Public Const USE_SOFT_FALSE As Integer = 0                          '' Valor para indicar que se no usa el softDelete
+' Seed photos for initial application startup
+Public Const PHOTO_SEED_1 As String = "images/img-126.png"           '' Initial seed photo
+Public Const PHOTO_SEED_2 As String = "images/img-125.png"           '' Initial seed photo
 
-Public Const COLLECTION_PRIVATE As String = ("Private")         '' Indica coleccion privada
-Public Const COLLECTION_SHARE As String = ("Shared")
+' Texts to indicate sync status
+Public Const SYNC_PENDING As String = "Pending"                 '' Pending sync status
+Public Const SYNC_SYNCED As String = "Synced"                   '' Completed sync status
+
+Public Const USE_SOFT_TRUE As Integer = 1                           '' Value indicating softDelete is used
+Public Const USE_SOFT_FALSE As Integer = 0                          '' Value indicating softDelete is not used
+
+Public Const GALLERY_PRIVATE As String = ("Private")         '' Indicates private gallery
+Public Const GALLERY_SHARED As String = ("Shared")

@@ -1,46 +1,34 @@
 ' Gambas module file
 
-' Modulo de inicio de la aplicación Gestor de Álbumes Compartidos en Linux Avanzado
+' Startup module for the Advanced Shared Albums Manager on Linux
 
-Private $configuration As Configuration
-Private $log4Gambas As Log4Gambas3
-Private $connDB As SQLiteContext
-Private $photorepository As PhotoRepository
-Private $photoService As PhotoService
-Private $titulo As String = "[Main] "
-
+Private $Configuration As Configuration
+Private $Log4Gambas As Log4Gambas3
+Private $ConnDB As SQLiteContext
+Private $PhotoRepository As PhotoRepository
+Private $PhotoService As PhotoService
+Private $Titulo As String = "[Main] "
 
 Public Sub Main()
+  Dim cFormMain As FMain
 
-  ' Dim response As Integer
-  Dim formMain As FMain
-  ' Dim result As String
-
-  $configuration = New Configuration
-  $log4Gambas = $configuration.InitializeLogger()
-  $log4Gambas.Info($titulo & ("Iniciando Gacela") & " V" & Application.Version)
-
-  ' Inicializa el entorno segun lo definido en el settings
-  $configuration.InitializeEnvironment()
-
-  ' Inicializacion e inyectores
-  $connDB = New SQLiteContext($configuration, $log4gambas)
-  ' Crea la clase de capa repository
-  $photorepository = New PhotoRepository($configuration, $log4Gambas, $connDB)
-  ' Crea el servicio de creacion de fotos
-  $photoService = New PhotoService($log4gambas, $photorepository, $configuration)
-
-  ' Si es primera vez, insertar datos de prueba en base privada
-  If $configuration.IsFirstRun Then
-    $photoService.InsertSeedData()
-  Endif
-
-  ' Creamos e inyectamos en el formulario
-  formMain = New FMain($configuration, $log4gambas, $photoService)
-  formMain.Show()
+  $Configuration = New Configuration
+  $Log4Gambas = $Configuration.InitializeLogger()
+  $Log4Gambas.Info($Titulo & ("Starting Gacela") & " V" & Application.Version)
+  
+  $Configuration.InitializeEnvironment()
+  
+  $ConnDB = New SQLiteContext($Configuration, $Log4Gambas)
+  
+  $PhotoRepository = New PhotoRepository($Configuration, $Log4Gambas, $ConnDB)
+  
+  $PhotoService = New PhotoService($Log4Gambas, $PhotoRepository, $Configuration)
+  
+  cFormMain = New FMain($Configuration, $Log4Gambas, $PhotoService)
+  cFormMain.Show()
   
 Catch
-  Print $titulo & ("Se detecto un problema grave y se detendra la aplicación : ") & Error.Text
-  Message.Error("Se detecto un problema grave y se detendra la aplicación : " & Error.Text)
+  Print $Titulo & ("A critical problem was detected and the application will stop: ") & Error.Text
+  Message.Error(("A critical problem was detected and the application will stop: ") & Error.Text)
 
 End
