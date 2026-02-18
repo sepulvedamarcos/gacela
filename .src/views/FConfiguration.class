@@ -1,2 +1,31 @@
 ' Gambas class file
 
+Private $Configuration As Configuration
+Private $log4Gambas As Log4Gambas3
+
+Public Sub _new(oLog4Gambas As Log4Gambas3, oConfiguration As Configuration)
+  
+  $Log4Gambas = oLog4Gambas
+  $Configuration = oConfiguration
+  
+End
+
+Public Sub btnOK_Click()
+
+  $Configuration.DeleteOriginals = SwitchButtonDeleteOriginal.Value
+  
+  Me.Close
+
+End
+
+Public Sub btnCancel_Click()
+
+  Me.Close
+
+End
+
+Public Sub Form_Open()
+
+  SwitchButtonDeleteOriginal.Value = $Configuration.DeleteOriginals
+
+End

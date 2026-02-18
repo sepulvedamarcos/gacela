@@ -35,10 +35,6 @@
       MoveScaled(4,49,102,3)
       Font = Font["-2"]
     }
-    { CheckBoxDeletePhoto CheckBox
-      MoveScaled(1,53,80,4)
-      Text = ("Delete original images and keep only the Gacela copies")
-    }
   }
   { VBoxButtons VBox
     MoveScaled(0,58,108,9)

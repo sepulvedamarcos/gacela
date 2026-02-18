@@ -223,6 +223,7 @@ Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As Photo
   oResult["stars"] = photoE.Stars
   oResult["import_user"] = photoE.ImportUser
   oResult["image_path"] = photoE.ImagePath
+  oResult["original_path"] = photoE.OriginalPath
   oResult["Hash256"] = photoE.Hash256
   oResult["thumbnail"] = photoE.Thumbnail
   oResult["last_sync_date"] = Null
@@ -350,6 +351,7 @@ Private Function MapResultToEntities(oResult As Result) As PhotoEntity[]
     cPhoto.Stars = oResult["stars"]
     cPhoto.ImportUser = oResult["import_user"]
     cPhoto.ImagePath = oResult["image_path"]
+    cPhoto.OriginalPath = oResult["original_path"]
     cPhoto.Hash256 = oResult["Hash256"]
     cPhoto.Thumbnail = oResult["thumbnail"]
     cPhoto.LastSyncDate = oResult["last_sync_date"]

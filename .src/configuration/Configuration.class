@@ -20,6 +20,7 @@ Property Read WhichGallery As Integer                                           
 Property Read IsFirstRun As Boolean                                           '' First execution indicator
 Property Read GalleryPath As String                                           '' Gallery path
 Property Read IsSharedGalleryAvailable As Boolean                             '' Shared gallery is available
+Property DeleteOriginals As Boolean                                           '' Delete originals after import
 '============================================
 '
 '      Public methods
@@ -119,6 +120,7 @@ Private Sub FirstInitializeSettings() '' Initial configuration setup
   $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Private
   $Settings[Constants.GLOBAL_GALLERY_TYPE] = Me.WhichGallery
   $Settings[Constants.GLOBAL_APPLICATION_THEME] = $OsTheme
+  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = False
   $Settings.Save()
   
 Catch
@@ -249,5 +251,18 @@ End
 Function IsSharedGalleryAvailable_Read() As Boolean
   
   Return $IsSharedEnabled
+  
+End
+
+Function DeleteOriginals_Read() As Boolean
+  
+  Return $Settings[Constants.IMPORT_DELETE_ORIGINALS, False]
+  
+End
+
+Sub DeleteOriginals_Write(value As Boolean)
+  
+  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = value
+  $Settings.Save()
   
 End

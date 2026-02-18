@@ -15,6 +15,9 @@ Public Const LOG4GAMBAS_SIZELOG As String = "Log4Gambas/SizeLog"
 Public Const LOG4GAMBAS_LOGFILE As String = "Log4Gambas/LogFile"
 Public Const LOG4GAMBAS_MAXFILESIZE As String = "Log4Gambas/MaxFilesSize"
 
+' Constants that define Imports
+Public Const IMPORT_DELETE_ORIGINALS As String = "Import/DeleteOriginals"  '' Delete originals after import
+
 ' Application constants
 Public Const GACELA_SETTING_DIRECTORY As String = ".config/gacela"      '' Directory where settings are stored
 Public Const GACELA_LOG_DIRECTORY As String = ".local/state/gacela"     '' Log directory

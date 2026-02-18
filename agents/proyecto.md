@@ -60,3 +60,6 @@ Gambas is case-insensitive for identifiers. In `.src/core/domain/PhotoEntity.cla
 1. Add logic tests (at least for services and repositories).
 1. Centralize error handling and user messages (separate UI vs. domain).
 1. Explicitly document the import and sync flow.
+1. Add library export by album/tag structure to give users a safe way to copy their library.
+1. Consider a future backup/sync option (e.g., FileSyncFree or similar tools).
+1. Add a DB versioning and migration pipeline (DBVersion table + migration methods).

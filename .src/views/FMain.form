@@ -9,17 +9,8 @@
   { MainMenu Menu
     Text = ("File")
     Radio = True
-    { MainMenu_PrivateCollection Menu
-      Text = ("Private gallery")
-      Picture = Picture["icon:/medium/folder-home"]
-      Radio = True
-    }
-    { MainMenu_ShareCollection Menu
-      Text = ("Shared gallery")
-      Picture = Picture["icon:/medium/user-group"]
-      Radio = True
-    }
-    { Menu1 Menu
+    { Menu3 Menu
+      Text = ("Export Images")
     }
     { MainMenu_ImportImages Menu
       Text = ("Import images")
@@ -31,8 +22,20 @@
       Picture = Picture["icon:/medium/quit"]
     }
   }
-  { ViewMenu Menu
+  { MainMenuView Menu
     Text = ("View")
+    { ViewGallery_PrivateCollection Menu
+      Text = ("Private gallery")
+      Picture = Picture["icon:/medium/folder-home"]
+      Radio = True
+    }
+    { ViewGallery_ShareCollection Menu
+      Text = ("Shared gallery")
+      Picture = Picture["icon:/medium/user-group"]
+      Radio = True
+    }
+    { Menu5 Menu
+    }
   }
   { OptionsMenu Menu
     Text = ("Options")
@@ -43,7 +46,10 @@
       Text = ("Gacela settings")
       Picture = Picture["icon:/medium/options"]
     }
-    { OptionsMenu_About Menu
+  }
+  { Menu4 Menu
+    Text = ("?")
+    { HelpMenu_About Menu
       Text = ("About Gacela")
     }
   }
@@ -65,6 +71,16 @@
     MoveScaled(0,0,137,8)
     Spacing = True
     Padding = 2
+    { ToolButtonImport ToolButton
+      MoveScaled(0,0,8,8)
+      Picture = Picture["icon:/32/upload"]
+      Border = True
+    }
+    { ToolButtonExport ToolButton
+      MoveScaled(8,0,8,8)
+      Picture = Picture["icon:/32/download"]
+      Border = True
+    }
     { Spring1 Spring
       MoveScaled(106,1,4,5)
       Direction = Direction.LeftToRight
@@ -200,11 +216,10 @@
     { MenuButtonCollection MenuButton
       MoveScaled(0,0,25,5)
       Text = ("Shared gallery")
-      Picture = Picture["icon:/medium/hue"]
       Arrow = False
       Menu = "CollectionToolMenu"
     }
-    { Label1 Label
+    { LabelStatusBar Label
       MoveScaled(25,0,58,5)
       Expand = True
       Padding = 4
@@ -212,6 +227,10 @@
       Border = Border.Etched
       Text = ("Status bar")
       Trim = True
+    }
+    { ToolButtonErase ToolButton
+      MoveScaled(133,0,4,4)
+      Picture = Picture["icon:/22/erase"]
     }
   }
 }

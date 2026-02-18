@@ -128,10 +128,11 @@ Public Sub ToggleGallery(iGallery As Integer)
   
 End
 
-Public Sub ImportPhotos(imagesPath As String[], Optional albumNam As String, Optional albumDes As String, Optional albumId As Integer = 0, Optional deletePhoto As Boolean = False) As String[]
+Public Sub ImportPhotos(imagesPath As String[], Optional albumNam As String, Optional albumDes As String, Optional albumId As Integer = 0) As String[]
   
   Dim sPhoto As String
   Dim iI As Integer
+  Dim bDeleteOriginals As Boolean
   Dim oAlbumEntity As New AlbumEntity
   Dim oPhotoSummary As New String[]
   Dim sResp As String
@@ -146,12 +147,12 @@ Public Sub ImportPhotos(imagesPath As String[], Optional albumNam As String, Opt
     
   End If
   
-  ' TODO: Evaluate delete-originals checkbox and pass it to SavePhoto. Default is not to delete.
+  bDeleteOriginals = $Configuration.DeleteOriginals
   
   For Each sPhoto In imagesPath
     iI += 1
     $Log4gambas.Debug($Titulo & "Archivo a procesar " & sPhoto)
-    sResp = SavePhoto(sPhoto, albumId, iI)
+    sResp = SavePhoto(sPhoto, "", albumId, iI, bDeleteOriginals)
     If sResp <> "" Then
       $Log4gambas.Debug($Titulo & "Image has an import error: " & sPhoto)
       oPhotoSummary.Add("NOK" & File.BaseName(sPhoto) & "." & File.Ext(sPhoto))
@@ -338,9 +339,10 @@ Private Function SavePhoto(sImagenPath As String, sDescription As String, Option
   Dim sHash256 As String
   Dim sFilename As String = File.BaseName(sImagenPath) & "." & File.Ext(sImagenPath)
   Dim sNewPath As String
-  Dim sResp As String 
+  Dim sResp As String
+  Dim sDate As String
+  Dim dDate As Date
   
-  ' Load original image
   oOriginalPhoto = Image.Load(sImagenPath)
   sImageString = File.Load(sImagenPath)
   
@@ -359,21 +361,25 @@ Private Function SavePhoto(sImagenPath As String, sDescription As String, Option
   sNewPath = SaveImageIO(sImagenPath)
   
   $Log4gambas.Debug($Titulo & ("Evaluating condition to delete original image"))
-  If deletePhoto Then
+  If bDeletePhoto Then
     $Log4gambas.Debug($Titulo & ("Condition true, delete original image"))
     DeleteImageIO(sImagenPath)
   Endif
   
+  sDate = $ImageMetadata.GetExifDateTimeOriginal(sNewPath &/ sFilename)
+  $Log4gambas.Debug($Titulo & ("Shell return normalize string ") & ": " & sDate)
+  dDate = CDate(sDate)
   With oPhotoE
     .FileName = sFilename
     .WidthPixels = oOriginalPhoto.Width
     .HeightPixels = oOriginalPhoto.Height
-    .CreationDate = $ImageMetadata.GetExifDateTimeOriginal(sNewPath &/ sFilename)
+    .CreationDate = dDate
     .ImportDate = Now()
     .Description = sDescription
     .Stars = 0
     .ImportUser = User.Name
     .ImagePath = sNewPath
+    .OriginalPath = sImagenPath
     .Hash256 = sHash256
     .Thumbnail = CreateThumbnail(oOriginalPhoto, sImagenPath)
   End With

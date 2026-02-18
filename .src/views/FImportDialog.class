@@ -5,13 +5,13 @@
 ' Business logic handler class
 '
 '
-Private $cPhotoService As PhotoService
+Private $PhotoService As PhotoService
 Private $Log4Gambas As Log4Gambas3
 Private $Titulo As String = "[FImportDialog] "
-Private $aFilesDrop As String[]
-Private $sTextCheckFalse As String = ("Import photos into an album")
-Private $sTextCheckTrue As String = ("Import photos into the album")
-Private $iIdAlbum As Integer '' Selected album id
+Private $FilesDrop As String[]
+Private $TextCheckFalse As String = ("Import photos into an album")
+Private $TextCheckTrue As String = ("Import photos into the album")
+Private $IdAlbum As Integer '' Selected album id
 
 ' ==================================================
 '
@@ -19,9 +19,9 @@ Private $iIdAlbum As Integer '' Selected album id
 '
 ' ==================================================
 Public Sub _new(cPhotoService As PhotoService, oLogger As Log4Gambas3, aFilesDrop As String[])
-  $cPhotoService = cPhotoService
+  $PhotoService = cPhotoService
   $Log4Gambas = oLogger
-  $aFilesDrop = aFilesDrop
+  $FilesDrop = aFilesDrop
   
   $Log4Gambas.Info($Titulo & ("Creating dialog window and album list"))
   
@@ -36,7 +36,7 @@ Public Sub _new(cPhotoService As PhotoService, oLogger As Log4Gambas3, aFilesDro
   ListEditorAvailabeAlbums.Wrap = True
   ListEditorAvailabeAlbums.Unique = True
   
-  CheckBoxEnableAlbum.Text = $sTextCheckFalse
+  CheckBoxEnableAlbum.Text = $TextCheckFalse
   
   FindAlbums()
   
@@ -67,7 +67,7 @@ Public Sub BtnOK_Click()
       
     Else
       $Log4Gambas.Info($Titulo & ("Starting photo import processing"))
-      aPhotoSummary = $cPhotoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $iIdAlbum, CheckBoxDeletePhoto.Value)
+      aPhotoSummary = $PhotoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $IdAlbum)
       If aPhotoSummary.Count > 0 Then
         Message.Info(("Process finished. To see the summary, click the status bar."))
         
@@ -75,7 +75,7 @@ Public Sub BtnOK_Click()
     Endif
   Endif
   
-  Me.Close()
+  Me.Close(Enumeration.DLG_OK)
   
 Catch
   $Log4Gambas.Error(("A problem occurred while importing the images") & " [" & Error.Text & "]")
@@ -112,13 +112,13 @@ Public Sub CheckBoxEnableAlbum_Click()
     PanelList.Enabled = False
     VBoxButtons.Enabled = False
     PanelAssociateAlbum.Visible = True
-    CheckBoxEnableAlbum.Text = $sTextCheckFalse
+    CheckBoxEnableAlbum.Text = $TextCheckFalse
     
   Else
     PanelAssociateAlbum.Visible = False
     PanelList.Enabled = True
     VBoxButtons.Enabled = True
-    CheckBoxEnableAlbum.Text = $sTextCheckTrue
+    CheckBoxEnableAlbum.Text = $TextCheckTrue
     
   Endif
   
@@ -141,7 +141,7 @@ Public Sub BtnOkAlbum_Click()
         Endif
       Next
       If iCuenta = 0 Then
-        ListEditorAvailabeAlbumsAdd()
+        ListEditorAvailabeAlbums_Add()
       Endif
     Endif
   Endif
@@ -151,7 +151,7 @@ Public Sub BtnOkAlbum_Click()
   VBoxButtons.Enabled = True
   
   $Log4Gambas.Debug($Titulo & ("Select an album to associate") & " [" & TextBoxAlbum.Text & "]")
-  CheckBoxEnableAlbum.Text = $sTextCheckTrue & " [" & TextBoxAlbum.Text & "]"
+  CheckBoxEnableAlbum.Text = $TextCheckTrue & " [" & TextBoxAlbum.Text & "]"
   LabelAlbumDescriptionSelected.Text = TextAreaAlbumDescription.Text
   
 End
@@ -160,11 +160,11 @@ Public Sub BtnCancelAlbum_Click()
   
   $Log4Gambas.Debug($Titulo & ("Cancel album association, revert changes"))
   CheckBoxEnableAlbum.Value = False
-  CheckBoxEnableAlbum.Text = $sTextCheckFalse
+  CheckBoxEnableAlbum.Text = $TextCheckFalse
   
 End
 
-Public Sub ListEditorAvailabeAlbumsAdd()
+Public Sub ListEditorAvailabeAlbums_Add()
   
   Dim cAlbum As AlbumEntity
   Dim aAlbums As AlbumEntity[]
@@ -184,7 +184,7 @@ Public Sub ListEditorAvailabeAlbumsAdd()
   Next
   
   $Log4Gambas.Debug($Titulo & ("New album: " & "{" & TextBoxAlbum.Text & "}{" & TextAreaAlbumDescription.Text & "}"))
-  If $cPhotoService.AddAlbum(TextBoxAlbum.Text, TextAreaAlbumDescription.Text) Then
+  If $PhotoService.AddAlbum(TextBoxAlbum.Text, TextAreaAlbumDescription.Text) Then
     $Log4Gambas.Debug($Titulo & ("New album added successfully, loading it into the list"))
     FindAlbums()
     
@@ -200,7 +200,7 @@ Catch
   
 End
 
-Public Sub ListEditorPhotosAdd()
+Public Sub ListEditorPhotos_Add()
   
   Dim vImg As Variant
   
@@ -221,13 +221,13 @@ Public Sub ListEditorPhotosAdd()
   
 End
 
-Public Sub ListEditorPhotosSelect()
+Public Sub ListEditorPhotos_Select()
   
   PictureBoxPreview.Image = Image.Load(ListEditorPhotos.Text)
   
 End
 
-Public Sub ListEditorAvailabeAlbumsSelect()
+Public Sub ListEditorAvailabeAlbums_Select()
   
   Dim aAlbums As AlbumEntity[]
   Dim cAlb As AlbumEntity
@@ -239,7 +239,7 @@ Public Sub ListEditorAvailabeAlbumsSelect()
     For Each cAlb In aAlbums
       If cAlb.name = ListEditorAvailabeAlbums.Text Then 
         $Log4Gambas.Debug($Titulo & ("Deletion data matches, sending id") & " [" & cAlb.Id & "] [" & ListEditorAvailabeAlbums.Text & "]")
-        If $cPhotoService.RemoveAlbum(cAlb.Id) Then
+        If $PhotoService.RemoveAlbum(cAlb.Id) Then
           TextBoxAlbum.Text = ""
           TextAreaAlbumDescription.Text = ""
           FindAlbums()
@@ -254,9 +254,9 @@ Public Sub ListEditorAvailabeAlbumsSelect()
   
   TextBoxAlbum.Text = aAlbums[ListEditorAvailabeAlbums.Index].Name
   TextAreaAlbumDescription.Text = aAlbums[ListEditorAvailabeAlbums.Index].Description
-  $iIdAlbum = aAlbums[ListEditorAvailabeAlbums.Index].Id
+  $IdAlbum = aAlbums[ListEditorAvailabeAlbums.Index].Id
   
-  $Log4Gambas.Debug($Titulo & ("Album selection") & "[" & TextBoxAlbum.Text & "][" & Str($iIdAlbum) & "]")
+  $Log4Gambas.Debug($Titulo & ("Album selection") & "[" & TextBoxAlbum.Text & "][" & Str($IdAlbum) & "]")
   
 End
 
@@ -271,7 +271,7 @@ Private Sub FindAlbums(Optional text As String)
   Dim cAlbum As AlbumEntity
   
   $Log4Gambas.Debug($Titulo & "Searching for album [" & text & "]")
-  aAlbums = $cPhotoService.FindAlbums(text, 0, Constants.USE_SOFT_FALSE)
+  aAlbums = $PhotoService.FindAlbums(text, 0, Constants.USE_SOFT_FALSE)
   
   ListEditorAvailabeAlbums.Clear
   ListEditorAvailabeAlbums.Index = -1

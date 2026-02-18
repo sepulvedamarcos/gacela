@@ -17,6 +17,7 @@ Private $Description As String = ""
 Private $Stars As Integer = 0
 Private $ImportUser As String = ""
 Private $ImagePath As String = ""
+Private $OriginalPath As String = ""
 Private $Hash256 As String = ""
 Private $Thumbnail As String
 Private $LastSyncDate As Date
@@ -43,6 +44,7 @@ Property Description As String            '' Photo description
 Property Stars As Integer                 '' Photo star rating
 Property ImportUser As String             '' User who imported the photo
 Property ImagePath As String              '' Path to the physical image
+Property OriginalPath As String           '' Original source path
 Property Hash256 As String                '' Hash of the image used for uniqueness
 Property Thumbnail As String              '' Thumbnail
 Property LastSyncDate As Date             '' Last sync date
@@ -161,6 +163,18 @@ Private Function ImportUser_Read() As String
 
   Return $ImportUser
 
+End
+
+Private Function OriginalPath_Read() As String
+  
+  Return $OriginalPath
+  
+End
+
+Private Sub OriginalPath_Write(value As String)
+  
+  $OriginalPath = value
+  
 End
 
 Private Sub ImportUser_Write(value As String)

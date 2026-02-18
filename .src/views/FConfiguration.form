@@ -1,5 +1,92 @@
 # Gambas Form File 3.0
 
-{ FConfiguration Form
-  MoveScaled(0,0,64,64)
+{ Form Form
+  MoveScaled(0,0,83,63)
+  Expand = True
+  Text = ("Configuration Panel")
+  Arrangement = Arrange.Vertical
+  Margin = True
+  Padding = 4
+  { Panel1 Panel
+    MoveScaled(0,0,82,56)
+    Arrangement = Arrange.Vertical
+    { IconPanelGacela IconPanel
+      MoveScaled(1,2,80,52)
+      Expand = True
+      Count = 2
+      Index = 0
+      Text = ("General")
+      Picture = Picture["icon:/medium/access"]
+      { Label1 Label
+        MoveScaled(1,2,50,3)
+        Text = ("Move images to internal repository")
+      }
+      { SwitchButtonDeleteOriginal SwitchButton
+        MoveScaled(53,2,8,4)
+      }
+      { Label3 Label
+        MoveScaled(1,6,51,7)
+        Font = Font["Adwaita Mono,-3"]
+        Text = ("If enabled, Gacela will move imported images to its internal repository and remove them from their original location. This action cannot be undone.")
+        Trim = True
+      }
+      Index = 1
+      Text = ("Logger")
+      Picture = Picture["icon:/medium/memory"]
+      { Label2 Label
+        MoveScaled(1,3,20,3)
+        Text = ("Log Level")
+      }
+      { ComboBoxLevel ComboBox
+        MoveScaled(22,2,21,4)
+      }
+      { Label4 Label
+        MoveScaled(1,8,20,3)
+        Text = ("Log Output")
+      }
+      { ComboBoxOutput ComboBox
+        MoveScaled(22,7,21,4)
+      }
+      { Label5 Label
+        MoveScaled(1,13,20,3)
+        Text = ("Log File Path")
+      }
+      { Label6 Label
+        MoveScaled(1,18,20,3)
+        Text = ("Max Log File Size")
+      }
+      { ValueBoxFileSize ValueBox
+        MoveScaled(22,17,15,4)
+      }
+      { Label7 Label
+        MoveScaled(1,23,20,3)
+        Text = ("Max Backup Files")
+      }
+      { ValueBoxBackupFiles ValueBox
+        MoveScaled(22,22,6,4)
+      }
+      { DirBoxFilePath DirBox
+        MoveScaled(22,12,40,4)
+      }
+      Index = 0
+    }
+  }
+  { HBox1 HBox
+    MoveScaled(0,56,83,7)
+    Expand = True
+    AutoResize = True
+    Spacing = True
+    Padding = 4
+    { Spring2 Spring
+      MoveScaled(2,1,4,4)
+    }
+    { btnOK Button
+      MoveScaled(48,2,16,4)
+      Text = ("OK")
+    }
+    { btnCancel Button
+      MoveScaled(65,2,16,4)
+      Text = ("Cancel")
+    }
+  }
 }

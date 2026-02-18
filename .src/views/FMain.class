@@ -25,21 +25,21 @@ Public Sub Form_Open()
   ExpanderAlbum.Hidden = True
   ExpanderTags.Hidden = True
   
+  ToolButtonErase.Text = IIf($Configuration.DeleteOriginals, "x", "")
+  
 End
 
 Public Sub Form_Drop()
   
-  Dim sFiledrop As String
   Dim aFilesDrop As String[]
+  Dim sFileDrop As String
   Dim sNamesErr As String
-  
-  'FIXME: move this code to a standard function to add an import toolbar button
   
   $Log4Gambas.Debug($Titulo & "Drag and drop files")
   
   aFilesDrop = Drag.Paste("text/uri-list")
   For Each sFileDrop In aFilesDrop
-    $Log4Gambas.debug($Titulo & "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
+    $Log4Gambas.Debug($Titulo & "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
     If LCase(File.Ext(sFileDrop)) = "jpg" Or LCase(File.Ext(sFileDrop)) = "png" Then
     Else
       sNamesErr = sNamesErr & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop)
@@ -100,7 +100,7 @@ Public Sub PanelGalleryContent_Scroll()
   
 End
 
-Public Sub MainMenu_Exit_Click()
+Public Sub ViewGallery_Exit_Click()
   
   Me.Close
   
@@ -112,13 +112,13 @@ Public Sub ToolButtonExit_Click()
   
 End
 
-Public Sub MainMenu_ShareCollection_Click()
+Public Sub ViewGallery_ShareCollection_Click()
   
   SelectGallery(Enumeration.GalleryType_Shared)
   
 End
 
-Public Sub MainMenu_PrivateCollection_Click()
+Public Sub ViewGallery_PrivateCollection_Click()
   
   SelectGallery(Enumeration.GalleryType_Private)
   
@@ -136,7 +136,7 @@ Public Sub CollectionToolMenu_Share_Click()
   
 End
 
-Public Sub MainMenu_ImportImages_Click()
+Public Sub ViewGallery_ImportImages_Click()
   
   ImportProcess()
   
@@ -147,6 +147,25 @@ Public Sub ToolButtonImport_Click()
   ImportProcess()
   
 End
+
+Public Sub HelpMenu_About_Click()
+
+  FAbout.ShowDialog
+  
+End
+
+Public Sub ToolButtonConfiguration_Click()
+
+  ShowConfigurationPanel
+
+End
+
+Public Sub OptionsMenu_Configuration_Click()
+
+  ShowConfigurationPanel
+
+End
+
 
 ' ==================================================
 '
@@ -196,7 +215,9 @@ Private Sub ImportProcess(Optional listFiles As String[])
   vResp = cSelector.ShowModal()
   
   If vResp = Enumeration.DLG_OK Then
-    CreatePhotoPanels($PhotoService.LoadNextPage())
+    ReloadGallery()
+    ' ClearPhotoGallery()
+    ' CreatePhotoPanels($PhotoService.LoadNextPage())
     'FIXME: At the end of the process, write to the status bar and allow a click to open the import event
     'TODO: ideally the status bar would keep a history like a log
     'FIXME: for now, the import summary window will be opened here
@@ -211,8 +232,8 @@ Private Sub SelectGallery(iGallery As Integer)
     Case Enumeration.GalleryType_Private
       CollectionToolMenu_Private.Value = True
       CollectionToolMenu_Share.Value = False
-      MainMenu_PrivateCollection.Value = CollectionToolMenu_Private.Value
-      MainMenu_ShareCollection.Value = CollectionToolMenu_Share.Value
+      ViewGallery_PrivateCollection.Value = CollectionToolMenu_Private.Value
+      ViewGallery_ShareCollection.Value = CollectionToolMenu_Share.Value
       
       MenuButtonCollection.Picture = CollectionToolMenu_Private.Picture
       MenuButtonCollection.Text = CollectionToolMenu_Private.Text
@@ -220,8 +241,8 @@ Private Sub SelectGallery(iGallery As Integer)
     Case Enumeration.GalleryType_Shared
       CollectionToolMenu_Private.Value = False
       CollectionToolMenu_Share.Value = True
-      MainMenu_PrivateCollection.Value = CollectionToolMenu_Private.Value
-      MainMenu_ShareCollection.Value = CollectionToolMenu_Share.Value
+      ViewGallery_PrivateCollection.Value = CollectionToolMenu_Private.Value
+      ViewGallery_ShareCollection.Value = CollectionToolMenu_Share.Value
       
       MenuButtonCollection.Picture = CollectionToolMenu_Share.Picture
       MenuButtonCollection.Text = CollectionToolMenu_Share.Text
@@ -238,5 +259,14 @@ Private Sub ReloadGallery()
   ClearPhotoGallery()
 
   CreatePhotoPanels($PhotoService.LoadFirstPage())
+  
+End
+
+Private Sub ShowConfigurationPanel()
+  
+  Dim oForm As FConfiguration
+  
+  oForm = New FConfiguration($Log4Gambas, $Configuration)
+  oForm.ShowModal()
   
 End

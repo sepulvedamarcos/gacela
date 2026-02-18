@@ -5,7 +5,7 @@
 ' Handles the SQLite database connection and schema
 '
 '
-Public Const SCHEMA_VERSION As Integer = 1
+Public Const SCHEMA_VERSION As String = "1.1"
 
 Private $DB As Connection
 Private $Log4Gambas As Log4Gambas3
@@ -50,6 +50,7 @@ Public Sub SwitchGallery()
   InitializeDatabase()
   $Log4Gambas.Info($Titulo & ("Switching database context to:") & " " & $DbGalleryDirectory)
   ConnectDatabase()
+  CheckAndCreateTables()
   
 End
 
@@ -94,12 +95,7 @@ Private Sub InitializeDatabase()
     $IsNewBD = True
     
     CreateDatabase()
-    ConnectDatabase()
-    CheckAndCreateTables()
-    
-    $Log4Gambas.Info($Titulo & ("Database connection established successfully"))
   Endif
-  CloseConnection()
   
 Catch
   $Log4Gambas.Error($Titulo & ("An error occurred while initializing the database") & " " & Error.Text)
@@ -171,10 +167,18 @@ Private Sub CheckAndCreateTables()
     $Log4Gambas.Info($Titulo & "[" & Constants.TABLE_PHOTOS_TAGS & "]" & $TableNotExist)
     CreatePhotosTagsTable()
   Endif
+  
+  If Not $DB.Tables.Exist("DBVersion") Then
+    CreateDBVersionTable()
+  Endif
+  EnsureDBVersion()
+  RunMigrations()
+
+  EnsurePhotosTableColumns()
   $Log4Gambas.Debug($Titulo & ("Table check and creation finished."))
   
 Catch
-  $Log4Gambas.Erro($Titulo & ("Table check/creation failed:") & " " & Error.Text)
+  $Log4Gambas.Error($Titulo & ("Table check/creation failed:") & " " & Error.Text)
   Error.Raise($Titulo & ("Table check/creation failed:") & " " & Error.Text)
   
 End
@@ -196,6 +200,7 @@ Private Sub CreatePhotosTable()
     .Fields.Add("stars", db.Integer)                   '' Star rating count
     .Fields.Add("import_user", db.String, 50)          '' Importing user
     .Fields.Add("image_path", db.String, 255)          '' Full path to original image
+    .Fields.Add("original_path", db.String, 255)       '' Original source path
     .Fields.Add("Hash256", db.String, 255)              '' Image hash for existence validation
     .Fields.Add("thumbnail", db.Blob)                  '' MINIATURA (BLOB)
     .Fields.Add("last_sync_date", db.Date)             '' Last sync date (for future cloud sync)
@@ -213,6 +218,38 @@ Private Sub CreatePhotosTable()
   End With
   
   $Log4Gambas.Debug($Titulo & "[" & Constants.TABLE_PHOTOS & "]" & $TableCreate)
+  
+End
+
+Private Sub EnsurePhotosTableColumns()
+  
+  Dim oTable As Table
+  Dim oResult As Result
+  Dim bHasOriginalPath As Boolean
+  
+  If Not $DB.Tables.Exist(Constants.TABLE_PHOTOS) Then Return
+  
+  oTable = $DB.Tables[Constants.TABLE_PHOTOS]
+  If Not oTable.Fields.Exist("original_path") Then
+    Try $DB.Exec("ALTER TABLE " & Constants.TABLE_PHOTOS & " ADD COLUMN original_path TEXT")
+    If Error Then
+      $Log4Gambas.Error($Titulo & ("Error adding original_path column") & " " & Error.Text)
+    Endif
+  Endif
+  
+  bHasOriginalPath = False
+  oResult = $DB.Exec("PRAGMA table_info(" & Constants.TABLE_PHOTOS & ")")
+  While oResult.Available
+    If oResult["name"] = "original_path" Then
+      bHasOriginalPath = True
+      Exit
+    Endif
+    oResult.MoveNext()
+  Wend
+  
+  If Not bHasOriginalPath Then
+    $Log4Gambas.Warning($Titulo & ("Column original_path was not created"))
+  Endif
   
 End
 
@@ -293,6 +330,68 @@ Private Sub CreatePhotosTagsTable()
   End With
   
   $Log4Gambas.Debug($Titulo & "[" & Constants.TABLE_PHOTOS_TAGS & "]" & $TableCreate)
+  
+End
+
+Private Sub CreateDBVersionTable()
+  
+  Dim oTable As Table
+  
+  oTable = $DB.Tables.Add("DBVersion")
+  With oTable
+    .Fields.Add("version", db.String, 10)
+    .Update()
+  End With
+  
+End
+
+Private Sub EnsureDBVersion()
+  
+  Dim oResult As Result
+  
+  oResult = $DB.Exec("SELECT COUNT(*) as total FROM DBVersion")
+  If oResult.Available Then
+    If oResult["total"] = 0 Then
+      $DB.Exec("INSERT INTO DBVersion(version) VALUES(&1)", SCHEMA_VERSION)
+    Endif
+  Endif
+  
+End
+
+Private Sub RunMigrations()
+  
+  Dim sCurrentVersion As String
+  
+  sCurrentVersion = GetDbVersion()
+  If sCurrentVersion = "1.0" Then
+    Migrate_1_0_to_1_1()
+  Endif
+  
+End
+
+Private Function GetDbVersion() As String
+  
+  Dim oResult As Result
+  
+  oResult = $DB.Exec("SELECT version FROM DBVersion LIMIT 1")
+  If oResult.Available Then
+    Return oResult["version"]
+  Endif
+  
+  Return ""
+  
+End
+
+Private Sub SetDbVersion(sVersion As String)
+  
+  $DB.Exec("UPDATE DBVersion SET version = &1", sVersion)
+  
+End
+
+Private Sub Migrate_1_0_to_1_1()
+  
+  ' Placeholder for future migration logic.
+  SetDbVersion("1.1")
   
 End
 
