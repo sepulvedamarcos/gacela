@@ -9,6 +9,15 @@
   { MainMenu Menu
     Text = ("File")
     Radio = True
+    { Menu1 Menu
+      Text = ("Send to trash folder")
+    }
+    { Menu7 Menu
+      Text = ("Delete permanently")
+      Visible = False
+    }
+    { Menu6 Menu
+    }
     { Menu3 Menu
       Text = ("Export Images")
     }
@@ -35,6 +44,9 @@
       Radio = True
     }
     { Menu5 Menu
+    }
+    { Menu8 Menu
+      Text = ("View deleted files")
     }
   }
   { OptionsMenu Menu
@@ -73,12 +85,22 @@
     Padding = 2
     { ToolButtonImport ToolButton
       MoveScaled(0,0,8,8)
+      ToolTip = ("Import images")
       Picture = Picture["icon:/32/upload"]
       Border = True
     }
     { ToolButtonExport ToolButton
       MoveScaled(8,0,8,8)
+      ToolTip = ("Export images")
       Picture = Picture["icon:/32/download"]
+      Border = True
+    }
+    { Panel2 Panel
+      MoveScaled(16,0,2,8)
+    }
+    { ToolButton1 ToolButton
+      MoveScaled(18,0,8,8)
+      Picture = Picture["icon:/32/trash"]
       Border = True
     }
     { Spring1 Spring
@@ -87,11 +109,13 @@
     }
     { ToolButtonConfiguration ToolButton
       MoveScaled(121,0,8,8)
+      ToolTip = ("Gacela settings")
       Picture = Picture["icons/64x64/package_settings.png"]
       Border = True
     }
     { ToolButtonExit ToolButton
       MoveScaled(129,0,8,8)
+      ToolTip = ("Exit")
       Picture = Picture["icon:/medium/logout"]
       Border = True
     }
@@ -228,9 +252,11 @@
       Text = ("Status bar")
       Trim = True
     }
-    { ToolButtonErase ToolButton
-      MoveScaled(133,0,4,4)
-      Picture = Picture["icon:/22/erase"]
+    { ToolButtonTrash ToolButton
+      MoveScaled(132,0,5,5)
+      ToolTip = ("View deleted files")
+      Picture = Picture["icons/22x22/user-trash-full.png"]
+      Border = True
     }
   }
 }
