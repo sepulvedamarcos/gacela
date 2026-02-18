@@ -87,6 +87,30 @@ Catch
   
 End
 
+Public Function MarkPhotoForDeletion(photoId As Integer, Optional deletedBy As String, Optional deletedAuto As Boolean = False) As Boolean
+  
+  ' TODO: move file to deleted directory and enforce limits before DB update.
+  If deletedBy = "" Then deletedBy = User.Name
+  
+  Return $PhotoRepository.MarkPhotoAsDeleted(photoId, deletedBy, deletedAuto)
+  
+Catch
+  $Log4gambas.Error($Titulo & "Problems marking photo for deletion")
+  Error.Propagate
+  
+End
+
+Public Function PermanentlyDeletePhoto(photoId As Integer) As Boolean
+  
+  ' TODO: delete physical file and related rows before DB purge.
+  Return $PhotoRepository.PermanentlyDeletePhoto(photoId)
+  
+Catch
+  $Log4gambas.Error($Titulo & "Problems permanently deleting photo")
+  Error.Propagate
+  
+End
+
 Public Sub InsertSeedData()
   
   $Log4gambas.Info($Titulo & ("Initial load inserting test data into photos table..."))

@@ -7,6 +7,8 @@ Private $Configuration As Configuration
 Private $Log4Gambas As Log4Gambas3
 Private $PhotoService As PhotoService
 Private $Titulo As String = "[FMain] "
+Private $StatusDefaultText As String
+Private StatusTimer As Timer
 
 Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3, cPhotoService As PhotoService)
   
@@ -25,7 +27,9 @@ Public Sub Form_Open()
   ExpanderAlbum.Hidden = True
   ExpanderTags.Hidden = True
   
-  ToolButtonErase.Text = IIf($Configuration.DeleteOriginals, "x", "")
+  $StatusDefaultText = LabelStatusBar.Text
+  StatusTimer = New Timer
+  StatusTimer.Enabled = False
   
 End
 
@@ -149,20 +153,54 @@ Public Sub ToolButtonImport_Click()
 End
 
 Public Sub HelpMenu_About_Click()
-
+  
   FAbout.ShowDialog
   
 End
 
 Public Sub ToolButtonConfiguration_Click()
-
+  
   ShowConfigurationPanel
-
+  
 End
 
 Public Sub OptionsMenu_Configuration_Click()
-
+  
   ShowConfigurationPanel
+  
+End
+
+Public Sub ToolButtonTrash_Enter()
+  
+  ShowStatus(("View deleted images"), 0)
+  
+End
+
+Public Sub ToolButtonTrash_Leave()
+  
+  ShowStatus("", 0)
+  
+End
+
+Public Sub ShowStatus(sMessage As String, Optional iTimeoutMs As Integer = 2500)
+  
+  If $StatusDefaultText = "" Then
+    $StatusDefaultText = LabelStatusBar.Text
+  Endif
+  
+  LabelStatusBar.Text = sMessage
+  
+  StatusTimer.Stop()
+  If iTimeoutMs > 0 Then
+    StatusTimer.Delay = iTimeoutMs
+    StatusTimer.Start()
+  Endif
+  
+End
+
+Public Sub ToolButtonTrash_Click()
+
+  ShowStatus(("Open deleted images folder"), 0)
 
 End
 
@@ -257,7 +295,7 @@ End
 Private Sub ReloadGallery()
   
   ClearPhotoGallery()
-
+  
   CreatePhotoPanels($PhotoService.LoadFirstPage())
   
 End
@@ -270,3 +308,11 @@ Private Sub ShowConfigurationPanel()
   oForm.ShowModal()
   
 End
+
+Private Sub StatusTimer_Timer()
+  
+  StatusTimer.Stop()
+  LabelStatusBar.Text = $StatusDefaultText
+  
+End
+

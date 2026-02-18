@@ -5,22 +5,37 @@
 ' 
 '
 Private $Settings As Settings                                                 '' Settings file handler
+Private $SettingPath As String                                                '' Settings file path
 Private $IsFirstRun As Boolean = False                                        '' First run indicator
 Private $WhichGallery As Integer = Enumeration.GalleryType_Private            '' Active gallery type
 Private $AppPath As String                                                    '' Application files path
-Private $LogPath As String                                                    '' Log file path
-Private $SettingPath As String                                                '' Settings file path
 Private $Log4gambas As New Log4Gambas3                                        '' Logger instance
 Private $OsTheme As Integer                                                   '' Current OS theme
 Private $AppTheme As Integer                                                  '' Application theme
 Private $IsSharedEnabled As Boolean                                           '' Shared gallery directory enabled
 Private $Titulo As String = "[Configuration] "
 
-Property Read WhichGallery As Integer                                              '' Which gallery is active
+Private $LogLevel As Integer
+Private $LogOutput As Integer
+Private $LogPath As String                                                    '' Log file path
+Private $LogSize As Integer
+Private $LogFiles As Integer
+Private $DeletedMaxSizeMB As Integer
+Private $DeletedMaxCount As Integer
+
+Property Read WhichGallery As Integer                                         '' Which gallery is active
 Property Read IsFirstRun As Boolean                                           '' First execution indicator
 Property Read GalleryPath As String                                           '' Gallery path
 Property Read IsSharedGalleryAvailable As Boolean                             '' Shared gallery is available
 Property DeleteOriginals As Boolean                                           '' Delete originals after import
+Property LogLevel As Integer
+Property LogOutput As Integer
+Property LogPath As String
+Property LogSize As Integer
+Property LogFiles As Integer
+Property DeletedMaxSizeMB As Integer
+Property DeletedMaxCount As Integer
+
 '============================================
 '
 '      Public methods
@@ -69,8 +84,20 @@ Public Sub InitializeEnvironment()
     Endif
   Endif
   
+  If $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, Null] = Null Then
+    $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = 2048
+    $Settings.Save()
+  Endif
+  
+  If $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, Null] = Null Then
+    $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
+    $Settings.Save()
+  Endif
+  
   $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
   $AppTheme = $Settings[Constants.GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_OS]
+  $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
+  $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 1000]
   
 End
 
@@ -101,11 +128,11 @@ Public Sub SetWhichGallery()
   
 End
 
-  '================================================
-  '
-  '         Private methods
-  '
-  '================================================
+'================================================
+'
+'         Private methods
+'
+'================================================
 Private Sub FirstInitializeSettings() '' Initial configuration setup
   
   $Log4gambas.info($Titulo & ("Creating ini file with initial data"))
@@ -121,6 +148,8 @@ Private Sub FirstInitializeSettings() '' Initial configuration setup
   $Settings[Constants.GLOBAL_GALLERY_TYPE] = Me.WhichGallery
   $Settings[Constants.GLOBAL_APPLICATION_THEME] = $OsTheme
   $Settings[Constants.IMPORT_DELETE_ORIGINALS] = False
+  $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = 2048
+  $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
   $Settings.Save()
   
 Catch
@@ -262,7 +291,113 @@ End
 
 Sub DeleteOriginals_Write(value As Boolean)
   
-  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = value
+  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = Value
+  $Settings.Save()
+  
+End
+
+Private Function LogLevel_Read() As Integer
+  
+  Return $Settings[Constants.LOG4GAMBAS_LEVEL]
+  
+End
+
+Private Sub LogLevel_Write(Value As Integer)
+  
+  $Settings[Constants.LOG4GAMBAS_LEVEL] = Value
+  $Settings.Save()
+  
+  $Log4gambas.SetMinLevel($Settings[Constants.LOG4GAMBAS_LEVEL, $Log4gambas.LEVEL_DEBUG])
+  
+End
+
+Private Function LogOutput_Read() As Integer
+  
+  Return $Settings[Constants.LOG4GAMBAS_OUTPUT]
+  
+End
+
+Private Sub LogOutput_Write(Value As Integer)
+  
+  $Settings[Constants.LOG4GAMBAS_OUTPUT] = Value
+  $Settings.Save()
+  
+  $Log4gambas.SetOutput($Settings[Constants.LOG4GAMBAS_OUTPUT, $Log4gambas.OUTPUT_BOTH])
+  
+End
+
+Private Function LogSize_Read() As Integer
+  
+  Return $Settings[Constants.LOG4GAMBAS_MAXFILESIZE] / 1024 / 1024
+  
+End
+
+Private Sub LogSize_Write(Value As Integer)
+  
+  $Log4gambas.SetMaxFileSize(Value * 1024 * 1024)
+  
+  $Settings[Constants.LOG4GAMBAS_MAXFILESIZE] = $Log4gambas.GetMaxFileSize()
+  $Settings.Save()
+  
+  
+End
+
+Private Function LogFiles_Read() As Integer
+  
+  Return $Settings[Constants.LOG4GAMBAS_MAXFILES]
+  
+End
+
+Private Sub LogFiles_Write(Value As Integer)
+  
+  $Settings[Constants.LOG4GAMBAS_MAXFILES] = Value
+  $Settings.Save()
+  
+  $Log4gambas.SetMaxFiles($Settings[Constants.LOG4GAMBAS_MAXFILES, $Log4gambas.GetMaxFiles()])
+  
+End
+
+Private Function LogPath_Read() As String
+  
+  Return $Settings[Constants.LOG4GAMBAS_LOGFILE]
+  
+End
+
+Private Sub LogPath_Write(Value As String)
+  
+  $Settings[Constants.LOG4GAMBAS_LOGFILE] = Value
+  $Settings.Save()
+  
+  $Log4gambas.SetLogFile($Settings[Constants.LOG4GAMBAS_LOGFILE, $Log4gambas.GetLogFile()])
+  
+End
+
+Private Function DeletedMaxSizeMB_Read() As Integer
+  
+  $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
+  Return $DeletedMaxSizeMB
+  
+End
+
+Private Sub DeletedMaxSizeMB_Write(Value As Integer)
+  
+  $DeletedMaxSizeMB = Value
+  $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = Value
+  $Settings.Save()
+  
+End
+
+Private Function DeletedMaxCount_Read() As Integer
+  
+  $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 1000]
+  Return $DeletedMaxCount
+  
+End
+
+Private Sub DeletedMaxCount_Write(Value As Integer)
+  
+  $DeletedMaxCount = Value
+  $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = Value
   $Settings.Save()
   
 End

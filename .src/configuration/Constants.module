@@ -6,6 +6,8 @@ Public Const GLOBAL_GALLERY_TYPE As String = "Global/GalleryType"
 Public Const GLOBAL_GALLERY_PHOTOS_PER_VIEW As String = "Global/PhotosPerView"
 Public Const GLOBAL_APPLICATION_THEME As String = "Global/Theme"
 Public Const GLOBAL_SHARED_GALLERY_ENABLED As String = "Global/SharedGallery"
+Public Const GLOBAL_DELETED_MAX_SIZE_MB As String = "Global/DeletedMaxSizeMB"
+Public Const GLOBAL_DELETED_MAX_COUNT As String = "Global/DeletedMaxCount"
 
 ' Constants that define the Log4Gambas section
 Public Const LOG4GAMBAS_LEVEL As String = "Log4Gambas/Level"
@@ -22,6 +24,7 @@ Public Const IMPORT_DELETE_ORIGINALS As String = "Import/DeleteOriginals"  '' De
 Public Const GACELA_SETTING_DIRECTORY As String = ".config/gacela"      '' Directory where settings are stored
 Public Const GACELA_LOG_DIRECTORY As String = ".local/state/gacela"     '' Log directory
 Public Const GACELA_GALLERY_DIRECTORY As String = ".local/share/gacela"  '' Gacela gallery directory
+Public Const GACELA_DELETED_DIRECTORY As String = ".local/share/gacela/deleted"  '' Deleted images directory
 Public Const GACELA_SHARED_GALLERY_DIRECTORY As String = "/var/lib/gacela"    '' Shared gallery directory
 Public Const DATABASE_NAME As String = "gacela.db"                    '' Database name
 Public Const DATABASE_SQLITE3 As String = "sqlite3"                   '' Database type
