@@ -8,6 +8,7 @@ Public Const GLOBAL_APPLICATION_THEME As String = "Global/Theme"
 Public Const GLOBAL_SHARED_GALLERY_ENABLED As String = "Global/SharedGallery"
 Public Const GLOBAL_DELETED_MAX_SIZE_MB As String = "Global/DeletedMaxSizeMB"
 Public Const GLOBAL_DELETED_MAX_COUNT As String = "Global/DeletedMaxCount"
+Public Const IMPORT_SHOW_SUMMARY As String = "Import/ShowSummary"
 
 ' Constants that define the Log4Gambas section
 Public Const LOG4GAMBAS_LEVEL As String = "Log4Gambas/Level"
@@ -31,13 +32,6 @@ Public Const DATABASE_SQLITE3 As String = "sqlite3"                   '' Databas
 Public Const CONFIG_NAME As String = "gacela.conf"                    '' Settings file name
 
 Public Const GRUPO_GACELA As String = "gacela-shared"                  '' Gacela users group name
-
-' Table name constants
-Public Const TABLE_PHOTOS As String = "photos"                  '' Photos table
-Public Const TABLE_ALBUMS As String = "albums"                  '' Albums table
-Public Const TABLE_TAGS As String = "tags"                      '' Tags table
-Public Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"     '' Photos-Albums relationship table
-Public Const TABLE_PHOTOS_TAGS As String = "photos_tags"        '' Photos-Tags relationship table
 
 ' Seed photos for initial application startup
 Public Const PHOTO_SEED_1 As String = "images/img-126.png"           '' Initial seed photo

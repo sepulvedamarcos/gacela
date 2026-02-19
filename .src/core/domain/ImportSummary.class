@@ -1,0 +1,50 @@
+' Gambas class file
+
+Public Const STATUS_OK As Integer = 1
+Public Const STATUS_FAIL As Integer = 0
+
+Private $Items As ImportSummaryItem[]
+Private $OkCount As Integer
+Private $FailCount As Integer
+
+Property Read Items As ImportSummaryItem[]
+Property Read Total As Integer
+Property Read OkCount As Integer
+Property Read FailCount As Integer
+
+Public Sub AddItem(oItem As ImportSummaryItem)
+  
+  If oItem Is Null Then Return
+  
+  $Items.Add(oItem)
+  If oItem.Status = STATUS_OK Then
+    $OkCount += 1
+  Else
+    $FailCount += 1
+  Endif
+  
+End
+
+Private Function Items_Read() As ImportSummaryItem[]
+  
+  Return $Items
+  
+End
+
+Private Function Total_Read() As Integer
+  
+  Return $Items.Count
+  
+End
+
+Private Function OkCount_Read() As Integer
+  
+  Return $OkCount
+  
+End
+
+Private Function FailCount_Read() As Integer
+  
+  Return $FailCount
+  
+End

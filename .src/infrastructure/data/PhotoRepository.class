@@ -10,6 +10,16 @@ Private $DbContext As SQLiteContext
 Private $Configuration As Configuration
 Private $Titulo As String = "[PhotoRepository] "
 
+Public Const TABLE_PHOTOS As String = "photos"
+Public Const TABLE_ALBUMS As String = "albums"
+Public Const TABLE_TAGS As String = "tags"
+Public Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"
+Public Const TABLE_PHOTOS_TAGS As String = "photos_tags"
+Public Const SCHEMA_VERSION As String = "1.1"
+
+Private $TableNotExist As String = ("Table does not exist, creating ...")
+Private $TableCreate As String = ("Table created")
+
 Property Read DBContext As SQLiteContext
 
 ' ==================================================
@@ -17,17 +27,19 @@ Property Read DBContext As SQLiteContext
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3, cContext As SQLiteContext)
+Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3)
   
   $Log4Gambas = oLogger
-  $DbContext = cContext
   $Configuration = cConfiguration
+  $DbContext = New SQLiteContext($Configuration, $Log4Gambas)
+  EnsureSchema()
   
 End
 
 Public Function SwitchGallery() As Boolean
   
   $DbContext.SwitchGallery()
+  EnsureSchema()
   
 Catch
   Error.Propagate()
@@ -47,24 +59,24 @@ Public Function GetPhotos(Optional id As Integer) As PhotoEntity[]
   Dim oPhotoResult As Result
   Dim sQuery As String
   
-  $Log4Gambas.Debug($Titulo & "Photo extraction")
+  $Log4Gambas.Debug(LogPrefix("GetPhotos") & "Photo extraction")
   
   sQuery = "soft_delete = &1"
   If id > 0 Then
     sQuery &= " AND photo_id = " & id
   End If
   
-  oPhotoResult = $DbContext.DBConnection.Find(Constants.TABLE_PHOTOS, sQuery, False)
+  oPhotoResult = $DbContext.DBConnection.Find(PhotoRepository.TABLE_PHOTOS, sQuery, False)
   
   If oPhotoResult.Available Then
-    $Log4Gambas.Debug($Titulo & "Extracted " & oPhotoResult.Count & " photos from response")
+    $Log4Gambas.Debug(LogPrefix("GetPhotos") & "Extracted " & oPhotoResult.Count & " photos from response")
     
     Return MapResultToEntities(oPhotoResult)
     
   Endif
   
 Catch
-  $Log4Gambas.Error($Titulo & "Problems retrieving photos " & Error.Text)
+  $Log4Gambas.Error(LogPrefix("GetPhotos") & "Problems retrieving photos " & Error.Text)
   Error.Propagate
   
 End
@@ -76,7 +88,7 @@ Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrd
   Dim sOrderBy As String = "import_date"
   Dim sOrderType As String = "desc"
   
-  $Log4Gambas.Debug($Titulo & "Executing query with filters")
+  $Log4Gambas.Debug(LogPrefix("FindWithFilters") & "Executing query with filters")
   
   If sortBy <> "" Then
     sOrderBy = sortBy
@@ -89,13 +101,13 @@ Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrd
   ' Execute query with LIMIT and OFFSET
   ' In Gambas, Find does not directly support LIMIT/OFFSET
   ' We must use Exec with SQL
-  sQuery = "SELECT * FROM " & Constants.TABLE_PHOTOS &
+  sQuery = "SELECT * FROM " & PhotoRepository.TABLE_PHOTOS &
     " WHERE " & whereClause &
     " ORDER BY " & sOrderBy &
     " LIMIT " & limit &
     " OFFSET " & offset
   
-  $Log4Gambas.Debug($Titulo & sQuery)
+  $Log4Gambas.Debug(LogPrefix("FindWithFilters") & sQuery)
   ' Convert params to array for Exec
   oResult = $DbContext.DBConnection.Exec(sQuery)
   
@@ -105,7 +117,7 @@ Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrd
   Return New PhotoEntity[]
   
 Catch
-  $Log4Gambas.Error($Titulo & "Problem in FindWithFilters: " & Error.Text)
+  $Log4Gambas.Error(LogPrefix("FindWithFilters") & "Problem in FindWithFilters: " & Error.Text)
   
   Return New PhotoEntity[]
   
@@ -116,9 +128,9 @@ Public Function CountWithFilters(whereClause As String) As Integer '' Count reco
   Dim oResult As Result
   Dim sQuery As String
   
-  $Log4Gambas.Info($Titulo & "Counting photos in the current database")
+  $Log4Gambas.Info(LogPrefix("CountWithFilters") & "Counting photos in the current database")
   
-  sQuery = "SELECT COUNT(*) as iTotal FROM " & Constants.TABLE_PHOTOS &
+  sQuery = "SELECT COUNT(*) as iTotal FROM " & PhotoRepository.TABLE_PHOTOS &
     " WHERE " & whereClause
   oResult = $DbContext.DBConnection.Exec(sQuery)
   
@@ -129,7 +141,7 @@ Public Function CountWithFilters(whereClause As String) As Integer '' Count reco
   Return 0
   
 Catch
-  $Log4Gambas.Error($Titulo & "Problem in CountWithFilters: " & Error.Text)
+  $Log4Gambas.Error(LogPrefix("CountWithFilters") & "Problem in CountWithFilters: " & Error.Text)
   Error.Propagate
   
 End
@@ -141,7 +153,7 @@ Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer
   
   $DbContext.DBConnection.Begin()
   
-  oResult = $DbContext.DBConnection.Create(Constants.TABLE_ALBUMS)
+  oResult = $DbContext.DBConnection.Create(PhotoRepository.TABLE_ALBUMS)
   oResult["name"] = cAlbum.Name
   oResult["description"] = cAlbum.Description
   oResult["creation_date"] = Now
@@ -153,12 +165,12 @@ Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer
   $DbContext.DBConnection.Commit
   iLastRecord = $DbContext.DBConnection.LastInsertId
   
-  $Log4Gambas.Debug($Titulo & ("Album code created [" & iLastRecord & "]"))
+  $Log4Gambas.Debug(LogPrefix("CreateAlbum") & ("Album code created [" & iLastRecord & "]"))
   Return iLastRecord
   
 Catch
   $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error($Titulo & ("Problems creating album, rolling back"))
+  $Log4Gambas.Error(LogPrefix("CreateAlbum") & ("Problems creating album, rolling back"))
   Error.Propagate
   
 End
@@ -168,7 +180,7 @@ Public Function DeleteAlbum(id As Integer) As Integer
   Dim oResult As Result
   
   $DbContext.DBConnection.Begin()
-  oResult = $DbContext.DBConnection.Edit(Constants.TABLE_ALBUMS)
+  oResult = $DbContext.DBConnection.Edit(PhotoRepository.TABLE_ALBUMS)
   oResult["album_id"] = id
   oResult["soft_delete"] = 1
   oResult.Update()
@@ -178,7 +190,7 @@ Public Function DeleteAlbum(id As Integer) As Integer
   
 Catch
   $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error($Titulo & ("Problems deleting album, rolling back"))
+  $Log4Gambas.Error(LogPrefix("DeleteAlbum") & ("Problems deleting album, rolling back"))
   Error.Propagate
   
 End
@@ -193,7 +205,7 @@ Public Function DeletePhoto(id As Integer) As Boolean
   
 Catch
   $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error($Titulo & ("Problems deleting image from DB, rolling back"))
+  $Log4Gambas.Error(LogPrefix("DeletePhoto") & ("Problems deleting image from DB, rolling back"))
   Error.Propagate
   
 End
@@ -203,7 +215,7 @@ Public Function MarkPhotoAsDeleted(id As Integer, deletedBy As String, deletedAu
   Dim oRes As Result
   
   $DbContext.DBConnection.Begin()
-  oRes = $DbContext.DBConnection.Edit(Constants.TABLE_PHOTOS)
+  oRes = $DbContext.DBConnection.Edit(PhotoRepository.TABLE_PHOTOS)
   oRes["photo_id"] = id
   oRes["soft_delete"] = 1
   oRes["soft_deleted_date"] = Now()
@@ -216,7 +228,7 @@ Public Function MarkPhotoAsDeleted(id As Integer, deletedBy As String, deletedAu
   
 Catch
   $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error($Titulo & "Problems marking image as deleted, rolling back")
+  $Log4Gambas.Error(LogPrefix("MarkPhotoAsDeleted") & "Problems marking image as deleted, rolling back")
   Error.Propagate
   
 End
@@ -227,13 +239,13 @@ Public Function PermanentlyDeletePhoto(id As Integer) As Boolean
   
   $DbContext.DBConnection.Begin()
   
-  sQuery = "DELETE FROM " & Constants.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1"
+  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1"
   $DbContext.DBConnection.Exec(sQuery, id)
   
-  sQuery = "DELETE FROM " & Constants.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1"
+  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1"
   $DbContext.DBConnection.Exec(sQuery, id)
   
-  sQuery = "DELETE FROM " & Constants.TABLE_PHOTOS & " WHERE photo_id = &1"
+  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS & " WHERE photo_id = &1"
   $DbContext.DBConnection.Exec(sQuery, id)
   
   $DbContext.DBConnection.Commit
@@ -241,7 +253,7 @@ Public Function PermanentlyDeletePhoto(id As Integer) As Boolean
   
 Catch
   $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error($Titulo & "Problems permanently deleting image, rolling back")
+  $Log4Gambas.Error(LogPrefix("PermanentlyDeletePhoto") & "Problems permanently deleting image, rolling back")
   Error.Propagate
   
 End
@@ -254,7 +266,7 @@ Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As Photo
   
   $DbContext.DBConnection.Begin()
   
-  oResult = $DbContext.DBConnection.Create(Constants.TABLE_PHOTOS)
+  oResult = $DbContext.DBConnection.Create(PhotoRepository.TABLE_PHOTOS)
   oResult["file_name"] = photoE.FileName
   oResult["width_pixels"] = photoE.WidthPixels
   oResult["height_pixels"] = photoE.HeightPixels
@@ -280,10 +292,10 @@ Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As Photo
   oResult.Update()
   
   iPhotoId = $DbContext.DBConnection.LastInsertId
-  $Log4Gambas.Debug($Titulo & ("Photo code created") & " [" & iPhotoId & "]")
+  $Log4Gambas.Debug(LogPrefix("CreatePhoto") & ("Photo code created") & " [" & iPhotoId & "]")
   
   If photoAlbumE <> Null Then
-    oResult = $DbContext.DBConnection.Create(Constants.TABLE_PHOTOS_ALBUMS)
+    oResult = $DbContext.DBConnection.Create(PhotoRepository.TABLE_PHOTOS_ALBUMS)
     oResult["photo_id"] = iPhotoId
     oResult["album_id"] = photoAlbumE.AlbumId
     oResult["order_in_album"] = photoAlbumE.OrderInAlbum
@@ -292,7 +304,7 @@ Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As Photo
     oResult.Update()
     
     iPhotoAlbumId = $DbContext.DBConnection.LastInsertId
-    $Log4Gambas.Debug($Titulo & ("Photo-album code created") & " [" & iPhotoAlbumId & "]")
+    $Log4Gambas.Debug(LogPrefix("CreatePhoto") & ("Photo-album code created") & " [" & iPhotoAlbumId & "]")
     
   End If
   
@@ -302,7 +314,7 @@ Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As Photo
   
 Catch
   $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error($Titulo & "Problems creating photo, rolling back")
+  $Log4Gambas.Error(LogPrefix("CreatePhoto") & "Problems creating photo, rolling back")
   Error.Propagate
   
 End
@@ -313,24 +325,24 @@ Public Function ValidateHash256Exist(sHash256 As String) As Boolean
   Dim iTotal As Integer
   Dim oResult As Result
   
-  $Log4Gambas.Debug($Titulo & ("Validating in table with Hash256") & " [" & sHash256 & "]")
-  sQuery = "SELECT COUNT(*) as iTotal FROM " & Constants.TABLE_PHOTOS &
+  $Log4Gambas.Debug(LogPrefix("ValidateHash256Exist") & ("Validating in table with Hash256") & " [" & sHash256 & "]")
+  sQuery = "SELECT COUNT(*) as iTotal FROM " & PhotoRepository.TABLE_PHOTOS &
     " WHERE Hash256 = &1"
   oResult = $DbContext.DBConnection.Exec(sQuery, sHash256)
   
   If oResult.Available Then
     iTotal = oResult["iTotal"]
     If iTotal >= 1 Then
-      $Log4Gambas.Debug($Titulo & ("Image already exists with that Hash256"))
+      $Log4Gambas.Debug(LogPrefix("ValidateHash256Exist") & ("Image already exists with that Hash256"))
       Return True
     End If
   End If
   
-  $Log4Gambas.Debug($Titulo & ("Image does not exist"))
+  $Log4Gambas.Debug(LogPrefix("ValidateHash256Exist") & ("Image does not exist"))
   Return False
   
 Catch
-  $Log4Gambas.Error($Titulo & ("Error searching photo by Hash256"))
+  $Log4Gambas.Error(LogPrefix("ValidateHash256Exist") & ("Error searching photo by Hash256"))
   Error.Propagate
   
 End
@@ -341,7 +353,7 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
   Dim oResult As Result
   Dim sCon As String = " WHERE "
   
-  sQuery = "SELECT * FROM " & Constants.TABLE_ALBUMS
+  sQuery = "SELECT * FROM " & PhotoRepository.TABLE_ALBUMS
   If useSoftDelete <> -1 Then
     sQuery &= " WHERE soft_delete = " & useSoftDelete
     sCon = " AND "
@@ -355,7 +367,7 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
     sQuery &= sCon & " LOWER(name) LIKE '%" & Lower(text) & "%'"
   Endif
   
-  $Log4Gambas.Debug($Titulo & "Query [" & sQuery & "]")
+  $Log4Gambas.Debug(LogPrefix("FindAlbums") & "Query [" & sQuery & "]")
   oResult = $DbContext.DBConnection.Exec(sQuery)
   If oResult.Available Then
     Return MapAlbumEntitys(oResult)
@@ -364,7 +376,7 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
   Return New AlbumEntity[]
   
 Catch
-  $Log4Gambas.Error($Titulo & "Problem reading albums")
+  $Log4Gambas.Error(LogPrefix("FindAlbums") & "Problem reading albums")
   Error.Propagate
   
 End
@@ -374,6 +386,287 @@ End
 '          Private methods
 '
 ' ==================================================
+Private Sub EnsureSchema()
+  
+  Dim oDb As Connection
+  
+  oDb = $DbContext.DBConnection
+  If oDb Is Null Or oDb.Tables Is Null Then
+    Error.Raise(LogPrefix("EnsureSchema") & "Database connection is not ready")
+  Endif
+  
+  $Log4Gambas.Debug(LogPrefix("EnsureSchema") & ("Checking the existence of schema tables..."))
+  ' 1. Photos table (photos)
+  If Not oDb.Tables.Exist(PhotoRepository.TABLE_PHOTOS) Then
+    $Log4Gambas.Info(LogPrefix("EnsureSchema") & "[" & PhotoRepository.TABLE_PHOTOS & "]" & $TableNotExist)
+    CreatePhotosTable(oDb)
+  Endif
+  ' 2. Albums table (albums)
+  If Not oDb.Tables.Exist(PhotoRepository.TABLE_ALBUMS) Then
+    $Log4Gambas.Info(LogPrefix("EnsureSchema") & "[" & PhotoRepository.TABLE_ALBUMS & "]" & $TableNotExist)
+    CreateAlbumsTable(oDb)
+  Endif
+  ' 3. Tags table (tags)
+  If Not oDb.Tables.Exist(PhotoRepository.TABLE_TAGS) Then
+    $Log4Gambas.Info(LogPrefix("EnsureSchema") & "[" & PhotoRepository.TABLE_TAGS & "]" & $TableNotExist)
+    CreateTagsTable(oDb)
+  Endif
+  ' 4. Photos-Albums relationship table (photo_albums)
+  If Not oDb.Tables.Exist(PhotoRepository.TABLE_PHOTOS_ALBUMS) Then
+    $Log4Gambas.Info(LogPrefix("EnsureSchema") & "[" & PhotoRepository.TABLE_PHOTOS_ALBUMS & "]" & $TableNotExist)
+    CreatePhotosAlbumsTable(oDb)
+  Endif
+  ' 5. Photos-Tags relationship table (photos_tags)
+  If Not oDb.Tables.Exist(PhotoRepository.TABLE_PHOTOS_TAGS) Then
+    $Log4Gambas.Info(LogPrefix("EnsureSchema") & "[" & PhotoRepository.TABLE_PHOTOS_TAGS & "]" & $TableNotExist)
+    CreatePhotosTagsTable(oDb)
+  Endif
+  
+  If Not oDb.Tables.Exist("DBVersion") Then
+    CreateDBVersionTable(oDb)
+  Endif
+  EnsureDBVersion(oDb)
+  RunMigrations(oDb)
+  
+  EnsurePhotosTableColumns(oDb)
+  $Log4Gambas.Debug(LogPrefix("EnsureSchema") & ("Table check and creation finished."))
+  
+Catch
+  $Log4Gambas.Error(LogPrefix("EnsureSchema") & ("Table check/creation failed:") & " " & Error.Text)
+  Error.Raise(LogPrefix("EnsureSchema") & ("Table check/creation failed:") & " " & Error.Text)
+  
+End
+
+Private Sub CreatePhotosTable(oDb As Connection)
+  
+  Dim oTable As Table
+  
+  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreatePhotosTable") & "Tables collection is not available")
+  oTable = oDb.Tables.Add(PhotoRepository.TABLE_PHOTOS)
+  If oTable Is Null Then Error.Raise(LogPrefix("CreatePhotosTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS)
+  With oTable
+    .Fields.Add("photo_id", db.Serial)                 '' Record identifier
+    .Fields.Add("file_name", db.String, 255)           '' Original file name
+    .Fields.Add("width_pixels", db.Integer)            '' Width in pixels
+    .Fields.Add("height_pixels", db.Integer)           '' Height in pixels
+    .Fields.Add("creation_date", db.Date)              '' Photo creation date
+    .Fields.Add("import_date", db.Date)                '' Import date into Gacela
+    .Fields.Add("description", db.String)              '' Photo description
+    .Fields.Add("stars", db.Integer)                   '' Star rating count
+    .Fields.Add("import_user", db.String, 50)          '' Importing user
+    .Fields.Add("image_path", db.String, 255)          '' Full path to original image
+    .Fields.Add("original_path", db.String, 255)       '' Original source path
+    .Fields.Add("Hash256", db.String, 255)             '' Image hash for existence validation
+    .Fields.Add("thumbnail", db.Blob)                  '' MINIATURA (BLOB)
+    .Fields.Add("last_sync_date", db.Date)             '' Last sync date (for future cloud sync)
+    .Fields.Add("sync_status", db.Integer)             '' Sync status indicator
+    .Fields.Add("soft_delete", db.Boolean)             '' Soft delete (garbage collector)
+    .Fields.Add("soft_deleted_date", db.date)          '' Date when it was soft-deleted
+    .Fields.Add("soft_deleted_by", db.String, 50)      '' User who deleted it
+    .Fields.Add("soft_deleted_auto", db.Date)          '' Date when it should be physically deleted
+    .Fields.Add("is_locked", db.Boolean)               '' Indicates if it is locked for deletion
+    .Fields.Add("locked_by", db.String, 50)            '' User who locked the photo
+    .Fields.Add("locked_date", db.date)                '' Date when it was locked
+    .Fields.Add("lock_reason", db.String, 200)         '' Reason why it was locked
+    .PrimaryKey = ["photo_id"]                         '' Create primary key
+    .Update()
+  End With
+  
+  $Log4Gambas.Debug(LogPrefix("CreatePhotosTable") & "[" & PhotoRepository.TABLE_PHOTOS & "]" & $TableCreate)
+  
+End
+
+Private Sub EnsurePhotosTableColumns(oDb As Connection)
+  
+  Dim oTable As Table
+  Dim oResult As Result
+  Dim bHasOriginalPath As Boolean
+  
+  If Not oDb.Tables.Exist(PhotoRepository.TABLE_PHOTOS) Then Return
+  
+  oTable = oDb.Tables[PhotoRepository.TABLE_PHOTOS]
+  If oTable Is Null Then Error.Raise(LogPrefix("EnsurePhotosTableColumns") & "Cannot open table " & PhotoRepository.TABLE_PHOTOS)
+  If Not oTable.Fields.Exist("original_path") Then
+    Try oDb.Exec("ALTER TABLE " & PhotoRepository.TABLE_PHOTOS & " ADD COLUMN original_path TEXT")
+    If Error Then
+      $Log4Gambas.Error(LogPrefix("EnsurePhotosTableColumns") & ("Error adding original_path column") & " " & Error.Text)
+    Endif
+  Endif
+  
+  bHasOriginalPath = False
+  oResult = oDb.Exec("PRAGMA table_info(" & PhotoRepository.TABLE_PHOTOS & ")")
+  While oResult.Available
+    If oResult["name"] = "original_path" Then
+      bHasOriginalPath = True
+      Exit
+    Endif
+    oResult.MoveNext()
+  Wend
+  
+  If Not bHasOriginalPath Then
+    $Log4Gambas.Warning(LogPrefix("EnsurePhotosTableColumns") & ("Column original_path was not created"))
+  Endif
+  
+End
+
+Private Sub CreateAlbumsTable(oDb As Connection)
+  
+  Dim oTable As Table
+  
+  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreateAlbumsTable") & "Tables collection is not available")
+  oTable = oDb.Tables.Add(PhotoRepository.TABLE_ALBUMS)
+  If oTable Is Null Then Error.Raise(LogPrefix("CreateAlbumsTable") & "Cannot create table " & PhotoRepository.TABLE_ALBUMS)
+  With oTable
+    .Fields.Add("album_id", db.Serial)                 '' Record identifier
+    .Fields.Add("name", db.String, 255)                '' Album short name
+    .Fields.Add("description", db.String)              '' Album description
+    .Fields.Add("creation_date", db.Date)              '' Album creation date
+    .Fields.Add("creation_user", db.String, 50)        '' User who created the album
+    .Fields.Add("thumbnail", db.Blob)                  '' ← MINIATURA (BLOB)
+    .Fields.Add("soft_delete", db.Boolean)             '' Soft delete
+    .PrimaryKey = ["album_id"]                         '' Create primary key
+    .Update()
+  End With
+  
+  $Log4Gambas.Debug(LogPrefix("CreateAlbumsTable") & "[" & PhotoRepository.TABLE_ALBUMS & "]" & $TableCreate)
+  
+End
+
+Private Sub CreatePhotosAlbumsTable(oDb As Connection)
+  
+  Dim oTable As Table
+  
+  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreatePhotosAlbumsTable") & "Tables collection is not available")
+  oTable = oDb.Tables.Add(PhotoRepository.TABLE_PHOTOS_ALBUMS)
+  If oTable Is Null Then Error.Raise(LogPrefix("CreatePhotosAlbumsTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS_ALBUMS)
+  With oTable
+    .Fields.Add("pho_alb_id", db.Serial)               '' Record identifier
+    .Fields.Add("photo_id", db.Integer)                '' Associated photo ID
+    .Fields.Add("album_id", db.Integer)                '' Associated album ID
+    .Fields.Add("order_in_album", db.Integer)          '' Photo order within the album
+    .Fields.Add("added_date", db.Date)                 '' Date added to album
+    .Fields.Add("added_user", db.String, 50)           '' User who added the relationship
+    .PrimaryKey = ["pho_alb_id"]
+    .Update()
+  End With
+  
+  $Log4Gambas.Debug(LogPrefix("CreatePhotosAlbumsTable") & "[" & PhotoRepository.TABLE_PHOTOS_ALBUMS & "]" & $TableCreate)
+  
+End
+
+Private Sub CreateTagsTable(oDb As Connection)
+  
+  Dim oTable As Table
+  
+  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreateTagsTable") & "Tables collection is not available")
+  oTable = oDb.Tables.Add(PhotoRepository.TABLE_TAGS)
+  If oTable Is Null Then Error.Raise(LogPrefix("CreateTagsTable") & "Cannot create table " & PhotoRepository.TABLE_TAGS)
+  With oTable
+    .Fields.Add("tag_id", db.Serial)                 '' Record identifier
+    .Fields.Add("name", db.String, 100)              '' Tag name
+    .Fields.Add("description", db.String)            '' Tag description
+    .Fields.Add("color", db.String, 7)               '' Tag display color
+    .Fields.Add("creation_date", db.Date)            '' Creation date
+    .Fields.Add("creation_user", db.String, 50)      '' User who created the tag
+    .PrimaryKey = ["tag_id"]
+    .Update()
+  End With
+  
+  $Log4Gambas.Debug(LogPrefix("CreateTagsTable") & "[" & PhotoRepository.TABLE_TAGS & "]" & $TableCreate)
+  
+End
+
+Private Sub CreatePhotosTagsTable(oDb As Connection)
+  
+  Dim oTable As Table
+  
+  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreatePhotosTagsTable") & "Tables collection is not available")
+  oTable = oDb.Tables.Add(PhotoRepository.TABLE_PHOTOS_TAGS)
+  If oTable Is Null Then Error.Raise(LogPrefix("CreatePhotosTagsTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS_TAGS)
+  With oTable
+    .Fields.Add("pho_tag_id", db.Serial)             '' Record identifier
+    .Fields.Add("photo_id", db.Integer)              '' Related photo ID
+    .Fields.Add("tag_id", db.Integer)                '' Related tag ID
+    .Fields.Add("added_date", db.Date)               '' Date added
+    .Fields.Add("added_user", db.String, 50)         '' User who added the relationship
+    .PrimaryKey = ["pho_tag_id"]
+    .Update()
+  End With
+  
+  $Log4Gambas.Debug(LogPrefix("CreatePhotosTagsTable") & "[" & PhotoRepository.TABLE_PHOTOS_TAGS & "]" & $TableCreate)
+  
+End
+
+Private Sub CreateDBVersionTable(oDb As Connection)
+  
+  Dim oTable As Table
+  
+  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreateDBVersionTable") & "Tables collection is not available")
+  oTable = oDb.Tables.Add("DBVersion")
+  If oTable Is Null Then Error.Raise(LogPrefix("CreateDBVersionTable") & "Cannot create table DBVersion")
+  With oTable
+    .Fields.Add("version", db.String, 10)
+    .Update()
+  End With
+  
+End
+
+Private Sub EnsureDBVersion(oDb As Connection)
+  
+  Dim oResult As Result
+  
+  oResult = oDb.Exec("SELECT COUNT(*) as total FROM DBVersion")
+  If oResult.Available Then
+    If oResult["total"] = 0 Then
+      oDb.Exec("INSERT INTO DBVersion(version) VALUES(&1)", SCHEMA_VERSION)
+    Endif
+  Endif
+  
+End
+
+Private Sub RunMigrations(oDb As Connection)
+  
+  Dim sCurrentVersion As String
+  
+  sCurrentVersion = GetDbVersion(oDb)
+  If sCurrentVersion = "1.0" Then
+    Migrate_1_0_to_1_1(oDb)
+  Endif
+  
+End
+
+Private Function GetDbVersion(oDb As Connection) As String
+  
+  Dim oResult As Result
+  
+  oResult = oDb.Exec("SELECT version FROM DBVersion LIMIT 1")
+  If oResult.Available Then
+    Return oResult["version"]
+  Endif
+  
+  Return ""
+  
+End
+
+Private Sub SetDbVersion(oDb As Connection, sVersion As String)
+  
+  oDb.Exec("UPDATE DBVersion SET version = &1", sVersion)
+  
+End
+
+Private Sub Migrate_1_0_to_1_1(oDb As Connection)
+  
+  ' Placeholder for future migration logic.
+  SetDbVersion(oDb, "1.1")
+  
+End
+
+Private Function LogPrefix(methodName As String) As String
+  
+  Return $Titulo & "[" & methodName & "] "
+  
+End
+
 
 Private Function MapResultToEntities(oResult As Result) As PhotoEntity[]
   
@@ -411,7 +704,7 @@ Private Function MapResultToEntities(oResult As Result) As PhotoEntity[]
   Return oPhotos
   
 Catch
-  $Log4Gambas.Error($Titulo & "Problem mapping Photo data: " & Error.Text)
+  $Log4Gambas.Error(LogPrefix("MapResultToEntities") & "Problem mapping Photo data: " & Error.Text)
   Error.Propagate
   
 End
@@ -440,7 +733,7 @@ Private Sub MapAlbumEntitys(oResult As Result) As AlbumEntity[] '' Map albums
   Return oAlbums
   
 Catch
-  $Log4Gambas.Error($Titulo & "Problem mapping cAlbum data")
+  $Log4Gambas.Error(LogPrefix("MapAlbumEntitys") & "Problem mapping cAlbum data")
   Error.Propagate
   
 End

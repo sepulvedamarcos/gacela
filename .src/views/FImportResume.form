@@ -31,7 +31,7 @@
   { ListViewSummary ListView
     MoveScaled(2,16,60,37)
   }
-  { CheckBox1 CheckBox
+  { CheckBoxShowImportSummary CheckBox
     MoveScaled(2,54,60,4)
     Text = ("Do not show this dialog on every import")
   }

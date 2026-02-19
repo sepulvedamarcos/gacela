@@ -22,6 +22,7 @@ Private $LogSize As Integer
 Private $LogFiles As Integer
 Private $DeletedMaxSizeMB As Integer
 Private $DeletedMaxCount As Integer
+Private $ImportShowSummary As Boolean
 
 Property Read WhichGallery As Integer                                         '' Which gallery is active
 Property Read IsFirstRun As Boolean                                           '' First execution indicator
@@ -35,6 +36,7 @@ Property LogSize As Integer
 Property LogFiles As Integer
 Property DeletedMaxSizeMB As Integer
 Property DeletedMaxCount As Integer
+Property ImportShowSummary As Boolean
 
 '============================================
 '
@@ -50,7 +52,7 @@ Public Sub _new()
   
   $Settings = New Settings($SettingPath &/ Constants.CONFIG_NAME)
   If $Settings.Count = 0 Then
-    $Log4gambas.Info($Titulo & ("First launch detected. The application will be configured in private mode."))
+    $Log4gambas.Info(LogPrefix("_new") & ("First launch detected. The application will be configured in private mode."))
     $IsFirstRun = True
     FirstInitializeSettings()
     FirstInitializeLogger()
@@ -59,21 +61,21 @@ Public Sub _new()
   $IsSharedEnabled = DetectShareEnabled()
   
 Catch
-  $Log4gambas.Error($Titulo & ("Error initializing configuration: ") & Error.Text)
-  Error.Raise($Titulo & ("Error initializing configuration: ") & Error.Text)
+  $Log4gambas.Error(LogPrefix("_new") & ("Error initializing configuration: ") & Error.Text)
+  Error.Raise(LogPrefix("_new") & ("Error initializing configuration: ") & Error.Text)
   
 End
 
 Public Sub InitializeEnvironment()
   
-  $Log4gambas.info($Titulo & "Initializing environment")
+  $Log4gambas.info(LogPrefix("InitializeEnvironment") & "Initializing environment")
   
   If $Settings[Constants.GLOBAL_GALLERY_TYPE, Null] = Null Then
     If $Settings["Global/LibraryType", Null] <> Null Then
       $Settings[Constants.GLOBAL_GALLERY_TYPE] = $Settings["Global/LibraryType"]
       $Settings.Save()
     Else
-      Error.Raise($Titulo & "Problems loading initial configuration")
+      Error.Raise(LogPrefix("InitializeEnvironment") & "Problems loading initial configuration")
     Endif
   Endif
   
@@ -94,16 +96,22 @@ Public Sub InitializeEnvironment()
     $Settings.Save()
   Endif
   
+  If $Settings[Constants.IMPORT_SHOW_SUMMARY, Null] = Null Then
+    $Settings[Constants.IMPORT_SHOW_SUMMARY] = True
+    $Settings.Save()
+  Endif
+  
   $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
   $AppTheme = $Settings[Constants.GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_OS]
   $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
-  $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 1000]
+  $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 10000]
+  $ImportShowSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
   
 End
 
 Public Function InitializeLogger() As Log4Gambas3
   
-  $Log4gambas.Info($Titulo & ("Creating ini file with Log4Gambas3 data"))
+  $Log4gambas.Info(LogPrefix("InitializeLogger") & ("Creating ini file with Log4Gambas3 data"))
   
   $Log4gambas.SetAppName(Application.Name)
   $Log4gambas.SetMinLevel($Settings[Constants.LOG4GAMBAS_LEVEL, $Log4gambas.LEVEL_DEBUG])
@@ -135,7 +143,7 @@ End
 '================================================
 Private Sub FirstInitializeSettings() '' Initial configuration setup
   
-  $Log4gambas.info($Titulo & ("Creating ini file with initial data"))
+  $Log4gambas.info(LogPrefix("FirstInitializeSettings") & ("Creating ini file with initial data"))
   
   If Not Exist($SettingPath &/ Constants.CONFIG_NAME) Then
     If Not Exist($SettingPath) Then
@@ -150,17 +158,18 @@ Private Sub FirstInitializeSettings() '' Initial configuration setup
   $Settings[Constants.IMPORT_DELETE_ORIGINALS] = False
   $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = 2048
   $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
+  $Settings[Constants.IMPORT_SHOW_SUMMARY] = True
   $Settings.Save()
   
 Catch
-  $Log4gambas.Error($Titulo & ("Error while creating settings directory") & Error.Text)
-  Error.Raise($Titulo & ("Error while creating settings directory") & Error.Text)
+  $Log4gambas.Error(LogPrefix("FirstInitializeSettings") & ("Error while creating settings directory") & Error.Text)
+  Error.Raise(LogPrefix("FirstInitializeSettings") & ("Error while creating settings directory") & Error.Text)
   
 End
 
 Private Function FirstInitializeLogger() As Log4Gambas3
   
-  $Log4gambas.info($Titulo & ("Creating logger with initial data"))
+  $Log4gambas.info(LogPrefix("FirstInitializeLogger") & ("Creating logger with initial data"))
   
   If Not Exist($LogPath) Then
     Mkdir $LogPath
@@ -209,7 +218,7 @@ Private Function DetectShareEnabled() As Boolean
   Dim cell As String
   
   ' Verify the group exists
-  $Log4gambas.Debug($Titulo & ("Checking group existence") & " " & Constants.GRUPO_GACELA)
+  $Log4gambas.Debug(LogPrefix("DetectShareEnabled") & ("Checking group existence") & " " & Constants.GRUPO_GACELA)
   Shell "getent group " & Constants.GRUPO_GACELA To sGroupAvailable
   If sGroupAvailable = "" Then
     Return False
@@ -245,7 +254,7 @@ Private Function DetectShareEnabled() As Boolean
   Return True
   
 Catch 
-  $Log4gambas.Error($Titulo & ("Error detecting whether the shared directory is active") & " " & Error.Text)
+  $Log4gambas.Error(LogPrefix("DetectShareEnabled") & ("Error detecting whether the shared directory is active") & " " & Error.Text)
   Error.Propagate
   
 End
@@ -399,5 +408,26 @@ Private Sub DeletedMaxCount_Write(Value As Integer)
   $DeletedMaxCount = Value
   $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = Value
   $Settings.Save()
+  
+End
+
+Private Function ImportShowSummary_Read() As Boolean
+  
+  $ImportShowSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
+  Return $ImportShowSummary
+  
+End
+
+Private Sub ImportShowSummary_Write(Value As Boolean)
+  
+  $ImportShowSummary = Value
+  $Settings[Constants.IMPORT_SHOW_SUMMARY] = Value
+  $Settings.Save()
+  
+End
+
+Private Function LogPrefix(methodName As String) As String
+  
+  Return $Titulo & "[" & methodName & "] "
   
 End

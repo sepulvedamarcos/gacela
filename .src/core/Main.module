@@ -4,7 +4,6 @@
 
 Private $Configuration As Configuration
 Private $Log4Gambas As Log4Gambas3
-Private $ConnDB As SQLiteContext
 Private $PhotoRepository As PhotoRepository
 Private $PhotoService As PhotoService
 Private $Titulo As String = "[Main] "
@@ -14,13 +13,11 @@ Public Sub Main()
 
   $Configuration = New Configuration
   $Log4Gambas = $Configuration.InitializeLogger()
-  $Log4Gambas.Info($Titulo & ("Starting Gacela") & " V" & Application.Version)
+  $Log4Gambas.Info(LogPrefix("Main") & ("Starting Gacela") & " V" & Application.Version)
   
   $Configuration.InitializeEnvironment()
   
-  $ConnDB = New SQLiteContext($Configuration, $Log4Gambas)
-  
-  $PhotoRepository = New PhotoRepository($Configuration, $Log4Gambas, $ConnDB)
+  $PhotoRepository = New PhotoRepository($Configuration, $Log4Gambas)
   
   $PhotoService = New PhotoService($Log4Gambas, $PhotoRepository, $Configuration)
   
@@ -28,7 +25,13 @@ Public Sub Main()
   cFormMain.Show()
   
 Catch
-  Print $Titulo & ("A critical problem was detected and the application will stop: ") & Error.Text
-  Message.Error(("A critical problem was detected and the application will stop: ") & Error.Text)
+  Print LogPrefix("Main") & ("A critical problem was detected and the application will stop: ") & Error.Text
+  Message.Error(LogPrefix("Main") & ("A critical problem was detected and the application will stop: ") & Error.Text)
 
+End
+
+Private Function LogPrefix(methodName As String) As String
+  
+  Return $Titulo & "[" & methodName & "] "
+  
 End

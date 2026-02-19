@@ -1,10 +1,24 @@
 ' Gambas class file
 
-Public Sub _new(iAmout As Integer)
+Private $Log4Gambas As Log4Gambas3
+Private $Configuration As Configuration
+Private $Summary As ImportSummary
+
+Public Sub _new(oSummary As ImportSummary, oLogger As Log4Gambas3, oConfiguration As Configuration)
   
-  LabelTotalAmount.Text = "" & Str(iAmout)
-  LabelSuccessful.Text = ""
-  LabelFailed.Text = ""
+  $Summary = oSummary
+  $Log4Gambas = oLogger
+  $Configuration = oConfiguration
+  
+  If $Summary <> Null Then
+    LabelTotalAmount.Text = Str($Summary.Total)
+    LabelSuccessful.Text = Str($Summary.OkCount)
+    LabelFailed.Text = Str($Summary.FailCount)
+  Else
+    LabelTotalAmount.Text = "0"
+    LabelSuccessful.Text = "0"
+    LabelFailed.Text = "0"
+  Endif
   
 End
 

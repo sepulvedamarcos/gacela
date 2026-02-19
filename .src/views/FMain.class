@@ -9,6 +9,7 @@ Private $PhotoService As PhotoService
 Private $Titulo As String = "[FMain] "
 Private $StatusDefaultText As String
 Private StatusTimer As Timer
+Private $LastImportSummary As ImportSummary
 
 Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3, cPhotoService As PhotoService)
   
@@ -20,7 +21,7 @@ End
 
 Public Sub Form_Open()
   
-  $Log4Gambas.Debug($Titulo & "On form open we load photo records")
+  $Log4Gambas.Debug(LogPrefix("Form_Open") & "On form open we load photo records")
   
   SelectGallery($Configuration.WhichGallery)
   
@@ -39,11 +40,11 @@ Public Sub Form_Drop()
   Dim sFileDrop As String
   Dim sNamesErr As String
   
-  $Log4Gambas.Debug($Titulo & "Drag and drop files")
+  $Log4Gambas.Debug(LogPrefix("Form_Drop") & "Drag and drop files")
   
   aFilesDrop = Drag.Paste("text/uri-list")
   For Each sFileDrop In aFilesDrop
-    $Log4Gambas.Debug($Titulo & "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
+    $Log4Gambas.Debug(LogPrefix("Form_Drop") & "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
     If LCase(File.Ext(sFileDrop)) = "jpg" Or LCase(File.Ext(sFileDrop)) = "png" Then
     Else
       sNamesErr = sNamesErr & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop)
@@ -254,6 +255,15 @@ Private Sub ImportProcess(Optional listFiles As String[])
   
   If vResp = Enumeration.DLG_OK Then
     ReloadGallery()
+    If cSelector.ImportSummary <> Null Then
+      $LastImportSummary = cSelector.ImportSummary
+      ShowStatus(("Import finished. OK: ") & $LastImportSummary.OkCount & (" NOK: ") & $LastImportSummary.FailCount, 5000)
+      If $Configuration.ImportShowSummary Then
+        Dim oImportResume As FImportResume
+        oImportResume = New FImportResume($LastImportSummary, $Log4Gambas, $Configuration)
+        oImportResume.ShowModal()
+      Endif
+    Endif
     ' ClearPhotoGallery()
     ' CreatePhotoPanels($PhotoService.LoadNextPage())
     'FIXME: At the end of the process, write to the status bar and allow a click to open the import event
@@ -316,3 +326,8 @@ Private Sub StatusTimer_Timer()
   
 End
 
+Private Function LogPrefix(methodName As String) As String
+  
+  Return $Titulo & "[" & methodName & "] "
+  
+End

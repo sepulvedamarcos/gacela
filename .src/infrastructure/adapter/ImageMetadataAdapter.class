@@ -25,7 +25,7 @@ Public Function GetExifDateTimeOriginal(imagenPath As String) As String
   Dim sCommandText As String
   Dim sExifData As String
   
-  $Log4gambas.info($Titulo & "Extracting metadata with identify")
+  $Log4gambas.info(LogPrefix("GetExifDateTimeOriginal") & "Extracting metadata with identify")
   sCommandText = "identify -format \"%[EXIF:DateTimeOriginal]\" -- " & ShellQuote(imagenPath)
   sExifData = ExecShellCommand(sCommandText)
   
@@ -46,15 +46,15 @@ Private Function ExecShellCommand(sCommandText As String) As String
   
   Dim sOutputCommand As String
   
-  $Log4gambas.Debug($Titulo & "Shell execution [" & sCommandText & "]")
+  $Log4gambas.Debug(LogPrefix("ExecShellCommand") & "Shell execution [" & sCommandText & "]")
   Shell sCommandText To sOutputCommand
   
-  $Log4gambas.Debug($Titulo & "Shell response [" & sOutputCommand & "]")
+  $Log4gambas.Debug(LogPrefix("ExecShellCommand") & "Shell response [" & sOutputCommand & "]")
   
   Return sOutputCommand
   
 Catch 
-  $Log4gambas.Error($Titulo & ("Error extracting image metadata: ") & Error.Text)
+  $Log4gambas.Error(LogPrefix("ExecShellCommand") & ("Error extracting image metadata: ") & Error.Text)
   Error.Propagate
   
 End
@@ -119,6 +119,12 @@ Private Function NormalizeExifDate(sExifText As String) As String
   If IsDate(sText) Then Return sText
   
   Return ""
+  
+End
+
+Private Function LogPrefix(methodName As String) As String
+  
+  Return $Titulo & "[" & methodName & "] "
   
 End
 

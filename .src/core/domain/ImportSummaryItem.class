@@ -1,0 +1,73 @@
+' Gambas class file
+
+Private $FilePath As String
+Private $FileName As String
+Private $Status As Integer
+Private $Reason As String
+Private $Message As String
+
+Property FilePath As String
+Property FileName As String
+Property Status As Integer
+Property Reason As String
+Property Message As String
+
+Private Function FilePath_Read() As String
+  
+  Return $FilePath
+  
+End
+
+Private Sub FilePath_Write(Value As String)
+  
+  $FilePath = Value
+  
+End
+
+Private Function FileName_Read() As String
+  
+  Return $FileName
+  
+End
+
+Private Sub FileName_Write(Value As String)
+  
+  $FileName = Value
+  
+End
+
+Private Function Status_Read() As Integer
+  
+  Return $Status
+  
+End
+
+Private Sub Status_Write(Value As Integer)
+  
+  $Status = Value
+  
+End
+
+Private Function Reason_Read() As String
+  
+  Return $Reason
+  
+End
+
+Private Sub Reason_Write(Value As String)
+  
+  $Reason = Value
+  
+End
+
+Private Function Message_Read() As String
+  
+  Return $Message
+  
+End
+
+Private Sub Message_Write(Value As String)
+  
+  $Message = Value
+  
+End
