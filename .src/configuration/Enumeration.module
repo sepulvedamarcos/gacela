@@ -1,20 +1,19 @@
 ' Gambas module file
 
-' Enum for gallery types
-Public Enum GalleryType_Private = 1                 '' Indicates private gallery
-Public Enum GalleryType_Shared = 2                  '' Indicates shared gallery
+'' Enum for gallery types
+Public Enum GalleryType_Private = 1, GalleryType_Shared
 
-' Enum for the application theme to use
-Public Enum APP_THEME_OS = 1                        '' Use the OS theme
-Public Enum APP_THEME_LIGHT = 2                     '' Always use the light theme
-Public Enum APP_THEME_DARK = 3                      '' Always use the dark theme
+'' Enum for the application theme to use
+Public Enum APP_THEME_OS = 1, APP_THEME_LIGHT, APP_THEME_DARK
 
-' Enums for sync status
-Public Enum SYNC_PENDING = 1                        '' Pending sync
-Public Enum SYNC_SYNCED = 2                         '' Synced
+'' Enums for sync status
+Public Enum SYNC_PENDING = 1, SYNC_SYNCED
 
-Public Enum DLG_CANCEL = 0                          '' Return value for a canceled ShowDialog
-Public Enum DLG_OK = 1                              '' Return value for an accepted ShowDialog
+'' Enums for dialog return
+Public Enum DLG_CANCEL, DLG_OK
 
-Public Enum QTN_YES = 1                             '' Return value for Yes
-Public Enum QTN_No = 0                              '' Return value for No
+'' Enums for answer message
+Public Enum QTN_NO, QTN_YES
+
+'' Enums for save photo result 
+Public Enum RESPONSE_OK, RESPONSE_FILEEXIST, RESPONSE_DBERROR, RESPONSE_ERROR

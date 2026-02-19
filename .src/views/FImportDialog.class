@@ -12,19 +12,20 @@ Private $FilesDrop As String[]
 Private $TextCheckFalse As String = ("Import photos into an album")
 Private $TextCheckTrue As String = ("Import photos into the album")
 Private $IdAlbum As Integer '' Selected album id
-Private $ImportSummary As ImportSummary
+Private $Fmain As Fmain
 
-Property Read ImportSummary As ImportSummary
 
 ' ==================================================
 '
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cPhotoService As PhotoService, oLogger As Log4Gambas3, aFilesDrop As String[])
+Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, oLogger As Log4Gambas3, aFilesDrop As String[])
+
   $PhotoService = cPhotoService
   $Log4Gambas = oLogger
   $FilesDrop = aFilesDrop
+  $Fmain = cFmain
   
   $Log4Gambas.Info(LogPrefix("_new") & ("Creating dialog window and album list"))
   
@@ -62,30 +63,23 @@ Public Sub BtnOK_Click()
   If ListEditorPhotos.List.Count = 0 Then
     Message.Warning(("You must select photos to process"))
     Return
-  Else 
-    iResp = Message.Question(("Are you sure you want to import the selected photos into the album with the chosen options?"), ("Yes"), ("No"))
-    
-    If iResp = 2 Then
-      Return
-      
-    Else
-      $Log4Gambas.Info(LogPrefix("BtnOK_Click") & ("Starting photo import processing"))
-      oSummary = $PhotoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $IdAlbum)
-      $ImportSummary = oSummary
-    Endif
+  End If
+  iResp = Message.Question(("Are you sure you want to import the selected photos into the album with the chosen options?"), ("Yes"), ("No"))
+  
+  If iResp = 2 Then
+    Return
+  Else
+    $Log4Gambas.Info(LogPrefix("BtnOK_Click") & ("Starting photo import processing"))
+    oSummary = $PhotoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $IdAlbum)
   Endif
+  
+  $Fmain.LastImportSummary = oSummary
   
   Me.Close(Enumeration.DLG_OK)
   
 Catch
   $Log4Gambas.Error(("A problem occurred while importing the images") & " [" & Error.Text & "]")
   Message.Error(("A problem occurred while importing the images") & " [" & Error.Text & "]")
-  
-End
-
-Private Function ImportSummary_Read() As ImportSummary
-  
-  Return $ImportSummary
   
 End
 

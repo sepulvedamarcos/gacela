@@ -3,7 +3,7 @@
 Public Const STATUS_OK As Integer = 1
 Public Const STATUS_FAIL As Integer = 0
 
-Private $Items As ImportSummaryItem[]
+Private $Items As New ImportSummaryItem[]
 Private $OkCount As Integer
 Private $FailCount As Integer
 
@@ -14,7 +14,7 @@ Property Read FailCount As Integer
 
 Public Sub AddItem(oItem As ImportSummaryItem)
   
-  If oItem Is Null Then Return
+  If oItem = Null Then Return
   
   $Items.Add(oItem)
   If oItem.Status = STATUS_OK Then

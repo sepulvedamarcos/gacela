@@ -391,8 +391,8 @@ Private Sub EnsureSchema()
   Dim oDb As Connection
   
   oDb = $DbContext.DBConnection
-  If oDb Is Null Or oDb.Tables Is Null Then
-    Error.Raise(LogPrefix("EnsureSchema") & "Database connection is not ready")
+  If oDb = Null Or oDb.Tables = Null Then
+    Error.Raise(LogPrefix("EnsureSchema") & ("Database connection is not ready"))
   Endif
   
   $Log4Gambas.Debug(LogPrefix("EnsureSchema") & ("Checking the existence of schema tables..."))
@@ -441,9 +441,9 @@ Private Sub CreatePhotosTable(oDb As Connection)
   
   Dim oTable As Table
   
-  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreatePhotosTable") & "Tables collection is not available")
+  If oDb.Tables = Null Then Error.Raise(LogPrefix("CreatePhotosTable") & "Tables collection is not available")
   oTable = oDb.Tables.Add(PhotoRepository.TABLE_PHOTOS)
-  If oTable Is Null Then Error.Raise(LogPrefix("CreatePhotosTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS)
+  If oTable = Null Then Error.Raise(LogPrefix("CreatePhotosTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS)
   With oTable
     .Fields.Add("photo_id", db.Serial)                 '' Record identifier
     .Fields.Add("file_name", db.String, 255)           '' Original file name
@@ -485,7 +485,7 @@ Private Sub EnsurePhotosTableColumns(oDb As Connection)
   If Not oDb.Tables.Exist(PhotoRepository.TABLE_PHOTOS) Then Return
   
   oTable = oDb.Tables[PhotoRepository.TABLE_PHOTOS]
-  If oTable Is Null Then Error.Raise(LogPrefix("EnsurePhotosTableColumns") & "Cannot open table " & PhotoRepository.TABLE_PHOTOS)
+  If oTable = Null Then Error.Raise(LogPrefix("EnsurePhotosTableColumns") & "Cannot open table " & PhotoRepository.TABLE_PHOTOS)
   If Not oTable.Fields.Exist("original_path") Then
     Try oDb.Exec("ALTER TABLE " & PhotoRepository.TABLE_PHOTOS & " ADD COLUMN original_path TEXT")
     If Error Then
@@ -513,9 +513,9 @@ Private Sub CreateAlbumsTable(oDb As Connection)
   
   Dim oTable As Table
   
-  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreateAlbumsTable") & "Tables collection is not available")
+  If oDb.Tables = Null Then Error.Raise(LogPrefix("CreateAlbumsTable") & "Tables collection is not available")
   oTable = oDb.Tables.Add(PhotoRepository.TABLE_ALBUMS)
-  If oTable Is Null Then Error.Raise(LogPrefix("CreateAlbumsTable") & "Cannot create table " & PhotoRepository.TABLE_ALBUMS)
+  If oTable = Null Then Error.Raise(LogPrefix("CreateAlbumsTable") & "Cannot create table " & PhotoRepository.TABLE_ALBUMS)
   With oTable
     .Fields.Add("album_id", db.Serial)                 '' Record identifier
     .Fields.Add("name", db.String, 255)                '' Album short name
@@ -536,9 +536,9 @@ Private Sub CreatePhotosAlbumsTable(oDb As Connection)
   
   Dim oTable As Table
   
-  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreatePhotosAlbumsTable") & "Tables collection is not available")
+  If oDb.Tables = Null Then Error.Raise(LogPrefix("CreatePhotosAlbumsTable") & "Tables collection is not available")
   oTable = oDb.Tables.Add(PhotoRepository.TABLE_PHOTOS_ALBUMS)
-  If oTable Is Null Then Error.Raise(LogPrefix("CreatePhotosAlbumsTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS_ALBUMS)
+  If oTable = Null Then Error.Raise(LogPrefix("CreatePhotosAlbumsTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS_ALBUMS)
   With oTable
     .Fields.Add("pho_alb_id", db.Serial)               '' Record identifier
     .Fields.Add("photo_id", db.Integer)                '' Associated photo ID
@@ -558,9 +558,9 @@ Private Sub CreateTagsTable(oDb As Connection)
   
   Dim oTable As Table
   
-  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreateTagsTable") & "Tables collection is not available")
+  If oDb.Tables = Null Then Error.Raise(LogPrefix("CreateTagsTable") & "Tables collection is not available")
   oTable = oDb.Tables.Add(PhotoRepository.TABLE_TAGS)
-  If oTable Is Null Then Error.Raise(LogPrefix("CreateTagsTable") & "Cannot create table " & PhotoRepository.TABLE_TAGS)
+  If oTable = Null Then Error.Raise(LogPrefix("CreateTagsTable") & "Cannot create table " & PhotoRepository.TABLE_TAGS)
   With oTable
     .Fields.Add("tag_id", db.Serial)                 '' Record identifier
     .Fields.Add("name", db.String, 100)              '' Tag name
@@ -580,9 +580,9 @@ Private Sub CreatePhotosTagsTable(oDb As Connection)
   
   Dim oTable As Table
   
-  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreatePhotosTagsTable") & "Tables collection is not available")
+  If oDb.Tables = Null Then Error.Raise(LogPrefix("CreatePhotosTagsTable") & "Tables collection is not available")
   oTable = oDb.Tables.Add(PhotoRepository.TABLE_PHOTOS_TAGS)
-  If oTable Is Null Then Error.Raise(LogPrefix("CreatePhotosTagsTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS_TAGS)
+  If oTable = Null Then Error.Raise(LogPrefix("CreatePhotosTagsTable") & "Cannot create table " & PhotoRepository.TABLE_PHOTOS_TAGS)
   With oTable
     .Fields.Add("pho_tag_id", db.Serial)             '' Record identifier
     .Fields.Add("photo_id", db.Integer)              '' Related photo ID
@@ -601,9 +601,9 @@ Private Sub CreateDBVersionTable(oDb As Connection)
   
   Dim oTable As Table
   
-  If oDb.Tables Is Null Then Error.Raise(LogPrefix("CreateDBVersionTable") & "Tables collection is not available")
+  If oDb.Tables = Null Then Error.Raise(LogPrefix("CreateDBVersionTable") & "Tables collection is not available")
   oTable = oDb.Tables.Add("DBVersion")
-  If oTable Is Null Then Error.Raise(LogPrefix("CreateDBVersionTable") & "Cannot create table DBVersion")
+  If oTable = Null Then Error.Raise(LogPrefix("CreateDBVersionTable") & "Cannot create table DBVersion")
   With oTable
     .Fields.Add("version", db.String, 10)
     .Update()

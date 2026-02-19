@@ -46,3 +46,8 @@ Public Const USE_SOFT_FALSE As Integer = 0                          '' Value ind
 
 Public Const GALLERY_PRIVATE As String = ("Private")         '' Indicates private gallery
 Public Const GALLERY_SHARED As String = ("Shared")
+
+Public Const RESPONSE_OK As String = ("Image saved successfully")
+Public Const RESPONSE_FILEEXIST As String = ("The file already exists")
+Public Const RESPONSE_DBERROR As String = ("Error while saving the photo to the database")
+Public Const RESPONSE_ERROR As String = ("Some error ocurred")

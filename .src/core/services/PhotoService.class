@@ -146,9 +146,9 @@ Public Sub ToggleGallery(iGallery As Integer)
     InsertSeedData()
   Endif
   
- Catch
-   $Log4gambas.Error(LogPrefix("ToggleGallery") & ("Error changing gallery"))
-   Error.Propagate
+Catch
+  $Log4gambas.Error(LogPrefix("ToggleGallery") & ("Error changing gallery"))
+  Error.Propagate
   
 End
 
@@ -159,10 +159,11 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumNam As String
   Dim bDeleteOriginals As Boolean
   Dim oAlbumEntity As New AlbumEntity
   Dim oSummary As New ImportSummary
-  Dim sResp As String
+  Dim iResp As Integer
   Dim oItem As ImportSummaryItem
   Dim sFileName As String
   Dim sReason As String
+  Dim sMessage As String
   
   If albumId = 0 Then
     If albumNam <> "" Then
@@ -179,28 +180,31 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumNam As String
   For Each sPhoto In imagesPath
     iI += 1
     $Log4gambas.Debug(LogPrefix("ImportPhotos") & "File to process" & ": " & sPhoto)
-    sResp = SavePhoto(sPhoto, "", albumId, iI, bDeleteOriginals)
+    iResp = SavePhoto(sPhoto, "", albumId, iI, bDeleteOriginals)
     sFileName = File.BaseName(sPhoto) & "." & File.Ext(sPhoto)
     oItem = New ImportSummaryItem
     oItem.FilePath = sPhoto
     oItem.FileName = sFileName
-    If sResp <> "" Then
+    If iResp > Enumeration.RESPONSE_OK Then
       $Log4gambas.Debug(LogPrefix("ImportPhotos") & ("Image has an import error") & ": " & sPhoto)
-      If sResp = "The file already exists" Then
+      If iResp = Enumeration.RESPONSE_FILEEXIST Then
         sReason = ("duplicate")
-      Else If sResp = "Error while saving the photo to the database" Then
+        sMessage = Constants.RESPONSE_FILEEXIST
+      Else If iResp = Enumeration.RESPONSE_DBERROR Then
+        sMessage = Constants.RESPONSE_DBERROR
         sReason = ("db_error")
       Else
         sReason = ("error")
-      Endif
+        sMessage = Constants.RESPONSE_ERROR
+      End If
       oItem.Status = ImportSummary.STATUS_FAIL
       oItem.Reason = sReason
-      oItem.Message = sResp
-    Else 
-      $Log4gambas.Debug(LogPrefix("ImportPhotos") & "Image saved successfully: " & sPhoto)
+      oItem.Message = sMessage
+    Else
+      $Log4gambas.Debug(LogPrefix("ImportPhotos") & ("Image saved successfully") & ": " & sPhoto)
       oItem.Status = ImportSummary.STATUS_OK
       oItem.Reason = ("imported")
-      oItem.Message = ("OK")
+      oItem.Message = Constants.RESPONSE_OK
     End If
     
     oSummary.AddItem(oItem)
@@ -211,6 +215,7 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumNam As String
   
 Catch
   $Log4gambas.Error(LogPrefix("ImportPhotos") & "Error inserting photo " & Error.Text)
+  Error.Propagate
   
 End
 
@@ -276,10 +281,7 @@ End
 '
 ' ==================================================
 
-Private Function SaveImageIO(originalImage As String) As String
-  
-  Dim sFilename As String = File.BaseName(originalImage) & "." & File.Ext(originalImage)
-  Dim sNewPath As String = $Configuration.GalleryPath &/ Format(Now, "yyyymmdd")
+Private Function SaveImageIO(originalImage As String, sNewPath As String, sFilename As String) As String
   
   $Log4gambas.Debug(LogPrefix("SaveImageIO") & ("Validating image existence and destination directory"))
   If Not Exist(sNewPath) Then
@@ -325,18 +327,16 @@ Catch
   
 End
 
-Private Function ValidateFileExist(sFilename As String) As Boolean
+Private Function ValidateFileExist(sPath As String, sFilename As String) As Boolean
   
-  Dim sPath As String = $Configuration.GalleryPath
-  
-  $Log4gambas.Debug(LogPrefix("ValidateFileExist") & ("Validating physical file existence during import ") & sPath &/ Format(Now, "yyyymmdd") &/ sFilename)
-  If Exist(sPath &/ Format(Now, "yyyymmdd") &/ sFilename) Then
-    $Log4gambas.Debug(LogPrefix("ValidateFileExist") & ("Physical file exists during import") & sPath &/ Format(Now, "yyyymmdd") &/ sFilename)
+  $Log4gambas.Debug(LogPrefix("ValidateFileExist") & ("Validating physical file existence during import ") & sPath &/ sFilename)
+  If Exist(sPath &/ sFilename) Then
+    $Log4gambas.Debug(LogPrefix("ValidateFileExist") & ("Physical file exists during import") & sPath &/ sFilename)
     Return True
     
   Endif
   
-  $Log4gambas.Debug(LogPrefix("ValidateFileExist") & ("Physical file does not exist during import") & sPath &/ Format(Now, "yyyymmdd") &/ sFilename)
+  $Log4gambas.Debug(LogPrefix("ValidateFileExist") & ("Physical file does not exist during import") & sPath &/ sFilename)
   Return False
   
 Catch
@@ -374,45 +374,52 @@ Catch
   
 End
 
-Private Function SavePhoto(sImagenPath As String, sDescription As String, Optional iAlbumId As Integer, Optional iIndex As Integer, Optional bDeletePhoto As Boolean = False) As String
+Private Function SavePhoto(sImagenPath As String, sDescription As String, Optional iAlbumId As Integer, Optional iIndex As Integer, Optional bDeletePhoto As Boolean = False) As Integer
   
   Dim oPhotoE As New PhotoEntity
   Dim oPhotoAlbumE As PhotoAlbumEntity
   Dim oOriginalPhoto As Image
   Dim sImageString As String
   Dim sHash256 As String
-  Dim sFilename As String = File.BaseName(sImagenPath) & "." & File.Ext(sImagenPath)
+  Dim sFilename As String
   Dim sNewPath As String
   Dim sResp As String
   Dim sDate As String
   Dim dDate As Date
+  Dim sBaseName As String
+  Dim sExt As String
+  Dim iSeq As Integer
   
   oOriginalPhoto = Image.Load(sImagenPath)
   sImageString = File.Load(sImagenPath)
   
-  $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Checking physical file existence during import"))
-  If ValidateFileExist(sFilename) Then
-    Return ("The file already exists")
-  End If
+  sExt = Lower(File.Ext(sImagenPath))
+  sNewPath = $Configuration.GalleryPath &/ Format(Now, "yyyymmdd")
+  sDate = $ImageMetadata.GetExifDateTimeOriginal(sImagenPath)
+  If sDate <> "" Then
+    dDate = CDate(sDate)
+  Else
+    dDate = Now()
+  Endif
+  
+  sBaseName = Format(dDate, "yyyymmddhhmmss")
+  sFilename = sBaseName & "." & sExt
+  iSeq = 1
+  While ValidateFileExist(sNewPath, sFilename)
+    sFilename = sBaseName & "_" & Format(iSeq, "000") & "." & sExt
+    iSeq += 1
+  Wend
   
   sHash256 = Hash256Calculate(sImageString)
   $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Checking file existence by Hash256 in the DB"))
   If $PhotoRepository.ValidateHash256Exist(sHash256) Then
-    Return ("The file already exists")
+    Return Enumeration.RESPONSE_FILEEXIST
   End If
   
   $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Saving image to the import directory"))
-  sNewPath = SaveImageIO(sImagenPath)
+  sNewPath = SaveImageIO(sImagenPath, sNewPath, sFilename)
   
-  $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Evaluating condition to delete original image"))
-  If bDeletePhoto Then
-    $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Condition true, delete original image"))
-    DeleteImageIO(sImagenPath)
-  Endif
-  
-  sDate = $ImageMetadata.GetExifDateTimeOriginal(sNewPath &/ sFilename)
-  $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Shell return normalize string ") & ": " & sDate)
-  dDate = CDate(sDate)
+  $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Photo creation date from EXIF or fallback ") & ": " & Format(dDate, "yyyy-mm-dd hh:nn:ss"))
   With oPhotoE
     .FileName = sFilename
     .WidthPixels = oOriginalPhoto.Width
@@ -436,10 +443,16 @@ Private Function SavePhoto(sImagenPath As String, sDescription As String, Option
   Endif
   
   If Not $PhotoRepository.CreatePhoto(oPhotoE, oPhotoAlbumE) Then
-    Return ("Error while saving the photo to the database")
+    Return Enumeration.RESPONSE_DBERROR
   Endif
   
-  Return True 
+  $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Evaluating condition to delete original image"))
+  If bDeletePhoto Then
+    $Log4gambas.Debug(LogPrefix("SavePhoto") & ("Condition true, delete original image"))
+    DeleteImageIO(sImagenPath)
+  Endif
+  
+  Return Enumeration.RESPONSE_OK
   
 Catch
   If Exist(sNewPath &/ sFilename) Then

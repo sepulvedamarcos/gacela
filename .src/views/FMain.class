@@ -11,6 +11,8 @@ Private $StatusDefaultText As String
 Private StatusTimer As Timer
 Private $LastImportSummary As ImportSummary
 
+Property LastImportSummary As ImportSummary
+
 Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3, cPhotoService As PhotoService)
   
   $Configuration = cConfiguration
@@ -250,13 +252,12 @@ Private Sub ImportProcess(Optional listFiles As String[])
   Dim vResp As Variant
   Dim cSelector As FImportDialog
   
-  cSelector = New FImportDialog($PhotoService, $Log4Gambas, listFiles)
+  cSelector = New FImportDialog(Me, $PhotoService, $Log4Gambas, listFiles)
   vResp = cSelector.ShowModal()
   
   If vResp = Enumeration.DLG_OK Then
     ReloadGallery()
-    If cSelector.ImportSummary <> Null Then
-      $LastImportSummary = cSelector.ImportSummary
+    If $LastImportSummary <> Null Then
       ShowStatus(("Import finished. OK: ") & $LastImportSummary.OkCount & (" NOK: ") & $LastImportSummary.FailCount, 5000)
       If $Configuration.ImportShowSummary Then
         Dim oImportResume As FImportResume
@@ -264,12 +265,6 @@ Private Sub ImportProcess(Optional listFiles As String[])
         oImportResume.ShowModal()
       Endif
     Endif
-    ' ClearPhotoGallery()
-    ' CreatePhotoPanels($PhotoService.LoadNextPage())
-    'FIXME: At the end of the process, write to the status bar and allow a click to open the import event
-    'TODO: ideally the status bar would keep a history like a log
-    'FIXME: for now, the import summary window will be opened here
-    ' fImportR = New FImportResume(1)
   Endif
   
 End
@@ -330,4 +325,16 @@ Private Function LogPrefix(methodName As String) As String
   
   Return $Titulo & "[" & methodName & "] "
   
+End
+
+Private Function LastImportSummary_Read() As ImportSummary
+
+  Return $LastImportSummary
+
+End
+
+Private Sub LastImportSummary_Write(Value As ImportSummary)
+
+  $LastImportSummary = Value
+
 End
