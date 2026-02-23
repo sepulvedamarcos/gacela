@@ -21,6 +21,7 @@ Private $dFilterDateFrom As Date
 Private $dFilterDateTo As Date
 Private $sFilterUser As String = ""
 Private $sSearchText As String = ""
+Private $iFilterAlbumId As Integer = 0
 Private $sSortBy As String = "import_date"  ' import_date, file_name, creation_date
 Private $sSortOrder As String = "DESC"      ' ASC, DESC
 
@@ -39,29 +40,38 @@ Public Sub _new(cRepository As PhotoRepository, oLogger As Log4Gambas3)
 
 End
 
-Public Function HasNext() As Boolean '' Check if there are more items
-
-  If $iCurrentIndex < $aCachedPhotos.Count Then
-    Return True
-  Endif
-
-  Return $bHasMorePages
-
+Public Sub SetFilterAlbum(albumId As Integer)
+  
+  If $iFilterAlbumId = albumId Then Return
+  
+  $iFilterAlbumId = albumId
+  Reset()
+  
 End
 
-Public Function Next() As PhotoEntity '' Get next item
+'Public Function HasNext() As Boolean '' Check if there are more items
+'
+'  If $iCurrentIndex < $aCachedPhotos.Count Then
+'    Return True
+'  Endif
+'
+'  Return $bHasMorePages
+'
+'End
 
-  If $iCurrentIndex >= $aCachedPhotos.Count Then
-    $Log4Gambas.Warning("No more items in cache. Call LoadNextBatch() first")
-    Return Null
-  Endif
-
-  Dim cPhoto As PhotoEntity = $aCachedPhotos[$iCurrentIndex]
-  $iCurrentIndex += 1
-
-  Return cPhoto
-
-End
+'Public Function Next() As PhotoEntity '' Get next item
+'
+'  If $iCurrentIndex >= $aCachedPhotos.Count Then
+'    $Log4Gambas.Warning("No more items in cache. Call LoadNextBatch() first")
+'    Return Null
+'  Endif
+'
+'  Dim cPhoto As PhotoEntity = $aCachedPhotos[$iCurrentIndex]
+'  $iCurrentIndex += 1
+'
+'  Return cPhoto
+'
+'End
 
 Public Function LoadNextBatch() As PhotoEntity[] '' Load next batch for infinite scroll
 
@@ -113,116 +123,116 @@ Public Sub Reset() '' Reset iterator
 
 End
 
-Public Sub SetFilterFavorites(onlyFavorites As Boolean)
+'Public Sub SetFilterFavorites(onlyFavorites As Boolean)
+'
+'  If $bFilterFavorites = onlyFavorites Then Return
+'
+'  $bFilterFavorites = onlyFavorites
+'  Reset()
+'
+'End
 
-  If $bFilterFavorites = onlyFavorites Then Return
+'Public Sub SetFilterFormat(format As String)
+'
+'  format = LCase(format)
+'  If $sFilterFormat = format Then Return
+'
+'  $sFilterFormat = format
+'  Reset()
+'
+'End
 
-  $bFilterFavorites = onlyFavorites
-  Reset()
+'Public Sub SetFilterDateRange(dateFrom As Date, dateTo As Date)
+'
+'  $dFilterDateFrom = dateFrom
+'  $dFilterDateTo = dateTo
+'  Reset()
+'
+'End
 
-End
+'Public Sub SetFilterUser(userName As String)
+'
+'  $sFilterUser = userName
+'  Reset()
+'
+'End
 
-Public Sub SetFilterFormat(format As String)
+'Public Sub SetSearchText(searchText As String)
+'
+'  If $sSearchText = searchText Then Return
+'
+'  $sSearchText = searchText
+'  Reset()
+'
+'End
 
-  format = LCase(format)
-  If $sFilterFormat = format Then Return
+'Public Sub SetSortBy(sortBy As String, Optional sortOrder As String = "DESC")
+'
+'  $sSortBy = sortBy
+'  $sSortOrder = sortOrder
+'  Reset()
+'
+'End
 
-  $sFilterFormat = format
-  Reset()
+'Public Sub ClearFilters()
+'
+'  $bFilterGarbage = False
+'  $bFilterFavorites = False
+'  $sFilterFormat = ""
+'  $dFilterDateFrom = Null
+'  $dFilterDateTo = Null
+'  $sFilterUser = ""
+'  $sSearchText = ""
+'  Reset()
+'
+'End
 
-End
+'Public Sub SetPageSize(pageSize As Integer)
+'
+'  If pageSize > 0 And pageSize <= 500 Then
+'    $iPageSize = pageSize
+'    Reset()
+'  Endif
+'
+'End
 
-Public Sub SetFilterDateRange(dateFrom As Date, dateTo As Date)
+'Public Function GetCurrentPage() As Integer
+'
+'  Return $iCurrentPage
+'
+'End
 
-  $dFilterDateFrom = dateFrom
-  $dFilterDateTo = dateTo
-  Reset()
+'Public Function GetTotalPages() As Integer
+'
+'  Return Ceil($iTotalCount / $iPageSize)
+'
+'End
 
-End
+'Public Function GetTotalCount() As Integer
+'
+'  Return $iTotalCount
+'
+'End
 
-Public Sub SetFilterUser(userName As String)
-
-  $sFilterUser = userName
-  Reset()
-
-End
-
-Public Sub SetSearchText(searchText As String)
-
-  If $sSearchText = searchText Then Return
-
-  $sSearchText = searchText
-  Reset()
-
-End
-
-Public Sub SetSortBy(sortBy As String, Optional sortOrder As String = "DESC")
-
-  $sSortBy = sortBy
-  $sSortOrder = sortOrder
-  Reset()
-
-End
-
-Public Sub ClearFilters()
-
-  $bFilterGarbage = False
-  $bFilterFavorites = False
-  $sFilterFormat = ""
-  $dFilterDateFrom = Null
-  $dFilterDateTo = Null
-  $sFilterUser = ""
-  $sSearchText = ""
-  Reset()
-
-End
-
-Public Sub SetPageSize(pageSize As Integer)
-
-  If pageSize > 0 And pageSize <= 500 Then
-    $iPageSize = pageSize
-    Reset()
-  Endif
-
-End
-
-Public Function GetCurrentPage() As Integer
-
-  Return $iCurrentPage
-
-End
-
-Public Function GetTotalPages() As Integer
-
-  Return Ceil($iTotalCount / $iPageSize)
-
-End
-
-Public Function GetTotalCount() As Integer
-
-  Return $iTotalCount
-
-End
-
-Public Function GetPageSize() As Integer
-
-  Return $iPageSize
-
-End
+'Public Function GetPageSize() As Integer
+'
+'  Return $iPageSize
+'
+'End
 
 ' Load a specific page
-Public Sub LoadPage(pageNumber As Integer)
-
-  If pageNumber < 0 Or pageNumber >= GetTotalPages() Then
-    $Log4Gambas.Warning("Page out of range: " & pageNumber)
-    Return
-  Endif
-
-  $iCurrentPage = pageNumber
-  $iCurrentIndex = 0
-  LoadCurrentPage()
-
-End
+'Public Sub LoadPage(pageNumber As Integer)
+'
+'  If pageNumber < 0 Or pageNumber >= GetTotalPages() Then
+'    $Log4Gambas.Warning("Page out of range: " & pageNumber)
+'    Return
+'  Endif
+'
+'  $iCurrentPage = pageNumber
+'  $iCurrentIndex = 0
+'  LoadCurrentPage()
+'
+'End
 ' ==================================================
 '
 '          Private methods
@@ -237,21 +247,21 @@ End
 '
 ' End
 
-Private Sub LoadCurrentPage()
-
-  Dim iOffset As Integer = $iCurrentPage * $iPageSize
-
-  $Log4Gambas.Debug("Loading page " & $iCurrentPage & ", iOffset=" & iOffset & ", limit=" & $iPageSize)
-
-  $aCachedPhotos = $cRepository.FindWithFilters(BuildFilterQuery(), BuildFilterParams(), $sSortBy, $sSortOrder, $iPageSize, iOffset)
-
-  $Log4Gambas.Debug("Page loaded: " & $aCachedPhotos.Count & " photos")
-
-Catch
-  $Log4Gambas.Error("Error loading page: " & Error.Text)
-  $aCachedPhotos = New PhotoEntity[]
-
-End
+'Private Sub LoadCurrentPage()
+'
+'  Dim iOffset As Integer = $iCurrentPage * $iPageSize
+'
+'  $Log4Gambas.Debug("Loading page " & $iCurrentPage & ", iOffset=" & iOffset & ", limit=" & $iPageSize)
+'
+'  $aCachedPhotos = $cRepository.FindWithFilters(BuildFilterQuery(), BuildFilterParams(), $sSortBy, $sSortOrder, $iPageSize, iOffset)
+'
+'  $Log4Gambas.Debug("Page loaded: " & $aCachedPhotos.Count & " photos")
+'
+'Catch
+'  $Log4Gambas.Error("Error loading page: " & Error.Text)
+'  $aCachedPhotos = New PhotoEntity[]
+'
+'End
 
 Private Sub UpdateTotalCount()
 
@@ -301,58 +311,63 @@ Private Function BuildFilterQuery() As String
   If $sSearchText <> "" Then
     aConditions.Add("LOWER(file_name) LIKE &7")
   Endif
+  
+  ' Filter: by album
+  If $iFilterAlbumId > 0 Then
+    aConditions.Add("EXISTS (SELECT 1 FROM " & PhotoRepository.TABLE_PHOTOS_ALBUMS & " pa WHERE pa.photo_id = " & PhotoRepository.TABLE_PHOTOS & ".photo_id AND pa.album_id = " & $iFilterAlbumId & ")")
+  Endif
 
   Return aConditions.Join(" AND ")
 
 End
 
 ' Build parameters for the query
-Private Function BuildFilterParams() As Variant[]
-
-  Dim oParams As New Variant[]
-
+'Private Function BuildFilterParams() As Variant[]
+'
+'  Dim oParams As New Variant[]
+'
   ' Parameter 1: soft_delete
-  oParams.Add(False)
-
+'  oParams.Add(False)
+'
   ' Parameter 2: is_favorite
-  If $bFilterFavorites Then
-    oParams.Add(True)
-  Endif
-
+'  If $bFilterFavorites Then
+'    oParams.Add(True)
+'  Endif
+'
   ' Parameter 3: format
-  If $sFilterFormat <> "" Then
-    oParams.Add($sFilterFormat)
-  Endif
-
+'  If $sFilterFormat <> "" Then
+'    oParams.Add($sFilterFormat)
+'  Endif
+'
   ' Parameter 4: date from
-  If $dFilterDateFrom Then
-    oParams.Add($dFilterDateFrom)
-  Endif
-
+'  If $dFilterDateFrom Then
+'    oParams.Add($dFilterDateFrom)
+'  Endif
+'
   ' Parameter 5: date to
-  If $dFilterDateTo Then
-    oParams.Add($dFilterDateTo)
-  Endif
-
+'  If $dFilterDateTo Then
+'    oParams.Add($dFilterDateTo)
+'  Endif
+'
   ' Parameter 6: user
-  If $sFilterUser <> "" Then
-    oParams.Add($sFilterUser)
-  Endif
-
+'  If $sFilterUser <> "" Then
+'    oParams.Add($sFilterUser)
+'  Endif
+'
   ' Parameter 7: search text
-  If $sSearchText <> "" Then
-    oParams.Add("%" & LCase($sSearchText) & "%")
-  Endif
-
-  Return oParams
-
-End
+'  If $sSearchText <> "" Then
+'    oParams.Add("%" & LCase($sSearchText) & "%")
+'  Endif
+'
+'  Return oParams
+'
+'End
 
 ' Read-only properties
 Property Read IsFiltered As Boolean
 
 Function IsFiltered_Read() As Boolean
 
-  Return $bFilterFavorites Or $sFilterFormat <> "" Or $dFilterDateFrom <> Null Or $dFilterDateTo <> Null Or $sFilterUser <> "" Or $sSearchText <> ""
+  Return $bFilterFavorites Or $sFilterFormat <> "" Or $dFilterDateFrom <> Null Or $dFilterDateTo <> Null Or $sFilterUser <> "" Or $sSearchText <> "" Or $iFilterAlbumId > 0
 
 End

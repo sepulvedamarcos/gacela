@@ -10,6 +10,7 @@ Private $Titulo As String = "[FMain] "
 Private $StatusDefaultText As String
 Private StatusTimer As Timer
 Private $LastImportSummary As ImportSummary
+Private $AlbumPanel As Panel
 
 Property LastImportSummary As ImportSummary
 
@@ -27,12 +28,11 @@ Public Sub Form_Open()
   
   SelectGallery($Configuration.WhichGallery)
   
-  ExpanderAlbum.Hidden = True
-  ExpanderTags.Hidden = True
-  
   $StatusDefaultText = LabelStatusBar.Text
   StatusTimer = New Timer
   StatusTimer.Enabled = False
+  
+  AddAlbumExpander()
   
 End
 
@@ -143,10 +143,16 @@ Public Sub CollectionToolMenu_Share_Click()
   
 End
 
-Public Sub ViewGallery_ImportImages_Click()
+Public Sub MainMenu_ExportImages_Click()
+
   
+
+End
+
+Public Sub MainMenu_ImportImages_Click()
+
   ImportProcess()
-  
+
 End
 
 Public Sub ToolButtonImport_Click()
@@ -202,11 +208,10 @@ Public Sub ShowStatus(sMessage As String, Optional iTimeoutMs As Integer = 2500)
 End
 
 Public Sub ToolButtonTrash_Click()
-
+  
   ShowStatus(("Open deleted images folder"), 0)
-
+  
 End
-
 
 ' ==================================================
 '
@@ -251,6 +256,7 @@ Private Sub ImportProcess(Optional listFiles As String[])
   
   Dim vResp As Variant
   Dim cSelector As FImportDialog
+  Dim oImportSummary As FImportSummary
   
   cSelector = New FImportDialog(Me, $PhotoService, $Log4Gambas, listFiles)
   vResp = cSelector.ShowModal()
@@ -260,11 +266,11 @@ Private Sub ImportProcess(Optional listFiles As String[])
     If $LastImportSummary <> Null Then
       ShowStatus(("Import finished. OK: ") & $LastImportSummary.OkCount & (" NOK: ") & $LastImportSummary.FailCount, 5000)
       If $Configuration.ImportShowSummary Then
-        Dim oImportResume As FImportResume
-        oImportResume = New FImportResume($LastImportSummary, $Log4Gambas, $Configuration)
-        oImportResume.ShowModal()
+        oImportSummary = New FImportSummary($LastImportSummary, $Log4Gambas, $Configuration)
+        oImportSummary.ShowModal()
       Endif
     Endif
+    ReloadAlbums()
   Endif
   
 End
@@ -305,6 +311,13 @@ Private Sub ReloadGallery()
   
 End
 
+Private Sub ReloadAlbums()
+  
+  ClearAlbumExpander()
+  AddAlbumExpander()
+  
+End
+
 Private Sub ShowConfigurationPanel()
   
   Dim oForm As FConfiguration
@@ -328,13 +341,86 @@ Private Function LogPrefix(methodName As String) As String
 End
 
 Private Function LastImportSummary_Read() As ImportSummary
-
+  
   Return $LastImportSummary
-
+  
 End
 
 Private Sub LastImportSummary_Write(Value As ImportSummary)
-
+  
   $LastImportSummary = Value
-
+  
 End
+
+Private Sub AddAlbumExpander()
+  
+  Dim oCKAlbum As RadioButton
+  Dim iHeight As Integer = 28
+  Dim oAlbums As AlbumEntity[]
+  
+  ExpanderAlbum.Hidden = False
+  Wait 0.5
+
+  $AlbumPanel = New Panel(ExpanderAlbum)
+  $AlbumPanel.Arrangement = Arrange.Vertical
+  $AlbumPanel.Width = ExpanderAlbum.Width
+  $AlbumPanel.Background = Color.Royal
+  
+  oCKAlbum = New RadioButton($AlbumPanel) As "AlbumRadio"
+  oCKAlbum.Text = ("Todos")
+  oCKAlbum.Tag = 0
+  oCKAlbum.Height = 28
+  oCKAlbum.Width = $AlbumPanel.Width
+  oCKAlbum.Value = True
+  
+  $AlbumPanel.Height = $AlbumPanel.Height + iHeight
+  iHeight = iHeight + 28
+  
+  oAlbums = $PhotoService.FindAlbums()
+  For Each oAlbum As AlbumEntity In oAlbums
+    
+    oCKAlbum = New RadioButton($AlbumPanel) As "AlbumRadio"
+    oCKAlbum.Text = oAlbum.Name
+    oCKAlbum.Tag = oAlbum.Id
+    ' oCKAlbum.Background = Color.Red
+    oCKAlbum.Height = 28
+    oCKAlbum.Width = $AlbumPanel.Width
+    
+    $AlbumPanel.Height = $AlbumPanel.Height + iHeight
+    iHeight = iHeight + 28
+  Next
+  
+  ExpanderAlbum.Arrangement = Arrange.Fill
+  ExpanderAlbum.Height = iHeight
+  ExpanderAlbum.Hidden = True
+  
+End
+
+Private Sub ClearAlbumExpander()
+  
+  If $AlbumPanel = Null Then Return
+  
+  For Each ctrl As Control In $AlbumPanel.Children
+    ctrl.Delete()
+  Next
+  $AlbumPanel.Delete()
+  $AlbumPanel = Null
+  
+End
+
+Public Sub AlbumRadio_Click()
+  
+  Dim oRadio As RadioButton
+  Dim iAlbumId As Integer
+  
+  For Each oRadio In $AlbumPanel.Children
+    If oRadio.Value = True Then 
+      iAlbumId = oRadio.Tag
+      $PhotoService.SetAlbumFilter(iAlbumId)
+      ReloadGallery()
+      Return
+    Endif
+  Next
+  
+End
+

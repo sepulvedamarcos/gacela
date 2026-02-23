@@ -33,20 +33,20 @@ Public Sub _new(oLog4gambas As Log4Gambas3, cPhotoRepository As PhotoRepository,
   
 End
 
-Public Function GetAllPhotos() As PhotoEntity[]
-  
-  Dim aPhotosEntity As PhotoEntity[]
-  
-  $Log4gambas.Debug(LogPrefix("GetAllPhotos") & ("Fetching all photos"))
-  Try aPhotosEntity = $PhotoRepository.GetPhotos()
-  If Error Then
-    $Log4gambas.Error(LogPrefix("GetAllPhotos") & ("Error reading photos: ") & Error.Text)
-    error.Propagate
-  Endif
-  
-  Return aPhotosEntity
-  
-End
+'Public Function GetAllPhotos() As PhotoEntity[]
+'  
+'  Dim aPhotosEntity As PhotoEntity[]
+'  
+'  $Log4gambas.Debug(LogPrefix("GetAllPhotos") & ("Fetching all photos"))
+'  Try aPhotosEntity = $PhotoRepository.GetPhotos()
+'  If Error Then
+'    $Log4gambas.Error(LogPrefix("GetAllPhotos") & ("Error reading photos: ") & Error.Text)
+'    error.Propagate
+'  Endif
+'  
+'  Return aPhotosEntity
+'  
+'End
 
 Public Function LoadFirstPage() As PhotoEntity[]
   
@@ -62,10 +62,16 @@ Public Function LoadNextPage() As PhotoEntity[]
   
 End
 
-Public Sub DeletePhoto(photoId As Integer) As Boolean
+Public Sub SetAlbumFilter(albumId As Integer)
   
-  Dim oPhotoE As PhotoEntity[]
+  $Iterator.SetFilterAlbum(albumId)
   
+End
+
+'Public Sub DeletePhoto(photoId As Integer) As Boolean
+'  
+'  Dim oPhotoE As PhotoEntity[]
+'  
   ' $Log4gambas.Info($Titulo & ("Image delete requested") & " [" & photoId & "]")
   ' oPhotoE = $PhotoRepository.GetPhotos(photoId)
   ' If oPhotoE.Count > 0 Then
@@ -79,37 +85,37 @@ Public Sub DeletePhoto(photoId As Integer) As Boolean
   '   $Log4gambas.Info($Titulo & ("Image not found to delete"))
   ' Endif
   ' 
-  Return True
-  
-Catch
-  $Log4gambas.error(LogPrefix("DeletePhoto") & "A problem occurred while deleting the photo")
-  Error.Propagate
-  
-End
+'  Return True
+'  
+'Catch
+'  $Log4gambas.error(LogPrefix("DeletePhoto") & "A problem occurred while deleting the photo")
+'  Error.Propagate
+'  
+'End
 
-Public Function MarkPhotoForDeletion(photoId As Integer, Optional deletedBy As String, Optional deletedAuto As Boolean = False) As Boolean
-  
+'Public Function MarkPhotoForDeletion(photoId As Integer, Optional deletedBy As String, Optional deletedAuto As Boolean = False) As Boolean
+'  
   ' TODO: move file to deleted directory and enforce limits before DB update.
-  If deletedBy = "" Then deletedBy = User.Name
-  
-  Return $PhotoRepository.MarkPhotoAsDeleted(photoId, deletedBy, deletedAuto)
-  
-Catch
-  $Log4gambas.Error(LogPrefix("MarkPhotoForDeletion") & "Problems marking photo for deletion")
-  Error.Propagate
-  
-End
+'  If deletedBy = "" Then deletedBy = User.Name
+'  
+'  Return $PhotoRepository.MarkPhotoAsDeleted(photoId, deletedBy, deletedAuto)
+'  
+'Catch
+'  $Log4gambas.Error(LogPrefix("MarkPhotoForDeletion") & "Problems marking photo for deletion")
+'  Error.Propagate
+'  
+'End
 
-Public Function PermanentlyDeletePhoto(photoId As Integer) As Boolean
-  
+'Public Function PermanentlyDeletePhoto(photoId As Integer) As Boolean
+'  
   ' TODO: delete physical file and related rows before DB purge.
-  Return $PhotoRepository.PermanentlyDeletePhoto(photoId)
-  
-Catch
-  $Log4gambas.Error(LogPrefix("PermanentlyDeletePhoto") & "Problems permanently deleting photo")
-  Error.Propagate
-  
-End
+'  Return $PhotoRepository.PermanentlyDeletePhoto(photoId)
+'  
+'Catch
+'  $Log4gambas.Error(LogPrefix("PermanentlyDeletePhoto") & "Problems permanently deleting photo")
+'  Error.Propagate
+'  
+'End
 
 Public Sub InsertSeedData()
   
@@ -216,12 +222,6 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumNam As String
 Catch
   $Log4gambas.Error(LogPrefix("ImportPhotos") & "Error inserting photo " & Error.Text)
   Error.Propagate
-  
-End
-
-Public Function GetPhotoIterator() As PhotoIterator
-  
-  Return New PhotoIterator($PhotoRepository, $Log4gambas)
   
 End
 
