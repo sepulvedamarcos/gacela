@@ -13,6 +13,23 @@ Public Sub _new(oLog4Gambas As Log4Gambas3, oConfiguration As Configuration)
   
 End
 
+Public Sub Form_Open()
+  
+  SwitchButtonDeleteOriginal.Value = $Configuration.DeleteOriginals
+  SpinBoxMaxFileDeleted.Value = $Configuration.DeletedMaxCount
+  SpinBoxDeleteMaxSize.Value = $Configuration.DeletedMaxSizeMB
+  
+  ComboBoxLevel.Index = $Configuration.LogLevel
+  ComboBoxOutput.Index = $Configuration.LogOutput
+  DirBoxFilePath.Value = $Configuration.LogPath
+  SpinBoxFileSize.Value = $Configuration.LogSize
+  SpinBoxBackupFiles.Value = $Configuration.LogFiles
+
+  SwitchButtonShowSummaryDialog.value = $Configuration.ImportShowSummary
+  
+End
+
+
 Public Sub btnOK_Click()
   
   $Configuration.DeleteOriginals = SwitchButtonDeleteOriginal.Value
@@ -25,6 +42,8 @@ Public Sub btnOK_Click()
   $Configuration.LogSize = SpinBoxFileSize.Value
   $Configuration.LogFiles = SpinBoxBackupFiles.Value
   
+  $Configuration.ImportShowSummary = SwitchButtonShowSummaryDialog.Value
+
   Me.Close
   
 End
@@ -32,19 +51,5 @@ End
 Public Sub btnCancel_Click()
   
   Me.Close
-  
-End
-
-Public Sub Form_Open()
-  
-  SwitchButtonDeleteOriginal.Value = $Configuration.DeleteOriginals
-  SpinBoxMaxFileDeleted.Value = $Configuration.DeletedMaxCount
-  SpinBoxDeleteMaxSize.Value = $Configuration.DeletedMaxSizeMB
-  
-  ComboBoxLevel.Index = $Configuration.LogLevel
-  ComboBoxOutput.Index = $Configuration.LogOutput
-  DirBoxFilePath.Value = $Configuration.LogPath
-  SpinBoxFileSize.Value = $Configuration.LogSize
-  SpinBoxBackupFiles.Value = $Configuration.LogFiles
   
 End

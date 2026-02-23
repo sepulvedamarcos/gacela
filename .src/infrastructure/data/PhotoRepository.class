@@ -195,68 +195,68 @@ Catch
   
 End
 
-Public Function DeletePhoto(id As Integer) As Boolean
-  
-  Dim oRes As Result
-  
+'Public Function DeletePhoto(id As Integer) As Boolean
+'  
+'  Dim oRes As Result
+'  
   ' FIXME : cascade delete should remove related TAGS and Albums. The layer above should also check locking.
-  
-  Return MarkPhotoAsDeleted(id, User.Name, False)
-  
-Catch
-  $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error(LogPrefix("DeletePhoto") & ("Problems deleting image from DB, rolling back"))
-  Error.Propagate
-  
-End
+'  
+'  Return MarkPhotoAsDeleted(id, User.Name, False)
+'  
+'Catch
+'  $DbContext.DBConnection.Rollback
+'  $Log4Gambas.Error(LogPrefix("DeletePhoto") & ("Problems deleting image from DB, rolling back"))
+'  Error.Propagate
+'  
+'End
 
-Public Function MarkPhotoAsDeleted(id As Integer, deletedBy As String, deletedAuto As Boolean) As Boolean
-  
-  Dim oRes As Result
-  
-  $DbContext.DBConnection.Begin()
-  oRes = $DbContext.DBConnection.Edit(PhotoRepository.TABLE_PHOTOS)
-  oRes["photo_id"] = id
-  oRes["soft_delete"] = 1
-  oRes["soft_deleted_date"] = Now()
-  oRes["soft_deleted_by"] = deletedBy
-  oRes["soft_deleted_auto"] = deletedAuto
-  oRes.Update()
-  
-  $DbContext.DBConnection.Commit
-  Return True
-  
-Catch
-  $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error(LogPrefix("MarkPhotoAsDeleted") & "Problems marking image as deleted, rolling back")
-  Error.Propagate
-  
-End
+'Public Function MarkPhotoAsDeleted(id As Integer, deletedBy As String, deletedAuto As Boolean) As Boolean
+'  
+'  Dim oRes As Result
+'  
+'  $DbContext.DBConnection.Begin()
+'  oRes = $DbContext.DBConnection.Edit(PhotoRepository.TABLE_PHOTOS)
+'  oRes["photo_id"] = id
+'  oRes["soft_delete"] = 1
+'  oRes["soft_deleted_date"] = Now()
+'  oRes["soft_deleted_by"] = deletedBy
+'  oRes["soft_deleted_auto"] = deletedAuto
+'  oRes.Update()
+'  
+'  $DbContext.DBConnection.Commit
+'  Return True
+'  
+'Catch
+'  $DbContext.DBConnection.Rollback
+'  $Log4Gambas.Error(LogPrefix("MarkPhotoAsDeleted") & "Problems marking image as deleted, rolling back")
+'  Error.Propagate
+'  
+'End
 
-Public Function PermanentlyDeletePhoto(id As Integer) As Boolean
-  
-  Dim sQuery As String
-  
-  $DbContext.DBConnection.Begin()
-  
-  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1"
-  $DbContext.DBConnection.Exec(sQuery, id)
-  
-  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1"
-  $DbContext.DBConnection.Exec(sQuery, id)
-  
-  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS & " WHERE photo_id = &1"
-  $DbContext.DBConnection.Exec(sQuery, id)
-  
-  $DbContext.DBConnection.Commit
-  Return True
-  
-Catch
-  $DbContext.DBConnection.Rollback
-  $Log4Gambas.Error(LogPrefix("PermanentlyDeletePhoto") & "Problems permanently deleting image, rolling back")
-  Error.Propagate
-  
-End
+'Public Function PermanentlyDeletePhoto(id As Integer) As Boolean
+'  
+'  Dim sQuery As String
+'  
+'  $DbContext.DBConnection.Begin()
+'  
+'  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1"
+'  $DbContext.DBConnection.Exec(sQuery, id)
+'  
+'  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1"
+'  $DbContext.DBConnection.Exec(sQuery, id)
+'  
+'  sQuery = "DELETE FROM " & PhotoRepository.TABLE_PHOTOS & " WHERE photo_id = &1"
+'  $DbContext.DBConnection.Exec(sQuery, id)
+'  
+'  $DbContext.DBConnection.Commit
+'  Return True
+'  
+'Catch
+'  $DbContext.DBConnection.Rollback
+'  $Log4Gambas.Error(LogPrefix("PermanentlyDeletePhoto") & "Problems permanently deleting image, rolling back")
+'  Error.Propagate
+'  
+'End
 
 Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean
   

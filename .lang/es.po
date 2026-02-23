@@ -2,6 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gacela 3.21.1\n"
+"POT-Creation-Date: 2026-02-19 20:24 UTC\n"
 "PO-Revision-Date: 2026-02-17 02:53 UTC\n"
 "Last-Translator: sepulvedamarcos <sepulvedamarcos@gmail.com>\n"
 "Language: es\n"
@@ -9,332 +10,166 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: FMain.form:114
-msgid "?"
-msgstr "Ayuda"
-
-#: FAbout.form:12 FMain.form:117
-msgid "About Gacela"
-msgstr "Acerca de Gacela"
-
-#: Main.module:31
-msgid "A critical problem was detected and the application will stop: "
-msgstr "Se detecto un problema critico y se detendra la aplicación"
-
-#: FImportDialog.class:218
-msgid "Adding a new photo"
-msgstr ""
-
-#: FImportDialog.class:215
-msgid "Adding new photos"
-msgstr ""
-
-#: FImportDialog.form:161
-msgid "Album name and description"
-msgstr ""
-
-#: FMain.form:190
-msgid "Albums"
-msgstr ""
-
-#: FImportDialog.form:130
-msgid "Album selection"
-msgstr ""
-
-#: FImportDialog.form:121
-msgid "Album to search"
-msgstr ""
-
-#: SQLiteContext.class:101
-msgid "An error occurred while initializing the database"
-msgstr ""
-
-#: FImportDialog.class:81
-msgid "A problem occurred while importing the images"
-msgstr ""
-
-#: FImportDialog.class:63
-msgid "Are you sure you want to import the selected photos into the album with the chosen options?"
-msgstr ""
-
-#: FImportDialog.class:172
-msgid "Attempting to add a new album"
-msgstr ""
-
-#: PhotoService.class:245
-msgid "Attempting to copy image into directory"
-msgstr ""
-
-#: PhotoService.class:259
-msgid "Attempting to delete image in directory"
-msgstr ""
-
-#: FConfiguration.form:129 FImportDialog.form:101 FImportResume.form:84
-msgid "Cancel"
-msgstr ""
-
-#: FImportDialog.class:161
-msgid "Cancel album association, revert changes"
-msgstr ""
-
-#: SQLiteContext.class:125
-msgid "Cannot create database:"
-msgstr ""
-
-#: SQLiteContext.class:116
-msgid "Cannot open connection to create DB:"
-msgstr ""
-
-#: FImportDialog.class:110
-msgid "Checkbox click to associate album "
-msgstr ""
-
-#: PhotoService.class:354
-msgid "Checking file existence by Hash256 in the DB"
-msgstr ""
-
-#: SQLiteContext.class:92
-msgid "Checking for Gacela database"
-msgstr ""
-
-#: Configuration.class:183
-msgid "Checking group existence"
-msgstr ""
-
-#: PhotoService.class:348
-msgid "Checking physical file existence during import"
-msgstr ""
-
-#: SQLiteContext.class:144
-msgid "Checking the existence of schema tables..."
-msgstr ""
-
-#: SQLiteContext.class:251
-msgid "Column original_path was not created"
-msgstr ""
-
-#: PhotoService.class:364
-msgid "Condition true, delete original image"
-msgstr ""
-
-#: FConfiguration.form:27
-msgid "Configuration Panel"
-msgstr ""
-
-#: SQLiteContext.class:86
-msgid "Connection established with:"
-msgstr ""
-
-#: SQLiteContext.class:82
-msgid "Could not connect to the database:"
-msgstr ""
-
-#: PhotoService.class:196
-msgid "Creating album entity to persist"
-msgstr ""
-
-#: FImportDialog.class:26
-msgid "Creating dialog window and album list"
-msgstr ""
-
-#: Configuration.class:111
-msgid "Creating ini file with initial data"
-msgstr ""
-
-#: Configuration.class:79
-msgid "Creating ini file with Log4Gambas3 data"
-msgstr ""
-
-#: Configuration.class:134
-msgid "Creating logger with initial data"
-msgstr ""
-
-#: SQLiteContext.class:403
-msgid "Database connection closed"
-msgstr ""
-
-#: SQLiteContext.class:138
-msgid "Database created successfully"
-msgstr ""
-
-#: SQLiteContext.class:94
-msgid "Database file does not exist. Starting creation:"
-msgstr ""
-
-#: SQLiteContext.class:76
-msgid "Database name:"
-msgstr ""
-
-#: SQLiteContext.class:75
-msgid "Database path:"
-msgstr ""
-
-#: SQLiteContext.class:77
-msgid "Database type:"
-msgstr ""
-
-#: FImportResume.form:68
-msgid "Default"
-msgstr ""
-
-#: PhotoService.class:214
-msgid "Deleting album entity"
-msgstr ""
-
-#: FImportDialog.class:241
-msgid "Deletion data matches, sending id"
-msgstr ""
-
-#: FImportDialog.class:236
-msgid "Detected deletion of an album"
-msgstr ""
-
-#: FImportResume.form:59
-msgid "Do not show this dialog on every import"
-msgstr ""
-
-#: SQLiteContext.class:236
-msgid "Error adding original_path column"
-msgstr ""
-
-#: PhotoService.class:126
-msgid "Error changing gallery"
-msgstr ""
-
-#: Configuration.class:219
-msgid "Error detecting whether the shared directory is active"
-msgstr ""
-
-#: ImageMetadataAdapter.class:57
-msgid "Error extracting image metadata: "
-msgstr ""
-
-#: PhotoService.class:400
-msgid "Error importing photo: "
-msgstr ""
-
-#: Configuration.class:47
-msgid "Error initializing configuration: "
-msgstr ""
-
-#: PhotoService.class:107
-msgid "Error inserting test photo"
-msgstr ""
-
-#: PhotoService.class:43
-msgid "Error reading photos: "
-msgstr ""
-
-#: PhotoRepository.class:292
-msgid "Error searching photo by Hash256"
-msgstr ""
-
-#: FImportDialog.class:193
-msgid "Error while adding a new album"
-msgstr ""
-
-#: Configuration.class:127
-msgid "Error while creating settings directory"
-msgstr ""
-
-#: PhotoService.class:391
-msgid "Error while saving the photo to the database"
-msgstr ""
-
-#: PhotoService.class:362
-msgid "Evaluating condition to delete original image"
-msgstr ""
-
-#: FMain.form:76
-msgid "Exit"
-msgstr "Salir"
-
-#: FMain.form:65
-msgid "Export Images"
-msgstr ""
-
-#: FImportDialog.class:192
-msgid "Failed to add new album"
-msgstr ""
-
-#: PhotoService.class:40
-msgid "Fetching all photos"
-msgstr ""
-
-#: FMain.form:61
-msgid "File"
-msgstr "Archivo"
-
-#: FMain.form:195
-msgid "Filter 1"
-msgstr ""
-
-#: FMain.form:201
-msgid "Filter 2"
-msgstr ""
-
-#: Configuration.class:38
-msgid "First launch detected. The application will be configured in private mode."
-msgstr ""
-
-#: FMain.form:57
-msgid "Gacela"
-msgstr ""
-
-#: FMain.form:108
-msgid "Gacela settings"
-msgstr ""
-
-#: FMain.form:122
-msgid "Gallery"
-msgstr ""
-
-#: SQLiteContext.class:45
-msgid "Gallery path has not changed. No reconnection required."
-msgstr ""
-
-#: FConfiguration.form:41
-msgid "General"
-msgstr ""
-
 #: .project:1
 msgid "Gestor de Álbumes Compartidos en Linux Avanzado"
-msgstr ""
-
-#: FAbout.form:32
-msgid "Gestor de Álbumes Compartidos En Linux Avanzado"
 msgstr ""
 
 #: .project:2
 msgid "Gestor de álbumes de fotos familiares compartidos en computadores con linux"
 msgstr ""
 
+#: Configuration.class:55
+msgid "First launch detected. The application will be configured in private mode."
+msgstr ""
+
+#: Configuration.class:64
+msgid "Error initializing configuration: "
+msgstr ""
+
+#: Configuration.class:114
+msgid "Creating ini file with Log4Gambas3 data"
+msgstr ""
+
+#: Configuration.class:146
+msgid "Creating ini file with initial data"
+msgstr ""
+
+#: Configuration.class:165
+msgid "Error while creating settings directory"
+msgstr ""
+
+#: Configuration.class:172
+msgid "Creating logger with initial data"
+msgstr ""
+
+#: Configuration.class:221
+msgid "Checking group existence"
+msgstr ""
+
+#: Configuration.class:257
+msgid "Error detecting whether the shared directory is active"
+msgstr ""
+
+#: Constants.module:47
+msgid "Private"
+msgstr "Privada"
+
+#: Constants.module:48
+msgid "Shared"
+msgstr "Compartida"
+
+#: Constants.module:50 PhotoService.class:204
+msgid "Image saved successfully"
+msgstr ""
+
+#: Constants.module:51
+msgid "The file already exists"
+msgstr ""
+
+#: Constants.module:52
+msgid "Error while saving the photo to the database"
+msgstr ""
+
+#: Constants.module:53
+msgid "Some error ocurred"
+msgstr ""
+
+#: FAbout.form:12 FMain.form:144
+msgid "About Gacela"
+msgstr "Acerca de Gacela"
+
+#: FAbout.form:26
+msgid "Version"
+msgstr ""
+
+#: FAbout.form:32
+msgid "Gestor de Álbumes Compartidos En Linux Avanzado"
+msgstr ""
+
 #: FAbout.form:41
 msgid "https://github.com/sepulvedamarcos/gacela"
 msgstr ""
 
-#: FConfiguration.form:56
+#: FConfiguration.form:34
+msgid "Configuration Panel"
+msgstr ""
+
+#: FConfiguration.form:48
+msgid "General"
+msgstr ""
+
+#: FConfiguration.form:53
+msgid "Move images to internal repository"
+msgstr ""
+
+#: FConfiguration.form:64
 msgid "If enabled, Gacela will move imported images to its internal repository and remove them from their original location. This action cannot be undone."
 msgstr ""
 
-#: PhotoRepository.class:283
-msgid "Image already exists with that Hash256"
+#: FConfiguration.form:70
+msgid "Maximun files in Trash folder"
 msgstr ""
 
-#: PhotoService.class:247
-msgid "Image copy completed successfully in directory"
+#: FConfiguration.form:76
+msgid "1000"
 msgstr ""
 
-#: PhotoService.class:261
-msgid "Image deletion completed successfully in directory"
+#: FConfiguration.form:83
+msgid "Once the trash folder reaches its maximum capacity, further deletions will be disabled. To resume deleting files, please perform a manual empty of the trash bin."
 msgstr ""
 
-#: PhotoRepository.class:288
-msgid "Image does not exist"
+#: FConfiguration.form:89
+msgid "Maximum storage limit for the trash folder"
 msgstr ""
 
-#: FMain.form:69
-msgid "Import images"
+#: FConfiguration.form:95
+msgid "0"
+msgstr ""
+
+#: FConfiguration.form:100
+msgid "Logger"
+msgstr ""
+
+#: FConfiguration.form:105
+msgid "Log Level"
+msgstr ""
+
+#: FConfiguration.form:115
+msgid "Log Output"
+msgstr ""
+
+#: FConfiguration.form:125
+msgid "Log File Path"
+msgstr ""
+
+#: FConfiguration.form:130
+msgid "Max Log File Size"
+msgstr ""
+
+#: FConfiguration.form:135
+msgid "Max Backup Files"
+msgstr ""
+
+#: FConfiguration.form:146
+msgid "1"
+msgstr ""
+
+#: FConfiguration.form:159
+msgid "Import/Export"
+msgstr ""
+
+#: FConfiguration.form:164
+msgid "Show import summary dialog"
+msgstr ""
+
+#: FConfiguration.form:192 FImportDialog.form:96 FImportResume.form:78
+#: FImportSummary.form:89
+msgid "OK"
+msgstr ""
+
+#: FConfiguration.form:198 FImportDialog.form:101 FImportResume.form:84
+#: FImportSummary.form:95
+msgid "Cancel"
 msgstr ""
 
 #: FImportDialog.class:12
@@ -345,251 +180,510 @@ msgstr ""
 msgid "Import photos into the album"
 msgstr ""
 
-#: FImportResume.form:20
-msgid "Import Summary"
+#: FImportDialog.class:30
+msgid "Creating dialog window and album list"
 msgstr ""
 
-#: SQLiteContext.class:27
-msgid "Initializing SQLite database context"
+#: FImportDialog.class:64
+msgid "You must select photos to process"
 msgstr ""
 
-#: PhotoService.class:92
-msgid "Initial load inserting test data into photos table..."
+#: FImportDialog.class:67
+msgid "Are you sure you want to import the selected photos into the album with the chosen options?"
 msgstr ""
 
-#: FConfiguration.form:83
-msgid "Log File Path"
-msgstr ""
-
-#: FConfiguration.form:60
-msgid "Logger"
-msgstr ""
-
-#: FConfiguration.form:65
-msgid "Log Level"
-msgstr ""
-
-#: FConfiguration.form:74
-msgid "Log Output"
-msgstr ""
-
-#: FConfiguration.form:97
-msgid "Max Backup Files"
-msgstr ""
-
-#: FConfiguration.form:88
-msgid "Max Log File Size"
-msgstr ""
-
-#: FConfiguration.form:46
-msgid "Move images to internal repository"
-msgstr ""
-
-#: FImportDialog.class:188
-msgid "New album added successfully, loading it into the list"
-msgstr ""
-
-#: FImportDialog.class:63
+#: FImportDialog.class:67
 msgid "No"
 msgstr ""
 
-#: FImportResume.form:32
-msgid "Number of images imported"
-msgstr ""
-
-#: FImportResume.form:50
-msgid "Number of images that failed"
-msgstr ""
-
-#: FImportResume.form:41
-msgid "Number of images uploaded successfully"
-msgstr ""
-
-#: FConfiguration.form:124 FImportDialog.form:96 FImportResume.form:78
-msgid "OK"
-msgstr ""
-
-#: FMain.form:101
-msgid "Options"
-msgstr ""
-
-#: PhotoRepository.class:254
-msgid "Photo-album code created"
-msgstr ""
-
-#: PhotoRepository.class:242
-msgid "Photo code created"
-msgstr ""
-
-#: FImportDialog.form:31
-msgid "Photo import dialog"
-msgstr ""
-
-#: FImportDialog.form:54
-msgid "Photos to import"
-msgstr ""
-
-#: PhotoService.class:295
-msgid "Physical file does not exist during import"
-msgstr ""
-
-#: PhotoService.class:290
-msgid "Physical file exists during import"
-msgstr ""
-
-#: FImportDialog.form:49
-msgid "Preview"
-msgstr ""
-
-#: Constants.module:50
-msgid "Private"
-msgstr "Privada"
-
-#: FMain.form:85
-msgid "Private gallery"
-msgstr "Galeria privada"
-
-#: PhotoService.class:264
-msgid "Problem deleting original image"
-msgstr ""
-
-#: PhotoRepository.class:161
-msgid "Problems creating album, rolling back"
-msgstr ""
-
-#: FImportDialog.class:198 PhotoService.class:205
-msgid "Problems creating an album"
-msgstr ""
-
-#: PhotoRepository.class:181
-msgid "Problems deleting album, rolling back"
-msgstr ""
-
-#: PhotoService.class:224
-msgid "Problems deleting an album"
-msgstr ""
-
-#: PhotoRepository.class:203
-msgid "Problems deleting image from DB, rolling back"
-msgstr ""
-
-#: PhotoService.class:299
-msgid "Problem validating file existence"
-msgstr ""
-
-#: PhotoService.class:252
-msgid "Problem while saving image"
-msgstr ""
-
-#: FImportDialog.class:72
-msgid "Process finished. To see the summary, click the status bar."
-msgstr ""
-
-#: PhotoService.class:359
-msgid "Saving image to the import directory"
-msgstr ""
-
-#: FMain.form:229
-msgid "Search"
-msgstr ""
-
-#: FImportDialog.class:153
-msgid "Select an album to associate"
-msgstr ""
-
-#: Constants.module:51
-msgid "Shared"
-msgstr "Compartida"
-
-#: FMain.form:91
-msgid "Shared gallery"
-msgstr "Galeria compartida"
-
-#: FMain.class:50
-msgid "Some of the files you are trying to import are not valid"
-msgstr ""
-
-#: Main.module:17
-msgid "Starting Gacela"
-msgstr "Iniciando la aplicacióin Gacela"
-
-#: FImportDialog.class:69
-msgid "Starting photo import processing"
-msgstr ""
-
-#: FMain.form:325
-msgid "Status bar"
-msgstr ""
-
-#: SQLiteContext.class:51
-msgid "Switching database context to:"
-msgstr ""
-
-#: SQLiteContext.class:181
-msgid "Table check/creation failed:"
-msgstr ""
-
-#: SQLiteContext.class:178
-msgid "Table check and creation finished."
-msgstr ""
-
-#: SQLiteContext.class:18
-msgid "Table created"
-msgstr ""
-
-#: SQLiteContext.class:17
-msgid "Table does not exist, creating ..."
-msgstr ""
-
-#: FMain.form:213
-msgid "Tags"
-msgstr ""
-
-#: PhotoService.class:104
-msgid "Test data inserted successfully"
-msgstr ""
-
-#: PhotoService.class:350
-msgid "The file already exists"
-msgstr ""
-
-#: FMain.form:104
-msgid "Toolbar configuration"
-msgstr ""
-
-#: PhotoService.class:240
-msgid "Validating image existence and destination directory"
-msgstr ""
-
-#: PhotoRepository.class:275
-msgid "Validating in table with Hash256"
-msgstr ""
-
-#: PhotoService.class:288
-msgid "Validating physical file existence during import "
-msgstr ""
-
-#: FAbout.form:26
-msgid "Version"
-msgstr ""
-
-#: FMain.form:82
-msgid "View"
-msgstr "Vista"
-
-#: FImportDialog.class:63
+#: FImportDialog.class:67
 msgid "Yes"
 msgstr ""
 
-#: FImportDialog.class:174
-msgid "You must enter an album name to continue"
+#: FImportDialog.class:72
+msgid "Starting photo import processing"
+msgstr ""
+
+#: FImportDialog.class:81
+msgid "A problem occurred while importing the images"
+msgstr ""
+
+#: FImportDialog.class:110
+msgid "Checkbox click to associate album "
 msgstr ""
 
 #: FImportDialog.class:133
 msgid "You must select an album to continue"
 msgstr ""
 
-#: FImportDialog.class:60
-msgid "You must select photos to process"
+#: FImportDialog.class:153
+msgid "Select an album to associate"
 msgstr ""
 
+#: FImportDialog.class:161
+msgid "Cancel album association, revert changes"
+msgstr ""
+
+#: FImportDialog.class:172
+msgid "Attempting to add a new album"
+msgstr ""
+
+#: FImportDialog.class:174
+msgid "You must enter an album name to continue"
+msgstr ""
+
+#: FImportDialog.class:188
+msgid "New album added successfully, loading it into the list"
+msgstr ""
+
+#: FImportDialog.class:192
+msgid "Failed to add new album"
+msgstr ""
+
+#: FImportDialog.class:193
+msgid "Error while adding a new album"
+msgstr ""
+
+#: FImportDialog.class:198 PhotoService.class:254
+msgid "Problems creating an album"
+msgstr ""
+
+#: FImportDialog.class:215
+msgid "Adding new photos"
+msgstr ""
+
+#: FImportDialog.class:218
+msgid "Adding a new photo"
+msgstr ""
+
+#: FImportDialog.class:236
+msgid "Detected deletion of an album"
+msgstr ""
+
+#: FImportDialog.class:241
+msgid "Deletion data matches, sending id"
+msgstr ""
+
+#: FImportDialog.form:31
+msgid "Photo import dialog"
+msgstr ""
+
+#: FImportDialog.form:49
+msgid "Preview"
+msgstr ""
+
+#: FImportDialog.form:54
+msgid "Photos to import"
+msgstr ""
+
+#: FImportDialog.form:121
+msgid "Album to search"
+msgstr ""
+
+#: FImportDialog.form:130
+msgid "Album selection"
+msgstr ""
+
+#: FImportDialog.form:161
+msgid "Album name and description"
+msgstr ""
+
+#: FImportResume.form:20 FImportSummary.form:22
+msgid "Import Summary"
+msgstr ""
+
+#: FImportResume.form:32
+msgid "Number of images imported"
+msgstr ""
+
+#: FImportResume.form:41
+msgid "Number of images uploaded successfully"
+msgstr ""
+
+#: FImportResume.form:50
+msgid "Number of images that failed"
+msgstr ""
+
+#: FImportResume.form:59
+msgid "Do not show this dialog on every import"
+msgstr ""
+
+#: FImportResume.form:68 FImportSummary.form:79
+msgid "Default"
+msgstr ""
+
+#: FImportSummary.form:37
+msgid "Images imported"
+msgstr ""
+
+#: FImportSummary.form:46
+msgid "Images successfully imported"
+msgstr ""
+
+#: FImportSummary.form:55
+msgid "Images failed to import"
+msgstr ""
+
+#: FImportSummary.form:60
+msgid "Do not show this dialog again"
+msgstr ""
+
+#: FMain.class:59
+msgid "Some of the files you are trying to import are not valid"
+msgstr ""
+
+#: FMain.class:178
+msgid "View deleted images"
+msgstr ""
+
+#: FMain.class:206
+msgid "Open deleted images folder"
+msgstr ""
+
+#: FMain.class:262
+msgid " NOK: "
+msgstr ""
+
+#: FMain.class:262
+msgid "Import finished. OK: "
+msgstr ""
+
+#: FMain.form:68
+msgid "Gacela"
+msgstr ""
+
+#: FMain.form:72
+msgid "File"
+msgstr "Archivo"
+
+#: FMain.form:76
+msgid "Send to trash folder"
+msgstr ""
+
+#: FMain.form:80
+msgid "Delete permanently"
+msgstr ""
+
+#: FMain.form:88
+msgid "Export Images"
+msgstr ""
+
+#: FMain.form:92
+msgid "Import images"
+msgstr ""
+
+#: FMain.form:99
+msgid "Exit"
+msgstr "Salir"
+
+#: FMain.form:105
+msgid "View"
+msgstr "Vista"
+
+#: FMain.form:108
+msgid "Private gallery"
+msgstr "Galeria privada"
+
+#: FMain.form:114
+msgid "Shared gallery"
+msgstr "Galeria compartida"
+
+#: FMain.form:123
+msgid "View deleted files"
+msgstr ""
+
+#: FMain.form:128
+msgid "Options"
+msgstr ""
+
+#: FMain.form:131
+msgid "Toolbar configuration"
+msgstr ""
+
+#: FMain.form:135
+msgid "Gacela settings"
+msgstr ""
+
+#: FMain.form:141
+msgid "?"
+msgstr "Ayuda"
+
+#: FMain.form:149
+msgid "Gallery"
+msgstr ""
+
+#: FMain.form:179
+msgid "Export images"
+msgstr ""
+
+#: FMain.form:236
+msgid "Albums"
+msgstr ""
+
+#: FMain.form:241
+msgid "Filter 1"
+msgstr ""
+
+#: FMain.form:247
+msgid "Filter 2"
+msgstr ""
+
+#: FMain.form:259
+msgid "Tags"
+msgstr ""
+
+#: FMain.form:297
+msgid "Search"
+msgstr ""
+
+#: FMain.form:393
+msgid "Status bar"
+msgstr ""
+
+#: ImageMetadataAdapter.class:57
+msgid "Error extracting image metadata: "
+msgstr ""
+
+#: Main.module:16
+msgid "Starting Gacela"
+msgstr "Iniciando la aplicacióin Gacela"
+
+#: Main.module:28
+msgid "A critical problem was detected and the application will stop: "
+msgstr "Se detecto un problema critico y se detendra la aplicación"
+
+#: PhotoRepository.class:20
+msgid "Table does not exist, creating ..."
+msgstr ""
+
+#: PhotoRepository.class:21
+msgid "Table created"
+msgstr ""
+
+#: PhotoRepository.class:173
+msgid "Problems creating album, rolling back"
+msgstr ""
+
+#: PhotoRepository.class:193
+msgid "Problems deleting album, rolling back"
+msgstr ""
+
+#: PhotoRepository.class:295
+msgid "Photo code created"
+msgstr ""
+
+#: PhotoRepository.class:307
+msgid "Photo-album code created"
+msgstr ""
+
+#: PhotoRepository.class:328
+msgid "Validating in table with Hash256"
+msgstr ""
+
+#: PhotoRepository.class:336
+msgid "Image already exists with that Hash256"
+msgstr ""
+
+#: PhotoRepository.class:341
+msgid "Image does not exist"
+msgstr ""
+
+#: PhotoRepository.class:345
+msgid "Error searching photo by Hash256"
+msgstr ""
+
+#: PhotoRepository.class:395
+msgid "Database connection is not ready"
+msgstr ""
+
+#: PhotoRepository.class:398
+msgid "Checking the existence of schema tables..."
+msgstr ""
+
+#: PhotoRepository.class:432
+msgid "Table check and creation finished."
+msgstr ""
+
+#: PhotoRepository.class:435
+msgid "Table check/creation failed:"
+msgstr ""
+
+#: PhotoRepository.class:492
+msgid "Error adding original_path column"
+msgstr ""
+
+#: PhotoRepository.class:507
+msgid "Column original_path was not created"
+msgstr ""
+
+#: PhotoService.class:116
+msgid "Initial load inserting test data into photos table..."
+msgstr ""
+
+#: PhotoService.class:128
+msgid "Test data inserted successfully"
+msgstr ""
+
+#: PhotoService.class:131
+msgid "Error inserting test photo"
+msgstr ""
+
+#: PhotoService.class:150
+msgid "Error changing gallery"
+msgstr ""
+
+#: PhotoService.class:189
+msgid "Image has an import error"
+msgstr ""
+
+#: PhotoService.class:191
+msgid "duplicate"
+msgstr ""
+
+#: PhotoService.class:195
+msgid "db_error"
+msgstr ""
+
+#: PhotoService.class:197
+msgid "error"
+msgstr ""
+
+#: PhotoService.class:206
+msgid "imported"
+msgstr ""
+
+#: PhotoService.class:245
+msgid "Creating album entity to persist"
+msgstr ""
+
+#: PhotoService.class:263
+msgid "Deleting album entity"
+msgstr ""
+
+#: PhotoService.class:273
+msgid "Problems deleting an album"
+msgstr ""
+
+#: PhotoService.class:286
+msgid "Validating image existence and destination directory"
+msgstr ""
+
+#: PhotoService.class:291
+msgid "Attempting to copy image into directory"
+msgstr ""
+
+#: PhotoService.class:293
+msgid "Image copy completed successfully in directory"
+msgstr ""
+
+#: PhotoService.class:298
+msgid "Problem while saving image"
+msgstr ""
+
+#: PhotoService.class:305
+msgid "Attempting to delete image in directory"
+msgstr ""
+
+#: PhotoService.class:307
+msgid "Image deletion completed successfully in directory"
+msgstr ""
+
+#: PhotoService.class:310
+msgid "Problem deleting original image"
+msgstr ""
+
+#: PhotoService.class:332
+msgid "Validating physical file existence during import "
+msgstr ""
+
+#: PhotoService.class:334
+msgid "Physical file exists during import"
+msgstr ""
+
+#: PhotoService.class:339
+msgid "Physical file does not exist during import"
+msgstr ""
+
+#: PhotoService.class:343
+msgid "Problem validating file existence"
+msgstr ""
+
+#: PhotoService.class:414
+msgid "Checking file existence by Hash256 in the DB"
+msgstr ""
+
+#: PhotoService.class:419
+msgid "Saving image to the import directory"
+msgstr ""
+
+#: PhotoService.class:422
+msgid "Photo creation date from EXIF or fallback "
+msgstr ""
+
+#: PhotoService.class:449
+msgid "Evaluating condition to delete original image"
+msgstr ""
+
+#: PhotoService.class:451
+msgid "Condition true, delete original image"
+msgstr ""
+
+#: PhotoService.class:461
+msgid "Error importing photo: "
+msgstr ""
+
+#: SQLiteContext.class:22
+msgid "Initializing SQLite database context"
+msgstr ""
+
+#: SQLiteContext.class:40
+msgid "Gallery path has not changed. No reconnection required."
+msgstr ""
+
+#: SQLiteContext.class:46
+msgid "Switching database context to:"
+msgstr ""
+
+#: SQLiteContext.class:63
+msgid "Database path:"
+msgstr ""
+
+#: SQLiteContext.class:64
+msgid "Database name:"
+msgstr ""
+
+#: SQLiteContext.class:65
+msgid "Database type:"
+msgstr ""
+
+#: SQLiteContext.class:70
+msgid "Could not connect to the database:"
+msgstr ""
+
+#: SQLiteContext.class:74
+msgid "Connection established with:"
+msgstr ""
+
+#: SQLiteContext.class:80
+msgid "Checking for Gacela database"
+msgstr ""
+
+#: SQLiteContext.class:82
+msgid "Database file does not exist. Starting creation:"
+msgstr ""
+
+#: SQLiteContext.class:89
+msgid "An error occurred while initializing the database"
+msgstr ""
+
+#: SQLiteContext.class:104
+msgid "Cannot open connection to create DB:"
+msgstr ""
+
+#: SQLiteContext.class:113
+msgid "Cannot create database:"
+msgstr ""
+
+#: SQLiteContext.class:126
+msgid "Database created successfully"
+msgstr ""

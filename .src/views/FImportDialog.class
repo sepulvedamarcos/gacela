@@ -11,7 +11,7 @@ Private $Titulo As String = "[FImportDialog] "
 Private $FilesDrop As String[]
 Private $TextCheckFalse As String = ("Import photos into an album")
 Private $TextCheckTrue As String = ("Import photos into the album")
-Private $IdAlbum As Integer '' Selected album id
+Private $IdAlbum As Integer
 Private $Fmain As Fmain
 
 
@@ -36,20 +36,13 @@ Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, oLogger As Log4G
   PanelAssociateAlbum.Visible = False
   PanelAssociateAlbum.Y = 4
   PanelAssociateAlbum.X = 182
-  ListEditorAvailabeAlbums.ReadOnly = True
-  ListEditorAvailabeAlbums.Wrap = True
-  ListEditorAvailabeAlbums.Unique = True
+  ListEditorAvailableAlbums.ReadOnly = True
+  ListEditorAvailableAlbums.Wrap = True
+  ListEditorAvailableAlbums.Unique = True
   
   CheckBoxEnableAlbum.Text = $TextCheckFalse
   
   FindAlbums()
-  
-End
-
-Public Sub Run() As Boolean
-  
-  $Log4Gambas.Debug(LogPrefix("Run") & "Run method")
-  Return Not Me.ShowModal()
   
 End
 
@@ -89,13 +82,13 @@ Public Sub BtnCancel_Click()
   
 End
 
-Public Sub ButtonBoxFilterFilter()
-  
-  $Log4Gambas.Debug(LogPrefix("ButtonBoxFilterFilter") & "Filter escribe [" & ButtonBoxFilter.Text & "]")
-  TextAreaAlbumDescription.Text = ""
-  FindAlbums(ButtonBoxFilter.Text)
-  
-End
+'Public Sub ButtonBoxFilterFilter()
+'  
+'  $Log4Gambas.Debug(LogPrefix("ButtonBoxFilterFilter") & "Filter escribe [" & ButtonBoxFilter.Text & "]")
+'  TextAreaAlbumDescription.Text = ""
+'  FindAlbums(ButtonBoxFilter.Text)
+'  
+'End
 
 Public Sub ButtonBoxFilter_Click()
   
@@ -129,19 +122,19 @@ Public Sub BtnOkAlbum_Click()
   Dim sItem As String
   Dim iCuenta As Integer
   
-  If TextBoxAlbum.Text = "" Or ListEditorAvailabeAlbums.List.Count = 0 Then
-    Message.Warning(("You must select an album to continue"))
-    ListEditorAvailabeAlbums.SetFocus()
+  If TextBoxAlbum.Text = "" Or ListEditorAvailableAlbums.Text = "" Then
+    Message.Warning(("You must select an album to continue or add new one"))
+    ListEditorAvailableAlbums.SetFocus()
     Return
   Else
     If TextBoxAlbum.Text <> "" Then 
-      For Each sItem In ListEditorAvailabeAlbums.List
+      For Each sItem In ListEditorAvailableAlbums.List
         If sItem = TextBoxAlbum.Text Then 
           iCuenta += 1
         Endif
       Next
       If iCuenta = 0 Then
-        ListEditorAvailabeAlbums_Add()
+        ListEditorAvailableAlbums_Add()
       Endif
     Endif
   Endif
@@ -164,7 +157,7 @@ Public Sub BtnCancelAlbum_Click()
   
 End
 
-Public Sub ListEditorAvailabeAlbums_Add()
+Public Sub ListEditorAvailableAlbums_Add()
   
   Dim cAlbum As AlbumEntity
   Dim aAlbums As AlbumEntity[]
@@ -176,7 +169,7 @@ Public Sub ListEditorAvailabeAlbums_Add()
     Return 
   Endif
   
-  aAlbums = ListEditorAvailabeAlbums.Tag
+  aAlbums = ListEditorAvailableAlbums.Tag
   For Each cAlbum In aAlbums
     If cAlbum.Name = TextBoxAlbum.Text Then 
       Return 
@@ -227,18 +220,18 @@ Public Sub ListEditorPhotos_Select()
   
 End
 
-Public Sub ListEditorAvailabeAlbums_Select()
+Public Sub ListEditorAvailableAlbums_Select()
   
   Dim aAlbums As AlbumEntity[]
   Dim cAlb As AlbumEntity
   
-  If ListEditorAvailabeAlbums.Index = -1 Then
-    $Log4Gambas.Debug(LogPrefix("ListEditorAvailabeAlbums_Select") & ("Detected deletion of an album") & "[" & ListEditorAvailabeAlbums.Text & "]")
+  If ListEditorAvailableAlbums.Index = -1 Then
+    $Log4Gambas.Debug(LogPrefix("ListEditorAvailabeAlbums_Select") & ("Detected deletion of an album") & "[" & ListEditorAvailableAlbums.Text & "]")
     
-    aAlbums = ListEditorAvailabeAlbums.Tag
+    aAlbums = ListEditorAvailableAlbums.Tag
     For Each cAlb In aAlbums
-      If cAlb.name = ListEditorAvailabeAlbums.Text Then 
-        $Log4Gambas.Debug(LogPrefix("ListEditorAvailabeAlbums_Select") & ("Deletion data matches, sending id") & " [" & cAlb.Id & "] [" & ListEditorAvailabeAlbums.Text & "]")
+      If cAlb.name = ListEditorAvailableAlbums.Text Then 
+        $Log4Gambas.Debug(LogPrefix("ListEditorAvailabeAlbums_Select") & ("Deletion data matches, sending id") & " [" & cAlb.Id & "] [" & ListEditorAvailableAlbums.Text & "]")
         If $PhotoService.RemoveAlbum(cAlb.Id) Then
           TextBoxAlbum.Text = ""
           TextAreaAlbumDescription.Text = ""
@@ -250,11 +243,11 @@ Public Sub ListEditorAvailabeAlbums_Select()
     Return
   Endif
   
-  aAlbums = ListEditorAvailabeAlbums.Tag
+  aAlbums = ListEditorAvailableAlbums.Tag
   
-  TextBoxAlbum.Text = aAlbums[ListEditorAvailabeAlbums.Index].Name
-  TextAreaAlbumDescription.Text = aAlbums[ListEditorAvailabeAlbums.Index].Description
-  $IdAlbum = aAlbums[ListEditorAvailabeAlbums.Index].Id
+  TextBoxAlbum.Text = aAlbums[ListEditorAvailableAlbums.Index].Name
+  TextAreaAlbumDescription.Text = aAlbums[ListEditorAvailableAlbums.Index].Description
+  $IdAlbum = aAlbums[ListEditorAvailableAlbums.Index].Id
   
   $Log4Gambas.Debug(LogPrefix("ListEditorAvailabeAlbums_Select") & ("Album selection") & "[" & TextBoxAlbum.Text & "][" & Str($IdAlbum) & "]")
   
@@ -273,12 +266,12 @@ Private Sub FindAlbums(Optional text As String)
   $Log4Gambas.Debug(LogPrefix("FindAlbums") & "Searching for album [" & text & "]")
   aAlbums = $PhotoService.FindAlbums(text, 0, Constants.USE_SOFT_FALSE)
   
-  ListEditorAvailabeAlbums.Clear
-  ListEditorAvailabeAlbums.Index = -1
-  ListEditorAvailabeAlbums.Tag = aAlbums
+  ListEditorAvailableAlbums.Clear
+  ListEditorAvailableAlbums.Index = -1
+  ListEditorAvailableAlbums.Tag = aAlbums
   For Each cAlbum In aAlbums
     
-    ListEditorAvailabeAlbums.Add(cAlbum.Name)
+    ListEditorAvailableAlbums.Add(cAlbum.Name)
     
   Next
   

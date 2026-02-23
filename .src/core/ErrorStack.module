@@ -8,29 +8,29 @@
 
 Public $Stack As Collection
 
-Public Sub Clear()
+'Public Sub Clear()
+'
+'  $Stack = Null
+'
+'End
 
-  $Stack = Null
+'Public Sub Push(sContext As String)
+'
+'  If $Stack = Null Then $Stack = New Collection
+'  $Stack.Add(sContext)
+'
+'End
 
-End
-
-Public Sub Push(sContext As String)
-
-  If $Stack = Null Then $Stack = New Collection
-  $Stack.Add(sContext)
-
-End
-
-Public Function Dump() As String
-
-  Dim sError As String, v As Variant
-
-  If $Stack = Null Then Return ""
-  
-  For Each v In $Stack
-    sError &= v & gb.NewLine
-  Next
-  
-  Return sError
-
-End
+'Public Function Dump() As String
+'
+'  Dim sError As String, v As Variant
+'
+'  If $Stack = Null Then Return ""
+'  
+'  For Each v In $Stack
+'    sError &= v & gb.NewLine
+'  Next
+'  
+'  Return sError
+'
+'End

@@ -1,19 +1,18 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,83,63)
-  Expand = True
+  MoveScaled(0,0,90,63)
   Text = ("Configuration Panel")
   Arrangement = Arrange.Vertical
   Margin = True
   Padding = 4
   { Panel1 Panel
-    MoveScaled(0,0,82,56)
+    MoveScaled(0,0,90,54)
     Arrangement = Arrange.Vertical
     { IconPanelGacela IconPanel
-      MoveScaled(1,2,80,52)
+      MoveScaled(1,2,87,46)
       Expand = True
-      Count = 2
+      Count = 3
       Index = 0
       Text = ("General")
       Picture = Picture["icon:/medium/access"]
@@ -107,11 +106,25 @@
         Suffix = "Mg"
         Value = 1
       }
+      Index = 2
+      Text = ("Import/Export")
+      Picture = Picture["icon:/22/upload"]
+      { Label11 Label
+        MoveScaled(0,1,36,3)
+        Text = ("Show import summary dialog")
+      }
+      { SwitchButtonShowSummaryDialog SwitchButton
+        MoveScaled(44,1,9,4)
+      }
       Index = 0
     }
   }
+  { Separator1 Separator
+    MoveScaled(0,54,104,2)
+    Expand = True
+  }
   { HBox1 HBox
-    MoveScaled(0,56,83,7)
+    MoveScaled(0,56,90,7)
     Expand = True
     AutoResize = True
     Spacing = True

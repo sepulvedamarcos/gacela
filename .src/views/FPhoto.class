@@ -26,9 +26,6 @@ Public Sub _new(cPhoto As PhotoEntity)
 
 End
 
-Public Sub Form_Open()
-
-End
 
 Public Sub Form_Resize()
 
@@ -39,32 +36,6 @@ Public Sub Form_Resize()
 
 End
 
-Public Sub Form_Arrange()
-
-  ' Me.Height = Me.Parent.Height
-  ' Me.Width = Me.Parent.Width
-  ' PictureBoxPhoto.Height = Me.Parent.Height
-  ' PictureBoxPhoto.Width = Me.Parent.Width
-
-End
-
-Public Sub Form_Activate()
-
-  ' Me.Height = Me.Parent.Height
-  ' Me.Width = Me.Parent.Width
-  ' PictureBoxPhoto.Height = Me.Parent.Height
-  ' PictureBoxPhoto.Width = Me.Parent.Width
-
-End
-
-Public Sub Form_State()
-
-  ' Me.Height = Me.Parent.Height
-  ' Me.Width = Me.Parent.Width
-  ' PictureBoxPhoto.Height = Me.Parent.Height
-  ' PictureBoxPhoto.Width = Me.Parent.Width
-
-End
 
 Public Sub PictureBoxPhoto_Enter()
 

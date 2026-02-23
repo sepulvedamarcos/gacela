@@ -70,7 +70,7 @@
     { TextAreaAlbumDescription TextArea
       MoveScaled(2,41,48,8)
     }
-    { ListEditorAvailabeAlbums ListEditor
+    { ListEditorAvailableAlbums ListEditor
       MoveScaled(2,12,48,20)
     }
     { ButtonBoxFilter ButtonBox

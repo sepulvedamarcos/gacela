@@ -3,7 +3,6 @@
 { Form Form
   MoveScaled(0,0,137,87)
   Drop = True
-  Expand = True
   Text = ("Gacela")
   Arrangement = Arrange.Vertical
   { MainMenu Menu
@@ -18,7 +17,7 @@
     }
     { Menu6 Menu
     }
-    { Menu3 Menu
+    { MainMenu_ExportImages Menu
       Text = ("Export Images")
     }
     { MainMenu_ImportImages Menu
@@ -51,6 +50,14 @@
   }
   { OptionsMenu Menu
     Text = ("Options")
+    { Menu9 Menu
+      Text = ("Albums")
+    }
+    { Menu10 Menu
+      Text = ("Tags")
+    }
+    { Menu11 Menu
+    }
     { ToolbarConfigurationMenu Menu
       Text = ("Toolbar configuration")
     }
@@ -123,42 +130,33 @@
   { HBox1 HBox
     MoveScaled(0,8,137,70)
     Expand = True
-    Spacing = True
     { PanelIzquierdo Panel
       MoveScaled(0,0,27,70)
-      Background = Color.ButtonBackground
-      Arrangement = Arrange.Row
-      Spacing = True
-      Padding = 4
-      { ExpanderAlbum Expander
-        MoveScaled(0,2,25,27)
-        Font = Font["Poppins,16"]
+      Arrangement = Arrange.Vertical
+      { Panel3 Panel
+        MoveScaled(0,3,26,63)
+        Background = Color.Pink
         Expand = True
-        Border = False
-        Text = ("Albums")
-        { CheckBox1 CheckBox
-          MoveScaled(2,2,16,4)
-          Font = Font["Poppins,-1"]
-          Text = ("Filter 1")
+        Arrangement = Arrange.Row
+        Margin = True
+        Padding = 4
+        { ExpanderAlbum Expander
+          MoveScaled(2,2,21,4)
+          Expand = True
+          Arrangement = Arrange.Fill
+          Border = False
+          Text = ("Albums")
         }
-        { CheckBox2 CheckBox
-          MoveScaled(2,6,16,4)
-          Font = Font["Poppins,+1"]
-          Text = ("Filter 2")
+        { ExpanderTags Expander
+          MoveScaled(2,12,24,18)
+          Expand = True
+          Arrangement = Arrange.Fill
+          Text = ("Tags")
         }
-        { Button5 Button
-          MoveScaled(3,12,16,4)
-        }
-      }
-      { ExpanderTags Expander
-        MoveScaled(1,29,24,21)
-        Font = Font["Poppins,16"]
-        Expand = True
-        Text = ("Tags")
       }
     }
     { PanelDerecho Panel
-      MoveScaled(32,2,97,65)
+      MoveScaled(29,1,97,65)
       Expand = True
       Arrangement = Arrange.Vertical
       { PanelBusqueda Panel
