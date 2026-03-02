@@ -32,8 +32,11 @@
       Text = ("Import photos into an album")
     }
     { LabelAlbumDescriptionSelected Label
-      MoveScaled(4,49,102,3)
+      MoveScaled(4,52,102,3)
       Font = Font["-2"]
+    }
+    { LabelAlbumNameSelected Label
+      MoveScaled(4,49,25,3)
     }
   }
   { VBoxButtons VBox
@@ -64,14 +67,13 @@
     }
   }
   { PanelAssociateAlbum Panel
-    MoveScaled(30,1,51,56)
+    MoveScaled(30,1,51,65)
     Background = Color.Background
     Border = Border.Sunken
-    { TextAreaAlbumDescription TextArea
-      MoveScaled(2,41,48,8)
-    }
-    { ListEditorAvailableAlbums ListEditor
-      MoveScaled(2,12,48,20)
+    { Label1 Label
+      MoveScaled(2,2,48,3)
+      Font = Font["+4"]
+      Text = ("Album selection")
     }
     { ButtonBoxFilter ButtonBox
       MoveScaled(2,7,48,4)
@@ -80,13 +82,21 @@
       ClearButton = True
       Filter = True
     }
-    { Label1 Label
-      MoveScaled(2,2,48,3)
-      Font = Font["+4"]
-      Text = ("Album selection")
+    { ListEditorAvailableAlbums ListBox
+      MoveScaled(2,12,48,20)
+    }
+    { Label2 Label
+      MoveScaled(2,33,47,3)
+      Text = ("Album name and description")
+    }
+    { TextBoxAlbum TextBox
+      MoveScaled(2,36,48,4)
+    }
+    { TextAreaAlbumDescription TextArea
+      MoveScaled(2,41,48,8)
     }
     { HBox2 HBox
-      MoveScaled(1,50,49,6)
+      MoveScaled(1,58,49,6)
       Expand = True
       AutoResize = True
       Spacing = True
@@ -97,18 +107,20 @@
       { btnOkAlbum Button
         MoveScaled(8,1,16,4)
         Text = ("OK")
+        Default = True
       }
       { btnCancelAlbum Button
         MoveScaled(29,1,16,4)
         Text = ("Cancel")
       }
     }
-    { TextBoxAlbum TextBox
-      MoveScaled(2,36,48,4)
+    { Separator2 Separator
+      MoveScaled(1,56,49,2)
+      Expand = True
     }
-    { Label2 Label
-      MoveScaled(2,33,47,3)
-      Text = ("Album name and description")
+    { ButtonAddAlbum Button
+      MoveScaled(34,50,16,4)
+      Text = ("Add")
     }
   }
 }

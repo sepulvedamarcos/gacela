@@ -6,22 +6,19 @@
 '
 '
 Private $PhotoService As PhotoService
-Private $Log4Gambas As Log4Gambas3
+Private $Log4Gambas As LoggerPort
 Private $Titulo As String = "[FImportDialog] "
 Private $FilesDrop As String[]
-Private $TextCheckFalse As String = ("Import photos into an album")
-Private $TextCheckTrue As String = ("Import photos into the album")
 Private $IdAlbum As Integer
 Private $Fmain As Fmain
-
 
 ' ==================================================
 '
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, oLogger As Log4Gambas3, aFilesDrop As String[])
-
+Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, oLogger As LoggerPort, aFilesDrop As String[])
+  
   $PhotoService = cPhotoService
   $Log4Gambas = oLogger
   $FilesDrop = aFilesDrop
@@ -36,11 +33,7 @@ Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, oLogger As Log4G
   PanelAssociateAlbum.Visible = False
   PanelAssociateAlbum.Y = 4
   PanelAssociateAlbum.X = 182
-  ListEditorAvailableAlbums.ReadOnly = True
   ListEditorAvailableAlbums.Wrap = True
-  ListEditorAvailableAlbums.Unique = True
-  
-  CheckBoxEnableAlbum.Text = $TextCheckFalse
   
   FindAlbums()
   
@@ -82,13 +75,26 @@ Public Sub BtnCancel_Click()
   
 End
 
-'Public Sub ButtonBoxFilterFilter()
-'  
-'  $Log4Gambas.Debug(LogPrefix("ButtonBoxFilterFilter") & "Filter escribe [" & ButtonBoxFilter.Text & "]")
-'  TextAreaAlbumDescription.Text = ""
-'  FindAlbums(ButtonBoxFilter.Text)
-'  
-'End
+Public Sub ButtonAddAlbum_Click()
+  
+  Dim iCuenta As Integer
+  
+  If TextBoxAlbum.Text <> "" Then
+    For Each sItem As String In ListEditorAvailableAlbums.List
+      If sItem = TextBoxAlbum.Text Then
+        iCuenta += 1
+      Endif
+    Next
+    If iCuenta = 0 Then
+      ListEditorAvailableAlbums_Add()
+      ListEditorAvailableAlbums.Index = ListEditorAvailableAlbums.Count - 1
+    Endif
+  Else
+    Message.Warning(("You must add an album to continue"))
+    TextBoxAlbum.SetFocus
+  Endif
+  
+End
 
 Public Sub ButtonBoxFilter_Click()
   
@@ -105,13 +111,11 @@ Public Sub CheckBoxEnableAlbum_Click()
     PanelList.Enabled = False
     VBoxButtons.Enabled = False
     PanelAssociateAlbum.Visible = True
-    CheckBoxEnableAlbum.Text = $TextCheckFalse
     
   Else
     PanelAssociateAlbum.Visible = False
     PanelList.Enabled = True
     VBoxButtons.Enabled = True
-    CheckBoxEnableAlbum.Text = $TextCheckTrue
     
   Endif
   
@@ -121,21 +125,25 @@ Public Sub BtnOkAlbum_Click()
   
   Dim sItem As String
   Dim iCuenta As Integer
+  Dim oAlbums As AlbumEntity[]
   
   If TextBoxAlbum.Text = "" Or ListEditorAvailableAlbums.Text = "" Then
     Message.Warning(("You must select an album to continue or add new one"))
     ListEditorAvailableAlbums.SetFocus()
     Return
   Else
-    If TextBoxAlbum.Text <> "" Then 
-      For Each sItem In ListEditorAvailableAlbums.List
-        If sItem = TextBoxAlbum.Text Then 
-          iCuenta += 1
-        Endif
-      Next
-      If iCuenta = 0 Then
-        ListEditorAvailableAlbums_Add()
+    If TextBoxAlbum.Text <> "" Then
+      
+      If TextBoxAlbum.Text = ListEditorAvailableAlbums.Text Then
+        oAlbums = ListEditorAvailableAlbums.Tag
+        $IdAlbum = oAlbums[ListEditorAvailableAlbums.Index].Id
+      Else
+        Message.Warning(("You must select an album to continue or add new one"))
+        ListEditorAvailableAlbums.SetFocus()
+        Return
+        
       Endif
+      
     Endif
   Endif
   
@@ -144,7 +152,8 @@ Public Sub BtnOkAlbum_Click()
   VBoxButtons.Enabled = True
   
   $Log4Gambas.Debug(LogPrefix("BtnOkAlbum_Click") & ("Select an album to associate") & " [" & TextBoxAlbum.Text & "]")
-  CheckBoxEnableAlbum.Text = $TextCheckTrue & " [" & TextBoxAlbum.Text & "]"
+  
+  LabelAlbumNameSelected.Text = TextBoxAlbum.Text
   LabelAlbumDescriptionSelected.Text = TextAreaAlbumDescription.Text
   
 End
@@ -153,7 +162,6 @@ Public Sub BtnCancelAlbum_Click()
   
   $Log4Gambas.Debug(LogPrefix("BtnCancelAlbum_Click") & ("Cancel album association, revert changes"))
   CheckBoxEnableAlbum.Value = False
-  CheckBoxEnableAlbum.Text = $TextCheckFalse
   
 End
 
