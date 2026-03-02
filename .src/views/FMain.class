@@ -4,7 +4,7 @@ Private $Width As Integer = 160
 Private $Height As Integer = 90
 
 Private $Configuration As Configuration
-Private $Log4Gambas As Log4Gambas3
+Private $Log4Gambas As LoggerPort
 Private $PhotoService As PhotoService
 Private $Titulo As String = "[FMain] "
 Private $StatusDefaultText As String
@@ -14,7 +14,7 @@ Private $AlbumPanel As Panel
 
 Property LastImportSummary As ImportSummary
 
-Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3, cPhotoService As PhotoService)
+Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService)
   
   $Configuration = cConfiguration
   $Log4Gambas = oLogger

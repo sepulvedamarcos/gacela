@@ -5,7 +5,7 @@
 ' Data access class for DB
 '
 '
-Private $Log4Gambas As Log4Gambas3
+Private $Log4Gambas As LoggerPort
 Private $DbContext As SQLiteContext
 Private $Configuration As Configuration
 Private $Titulo As String = "[PhotoRepository] "
@@ -27,7 +27,7 @@ Property Read DBContext As SQLiteContext
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cConfiguration As Configuration, oLogger As Log4Gambas3)
+Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort)
   
   $Log4Gambas = oLogger
   $Configuration = cConfiguration

@@ -11,7 +11,7 @@ Private $iPageSize As Integer = 15
 Private $iCurrentPage As Integer = 0
 Private $aCachedPhotos As PhotoEntity[]
 Private $iTotalCount As Integer = 0
-Private $Log4Gambas As Log4Gambas3
+Private $Log4Gambas As LoggerPort
 Private $bHasMorePages As Boolean = True
 ' Filters
 Private $bFilterGarbage As Boolean = False
@@ -30,7 +30,7 @@ Private $sSortOrder As String = "DESC"      ' ASC, DESC
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cRepository As PhotoRepository, oLogger As Log4Gambas3)
+Public Sub _new(cRepository As PhotoRepository, oLogger As LoggerPort)
   $cRepository = cRepository
   $Log4Gambas = oLogger
   $aCachedPhotos = New PhotoEntity[]

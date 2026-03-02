@@ -6,7 +6,7 @@
 '
 '
 
-Private $Log4gambas As Log4Gambas3
+Private $Log4gambas As LoggerPort
 Private $Titulo As String = "[ImageMetadataAdapter] "
 
 ' ==================================================
@@ -14,7 +14,7 @@ Private $Titulo As String = "[ImageMetadataAdapter] "
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(oLog4gambas As Log4Gambas3)
+Public Sub _new(oLog4gambas As LoggerPort)
   
   $Log4gambas = oLog4gambas
   

@@ -1,0 +1,82 @@
+' Gambas class file
+
+' Adapter from LoggerPort to Log4Gambas3.
+Inherits LoggerPort
+
+Private $Backend As New Log4Gambas3
+
+Public Sub Debug(message As String)
+  $Backend.Debug(message)
+End
+
+Public Sub Info(message As String)
+  $Backend.Info(message)
+End
+
+Public Sub Warning(message As String)
+  $Backend.Warning(message)
+End
+
+Public Sub Error(message As String)
+  $Backend.Error(message)
+End
+
+Public Sub Fatal(message As String)
+  $Backend.Fatal(message)
+End
+
+Public Sub SetAppName(appName As String)
+  $Backend.SetAppName(appName)
+End
+
+Public Sub SetMinLevel(level As Integer)
+  $Backend.SetMinLevel(level)
+End
+
+Public Sub SetOutput(output As Integer)
+  $Backend.SetOutput(output)
+End
+
+Public Sub SetLogFile(logFile As String)
+  $Backend.SetLogFile(logFile)
+End
+
+Public Sub SetMaxFileSize(sizeBytes As Integer)
+  $Backend.SetMaxFileSize(sizeBytes)
+End
+
+Public Sub SetMaxFiles(maxFiles As Integer)
+  $Backend.SetMaxFiles(maxFiles)
+End
+
+Public Function GetMinLevel() As Integer
+  Return $Backend.GetMinLevel()
+End
+
+Public Function GetLogFile() As String
+  Return $Backend.GetLogFile()
+End
+
+Public Function GetMaxFileSize() As Integer
+  Return $Backend.GetMaxFileSize()
+End
+
+Public Function GetMaxFiles() As Integer
+  Return $Backend.GetMaxFiles()
+End
+
+Public Function GetDefaultLevelDebug() As Integer
+  Return $Backend.LEVEL_DEBUG
+End
+
+Public Function GetDefaultOutputBoth() As Integer
+  Return $Backend.OUTPUT_BOTH
+End
+
+Private Function Levels_Read() As String[]
+  Return $Backend.Levels
+End
+
+Private Function Outputs_Read() As String[]
+  Return $Backend.Outputs
+End

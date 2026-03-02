@@ -9,7 +9,7 @@ Private $SettingPath As String                                                ''
 Private $IsFirstRun As Boolean = False                                        '' First run indicator
 Private $WhichGallery As Integer = Enumeration.GalleryType_Private            '' Active gallery type
 Private $AppPath As String                                                    '' Application files path
-Private $Log4gambas As New Log4Gambas3                                        '' Logger instance
+Private $Log4gambas As LoggerPort                                              '' Logger instance
 Private $OsTheme As Integer                                                   '' Current OS theme
 Private $AppTheme As Integer                                                  '' Application theme
 Private $IsSharedEnabled As Boolean                                           '' Shared gallery directory enabled
@@ -49,6 +49,7 @@ Public Sub _new()
   $SettingPath = User.Home &/ Constants.GACELA_SETTING_DIRECTORY
   $LogPath = User.Home &/ Constants.GACELA_LOG_DIRECTORY
   $OsTheme = FindOSTheme()
+  $Log4gambas = New Log4GambasLoggerAdapter
   
   $Settings = New Settings($SettingPath &/ Constants.CONFIG_NAME)
   If $Settings.Count = 0 Then
@@ -109,13 +110,13 @@ Public Sub InitializeEnvironment()
   
 End
 
-Public Function InitializeLogger() As Log4Gambas3
+Public Function InitializeLogger() As LoggerPort
   
-  $Log4gambas.Info(LogPrefix("InitializeLogger") & ("Creating ini file with Log4Gambas3 data"))
+  $Log4gambas.Info(LogPrefix("InitializeLogger") & ("Creating logger with configured data"))
   
   $Log4gambas.SetAppName(Application.Name)
-  $Log4gambas.SetMinLevel($Settings[Constants.LOG4GAMBAS_LEVEL, $Log4gambas.LEVEL_DEBUG])
-  $Log4gambas.SetOutput($Settings[Constants.LOG4GAMBAS_OUTPUT, $Log4gambas.OUTPUT_BOTH])
+  $Log4gambas.SetMinLevel($Settings[Constants.LOG4GAMBAS_LEVEL, $Log4gambas.GetDefaultLevelDebug()])
+  $Log4gambas.SetOutput($Settings[Constants.LOG4GAMBAS_OUTPUT, $Log4gambas.GetDefaultOutputBoth()])
   $Log4gambas.SetLogFile($Settings[Constants.LOG4GAMBAS_LOGFILE, $Log4gambas.GetLogFile()])
   $Log4gambas.SetMaxFileSize($Settings[Constants.LOG4GAMBAS_MAXFILESIZE, $Log4gambas.GetMaxFileSize()])
   $Log4gambas.SetMaxFiles($Settings[Constants.LOG4GAMBAS_MAXFILES, $Log4gambas.GetMaxFiles()])
@@ -167,7 +168,7 @@ Catch
   
 End
 
-Private Function FirstInitializeLogger() As Log4Gambas3
+Private Function FirstInitializeLogger() As LoggerPort
   
   $Log4gambas.info(LogPrefix("FirstInitializeLogger") & ("Creating logger with initial data"))
   
@@ -176,7 +177,7 @@ Private Function FirstInitializeLogger() As Log4Gambas3
   Endif
   
   $Settings[Constants.LOG4GAMBAS_LEVEL] = $Log4gambas.GetMinLevel()
-  $Settings[Constants.LOG4GAMBAS_OUTPUT] = $Log4gambas.OUTPUT_BOTH
+  $Settings[Constants.LOG4GAMBAS_OUTPUT] = $Log4gambas.GetDefaultOutputBoth()
   $Settings[Constants.LOG4GAMBAS_LOGFILE] = $LogPath
   $Settings[Constants.LOG4GAMBAS_MAXFILESIZE] = $Log4gambas.GetMaxFileSize()
   $Settings[Constants.LOG4GAMBAS_MAXFILES] = $Log4gambas.GetMaxFiles()
@@ -316,7 +317,7 @@ Private Sub LogLevel_Write(Value As Integer)
   $Settings[Constants.LOG4GAMBAS_LEVEL] = Value
   $Settings.Save()
   
-  $Log4gambas.SetMinLevel($Settings[Constants.LOG4GAMBAS_LEVEL, $Log4gambas.LEVEL_DEBUG])
+  $Log4gambas.SetMinLevel($Settings[Constants.LOG4GAMBAS_LEVEL, $Log4gambas.GetDefaultLevelDebug()])
   
 End
 
@@ -331,7 +332,7 @@ Private Sub LogOutput_Write(Value As Integer)
   $Settings[Constants.LOG4GAMBAS_OUTPUT] = Value
   $Settings.Save()
   
-  $Log4gambas.SetOutput($Settings[Constants.LOG4GAMBAS_OUTPUT, $Log4gambas.OUTPUT_BOTH])
+  $Log4gambas.SetOutput($Settings[Constants.LOG4GAMBAS_OUTPUT, $Log4gambas.GetDefaultOutputBoth()])
   
 End
 

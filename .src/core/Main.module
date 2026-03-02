@@ -3,7 +3,7 @@
 ' Startup module for the Advanced Shared Albums Manager on Linux
 
 Private $Configuration As Configuration
-Private $Log4Gambas As Log4Gambas3
+Private $Log4Gambas As LoggerPort
 Private $PhotoRepository As PhotoRepository
 Private $PhotoService As PhotoService
 Private $Titulo As String = "[Main] "

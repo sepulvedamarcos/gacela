@@ -1,9 +1,9 @@
 ' Gambas class file
 
 Private $Configuration As Configuration
-Private $log4Gambas As Log4Gambas3
+Private $log4Gambas As LoggerPort
 
-Public Sub _new(oLog4Gambas As Log4Gambas3, oConfiguration As Configuration)
+Public Sub _new(oLog4Gambas As LoggerPort, oConfiguration As Configuration)
   
   $Log4Gambas = oLog4Gambas
   $Configuration = oConfiguration

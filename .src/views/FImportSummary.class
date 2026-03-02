@@ -1,10 +1,10 @@
 ' Gambas class file
 
-Private $Log4Gambas As Log4Gambas3
+Private $Log4Gambas As LoggerPort
 Private $Configuration As Configuration
 Private $Summary As ImportSummary
 
-Public Sub _new(oSummary As ImportSummary, oLogger As Log4Gambas3, oConfiguration As Configuration)
+Public Sub _new(oSummary As ImportSummary, oLogger As LoggerPort, oConfiguration As Configuration)
   
   $Summary = oSummary
   $Log4Gambas = oLogger

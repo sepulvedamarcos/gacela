@@ -5,7 +5,7 @@
 ' Business logic handler class
 '
 '
-Private $Log4gambas As Log4Gambas3
+Private $Log4gambas As LoggerPort
 Private $PhotoRepository As PhotoRepository
 Private $Configuration As Configuration
 Private $Iterator As PhotoIterator
@@ -17,7 +17,7 @@ Private $ImageMetadata As ImageMetadataAdapter
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(oLog4gambas As Log4Gambas3, cPhotoRepository As PhotoRepository, cConfiguration As Configuration)
+Public Sub _new(oLog4gambas As LoggerPort, cPhotoRepository As PhotoRepository, cConfiguration As Configuration)
   
   $Log4gambas = oLog4gambas
   $PhotoRepository = cPhotoRepository

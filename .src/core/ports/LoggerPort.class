@@ -1,0 +1,82 @@
+' Gambas class file
+
+' Port for application logging. Keep the app decoupled from a concrete logger library.
+
+Property Read Levels As String[]
+Property Read Outputs As String[]
+
+Public Sub Debug(message As String)
+  Error.Raise("LoggerPort.Debug not implemented")
+End
+
+Public Sub Info(message As String)
+  Error.Raise("LoggerPort.Info not implemented")
+End
+
+Public Sub Warning(message As String)
+  Error.Raise("LoggerPort.Warning not implemented")
+End
+
+Public Sub Error(message As String)
+  Error.Raise("LoggerPort.Error not implemented")
+End
+
+Public Sub Fatal(message As String)
+  Error.Raise("LoggerPort.Fatal not implemented")
+End
+
+Public Sub SetAppName(appName As String)
+  Error.Raise("LoggerPort.SetAppName not implemented")
+End
+
+Public Sub SetMinLevel(level As Integer)
+  Error.Raise("LoggerPort.SetMinLevel not implemented")
+End
+
+Public Sub SetOutput(output As Integer)
+  Error.Raise("LoggerPort.SetOutput not implemented")
+End
+
+Public Sub SetLogFile(logFile As String)
+  Error.Raise("LoggerPort.SetLogFile not implemented")
+End
+
+Public Sub SetMaxFileSize(sizeBytes As Integer)
+  Error.Raise("LoggerPort.SetMaxFileSize not implemented")
+End
+
+Public Sub SetMaxFiles(maxFiles As Integer)
+  Error.Raise("LoggerPort.SetMaxFiles not implemented")
+End
+
+Public Function GetMinLevel() As Integer
+  Error.Raise("LoggerPort.GetMinLevel not implemented")
+End
+
+Public Function GetLogFile() As String
+  Error.Raise("LoggerPort.GetLogFile not implemented")
+End
+
+Public Function GetMaxFileSize() As Integer
+  Error.Raise("LoggerPort.GetMaxFileSize not implemented")
+End
+
+Public Function GetMaxFiles() As Integer
+  Error.Raise("LoggerPort.GetMaxFiles not implemented")
+End
+
+Public Function GetDefaultLevelDebug() As Integer
+  Error.Raise("LoggerPort.GetDefaultLevelDebug not implemented")
+End
+
+Public Function GetDefaultOutputBoth() As Integer
+  Error.Raise("LoggerPort.GetDefaultOutputBoth not implemented")
+End
+
+Private Function Levels_Read() As String[]
+  Return New String[]
+End
+
+Private Function Outputs_Read() As String[]
+  Return New String[]
+End
