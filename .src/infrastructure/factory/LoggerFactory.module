@@ -1,0 +1,21 @@
+' Gambas module file
+
+' Centralized creation of concrete logger adapters.
+
+Public Function Create(oSettings As Settings) As LoggerPort
+  
+  Dim sProvider As String
+  
+  sProvider = "log4gambas"
+  If oSettings <> Null Then
+    sProvider = LCase(oSettings[Constants.LOGGER_PROVIDER, sProvider])
+  Endif
+  
+  Select Case sProvider
+    Case "log4gambas"
+      Return New Log4GambasAdapter
+    Default
+      Return New Log4GambasAdapter
+  End Select
+  
+End

@@ -1,28 +1,29 @@
 ' Gambas class file
 
 ' Adapter from LoggerPort to Log4Gambas3.
+' this class it's used only in factory method
 Inherits LoggerPort
 
 Private $Backend As New Log4Gambas3
 
-Public Sub Debug(message As String)
-  $Backend.Debug(message)
+Public Sub Debug(message As LogMessage)
+  $Backend.Debug(Super.FormatMessage(message))
 End
 
-Public Sub Info(message As String)
-  $Backend.Info(message)
+Public Sub Info(message As LogMessage)
+  $Backend.Info(Super.FormatMessage(message))
 End
 
-Public Sub Warning(message As String)
-  $Backend.Warning(message)
+Public Sub Warning(message As LogMessage)
+  $Backend.Warning(Super.FormatMessage(message))
 End
 
-Public Sub Error(message As String)
-  $Backend.Error(message)
+Public Sub Error(message As LogMessage)
+  $Backend.Error(Super.FormatMessage(message))
 End
 
-Public Sub Fatal(message As String)
-  $Backend.Fatal(message)
+Public Sub Fatal(message As LogMessage)
+  $Backend.Fatal(Super.FormatMessage(message))
 End
 
 Public Sub SetAppName(appName As String)
