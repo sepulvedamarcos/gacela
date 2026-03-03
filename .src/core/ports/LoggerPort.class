@@ -1,27 +1,28 @@
 ' Gambas class file
 
 ' Port for application logging. Keep the app decoupled from a concrete logger library.
+' it's a contract to imeplemnt like interface
 
 Property Read Levels As String[]
 Property Read Outputs As String[]
 
-Public Sub Debug(message As String)
+Public Sub Debug(message As LogMessage)
   Error.Raise("LoggerPort.Debug not implemented")
 End
 
-Public Sub Info(message As String)
+Public Sub Info(message As LogMessage)
   Error.Raise("LoggerPort.Info not implemented")
 End
 
-Public Sub Warning(message As String)
+Public Sub Warning(message As LogMessage)
   Error.Raise("LoggerPort.Warning not implemented")
 End
 
-Public Sub Error(message As String)
+Public Sub Error(message As LogMessage)
   Error.Raise("LoggerPort.Error not implemented")
 End
 
-Public Sub Fatal(message As String)
+Public Sub Fatal(message As LogMessage)
   Error.Raise("LoggerPort.Fatal not implemented")
 End
 
@@ -71,6 +72,11 @@ End
 
 Public Function GetDefaultOutputBoth() As Integer
   Error.Raise("LoggerPort.GetDefaultOutputBoth not implemented")
+End
+
+Public Function FormatMessage(message As LogMessage) As String
+  If message = Null Then Return ""
+  Return message.ToText()
 End
 
 Private Function Levels_Read() As String[]
