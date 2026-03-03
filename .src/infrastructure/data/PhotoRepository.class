@@ -8,7 +8,7 @@
 Private $Logger As LoggerPort
 Private $DbContext As SQLiteContext
 Private $Configuration As Configuration
-Private $Titulo As String = "[PhotoRepository] "
+Private $Titulo As String = "PhotoRepository"
 
 Private $LogMessage As LogMessage
 Public Const TABLE_PHOTOS As String = "photos"

@@ -7,7 +7,7 @@
 '
 
 Private $Logger As LoggerPort
-Private $Titulo As String = "[ImageMetadataAdapter] "
+Private $Titulo As String = "ImageMetadataAdapter"
 
 Private $LogMessage As LogMessage
 ' ==================================================

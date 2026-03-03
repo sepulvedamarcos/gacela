@@ -3,7 +3,7 @@
 Private $Logger As LoggerPort
 Private $Configuration As Configuration
 Private $Summary As ImportSummary
-Private $Titulo As String = "[FImportSummary] "
+Private $Titulo As String = "FImportSummary"
 
 Private $LogMessage As LogMessage
 Public Sub _new(oSummary As ImportSummary, oLogger As LoggerPort, oConfiguration As Configuration)

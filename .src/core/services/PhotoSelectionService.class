@@ -1,0 +1,100 @@
+' Gambas class file
+
+Private $SelectedIds As Integer[]
+
+Event SelectionChanged(iCount As Integer, bHasSelection As Boolean)
+
+Public Sub _new()
+
+  $SelectedIds = New Integer[]
+
+End
+
+Public Function Count() As Integer
+
+  Return $SelectedIds.Count
+
+End
+
+Public Function HasSelection() As Boolean
+
+  Return $SelectedIds.Count > 0
+
+End
+
+Public Function IsSelected(iPhotoId As Integer) As Boolean
+
+  Return FindIndex(iPhotoId) >= 0
+
+End
+
+Public Function GetSelectedIds() As Integer[]
+
+  Dim aCopy As New Integer[]
+  Dim iPhotoId As Integer
+
+  For Each iPhotoId In $SelectedIds
+    aCopy.Add(iPhotoId)
+  Next
+
+  Return aCopy
+
+End
+
+Public Sub Toggle(iPhotoId As Integer)
+
+  If IsSelected(iPhotoId) Then
+    Unselect(iPhotoId)
+  Else
+    Select(iPhotoId)
+  Endif
+
+End
+
+Public Sub Select(iPhotoId As Integer)
+
+  If FindIndex(iPhotoId) >= 0 Then Return
+
+  $SelectedIds.Add(iPhotoId)
+  RaiseSelectionChanged()
+
+End
+
+Public Sub Unselect(iPhotoId As Integer)
+
+  Dim iIndex As Integer
+
+  iIndex = FindIndex(iPhotoId)
+  If iIndex < 0 Then Return
+
+  $SelectedIds.Remove(iIndex)
+  RaiseSelectionChanged()
+
+End
+
+Public Sub Clear()
+
+  If $SelectedIds.Count = 0 Then Return
+
+  $SelectedIds = New Integer[]
+  RaiseSelectionChanged()
+
+End
+
+Private Function FindIndex(iPhotoId As Integer) As Integer
+
+  Dim iIndex As Integer
+
+  For iIndex = 0 To $SelectedIds.Max
+    If $SelectedIds[iIndex] = iPhotoId Then Return iIndex
+  Next
+
+  Return -1
+
+End
+
+Private Sub RaiseSelectionChanged()
+
+  Raise SelectionChanged($SelectedIds.Count, HasSelection())
+
+End

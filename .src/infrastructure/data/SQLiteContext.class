@@ -9,7 +9,7 @@ Private $DB As Connection
 Private $Logger As LoggerPort
 Private $Configuration As Configuration
 Private $DbGalleryDirectory As String
-Private $Titulo As String = "[SQLiteContext] "
+Private $Titulo As String = "SQLiteContext"
 Private $LogMessage As LogMessage
 Private $IsNewBD As Boolean = False
 

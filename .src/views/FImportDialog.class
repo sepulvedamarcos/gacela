@@ -7,7 +7,7 @@
 '
 Private $PhotoService As PhotoService
 Private $Logger As LoggerPort
-Private $Titulo As String = "[FImportDialog] "
+Private $Titulo As String = "FImportDialog"
 Private $LogMessage As LogMessage
 Private $FilesDrop As String[]
 Private $IdAlbum As Integer

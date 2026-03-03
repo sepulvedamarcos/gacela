@@ -17,16 +17,18 @@ Public Sub _new(component As String, methodName As String, message As String)
 End
 
 Public Function ToText() As String
-  Dim sComponent As String
+  Dim sComponent, sMethod, sDate As String
   
   sComponent = NormalizeComponent($Component)
+  sMethod = NormalizeComponent($Method)
+  sDate = Format(Now, "yyyy-mm-dd hh:nn:ss")
   
-  If sComponent <> "" And $Method <> "" Then
-    Return "[" & sComponent & "][" & $Method & "] " & $Text
+  If sComponent <> "" And sMethod <> "" Then
+    Return "[" & sDate & "][" & sComponent & "][" & sMethod & "]{" & $Text & "}"
   Else If $Method <> "" Then
-    Return "[" & $Method & "] " & $Text
+    Return "[" & sDate & "][" & sMethod & "]{" & $Text & "}"
   Else
-    Return $Text
+    Return "[" & sDate & "]{" & $Text & "}"
   Endif
 End
 

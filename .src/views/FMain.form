@@ -86,7 +86,7 @@
       Radio = True
     }
   }
-  { HBox4 HBox
+  { HBoxToolBar HBox
     MoveScaled(0,0,137,8)
     Spacing = True
     Padding = 2
@@ -102,23 +102,27 @@
       Picture = Picture["icon:/32/download"]
       Border = True
     }
-    { Panel2 Panel
+    { PanelSpring2 Panel
       MoveScaled(16,0,2,8)
     }
-    { ToolButton1 ToolButton
+    { ToolButtonTrash ToolButton
       MoveScaled(18,0,8,8)
+      Enabled = False
       Picture = Picture["icon:/32/trash"]
       Border = True
     }
-    { Spring1 Spring
-      MoveScaled(106,1,4,5)
+    { SpringToolBar Spring
+      MoveScaled(73,1,4,6)
       Direction = Direction.LeftToRight
     }
     { ToolButtonConfiguration ToolButton
-      MoveScaled(121,0,8,8)
+      MoveScaled(119,0,8,8)
       ToolTip = ("Gacela settings")
       Picture = Picture["icons/64x64/package_settings.png"]
       Border = True
+    }
+    { PanelSpring3 Panel
+      MoveScaled(127,0,2,8)
     }
     { ToolButtonExit ToolButton
       MoveScaled(129,0,8,8)
@@ -127,7 +131,7 @@
       Border = True
     }
   }
-  { HBox1 HBox
+  { HBoxContext HBox
     MoveScaled(0,8,137,70)
     Expand = True
     { PanelIzquierdo Panel
@@ -156,7 +160,7 @@
       }
     }
     { PanelDerecho Panel
-      MoveScaled(29,1,97,65)
+      MoveScaled(29,2,93,47)
       Expand = True
       Arrangement = Arrange.Vertical
       { PanelBusqueda Panel
@@ -179,12 +183,12 @@
         }
       }
       { HBox2 Panel
-        MoveScaled(1,8,90,6)
+        MoveScaled(1,9,90,8)
         Arrangement = Arrange.Horizontal
+        Border = Border.Sunken
         { HBox3 HBox
-          MoveScaled(1,0,8,6)
+          MoveScaled(30,0,7,6)
           Background = Color.LightBackground
-          Expand = True
         }
         { Panel1 Panel
           MoveScaled(40,0,50,6)
@@ -217,9 +221,8 @@
           }
         }
       }
-      { !PanelGalleryContent ScrollView
-        MoveScaled(1,16,90,36)
-        #Public = True
+      { PanelGalleryContent ScrollView
+        MoveScaled(3,20,41,24)
         Background = Color.SelectedBackground
         Expand = True
         Arrangement = Arrange.Row
@@ -228,13 +231,13 @@
         Padding = 4
         Border = False
         ScrollBar = Scroll.Vertical
+        Focus = True
         Shadow = True
       }
     }
   }
-  { HBox5 Panel
+  { HBoxStatusBar HBox
     MoveScaled(0,78,137,5)
-    Arrangement = Arrange.Horizontal
     { MenuButtonCollection MenuButton
       MoveScaled(0,0,25,5)
       Text = ("Shared gallery")
@@ -250,7 +253,7 @@
       Text = ("Status bar")
       Trim = True
     }
-    { ToolButtonTrash ToolButton
+    { ToolButtonViewTrash ToolButton
       MoveScaled(132,0,5,5)
       ToolTip = ("View deleted files")
       Picture = Picture["icons/22x22/user-trash-full.png"]

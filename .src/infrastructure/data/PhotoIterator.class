@@ -24,7 +24,7 @@ Private $sSearchText As String = ""
 Private $iFilterAlbumId As Integer = 0
 Private $sSortBy As String = "import_date"  ' import_date, file_name, creation_date
 Private $sSortOrder As String = "DESC"      ' ASC, DESC
-Private $Titulo As String = "[PhotoIterator] "
+Private $Titulo As String = "PhotoIterator"
 
 Private $LogMessage As LogMessage
 ' ==================================================

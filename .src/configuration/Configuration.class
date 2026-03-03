@@ -13,7 +13,7 @@ Private $Logger As LoggerPort                                              '' Lo
 Private $OsTheme As Integer                                                   '' Current OS theme
 Private $AppTheme As Integer                                                  '' Application theme
 Private $IsSharedEnabled As Boolean                                           '' Shared gallery directory enabled
-Private $Titulo As String = "[Configuration] "
+Private $Titulo As String = "Configuration"
 
 Private $LogMessage As LogMessage
 Private $LogLevel As Integer
@@ -46,11 +46,11 @@ Property ImportShowSummary As Boolean
 '============================================
 
 Public Sub _new()
-
+  
   $SettingPath = User.Home &/ Constants.GACELA_SETTING_DIRECTORY
   $LogPath = User.Home &/ Constants.GACELA_LOG_DIRECTORY
   $OsTheme = FindOSTheme()
-
+  
   $Settings = New Settings($SettingPath &/ Constants.CONFIG_NAME)
   $Logger = LoggerFactory.Create($Settings)
   If $Settings.Count = 0 Then
@@ -60,23 +60,23 @@ Public Sub _new()
     FirstInitializeSettings()
     FirstInitializeLogger()
   Endif
-
+  
   MigrateLoggerSettings()
-
+  
   $IsSharedEnabled = DetectShareEnabled()
-
+  
 Catch
   $LogMessage = New LogMessage($Titulo, "_new", ("Error initializing configuration: ") & Error.Text)
   $Logger.Error($LogMessage)
   Error.Raise($LogMessage.ToText())
-
+  
 End
 
 Public Sub InitializeEnvironment()
-
+  
   $LogMessage = New LogMessage($Titulo, "InitializeEnvironment", "Initializing environment")
   $Logger.Info($LogMessage)
-
+  
   If $Settings[Constants.GLOBAL_GALLERY_TYPE, Null] = Null Then
     If $Settings["Global/LibraryType", Null] <> Null Then
       $Settings[Constants.GLOBAL_GALLERY_TYPE] = $Settings["Global/LibraryType"]
@@ -86,63 +86,63 @@ Public Sub InitializeEnvironment()
       Error.Raise($LogMessage.ToText())
     Endif
   Endif
-
+  
   If $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED, Null] = Null Then
     If $Settings["Global/Shared", Null] <> Null Then
       $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED] = $Settings["Global/Shared"]
       $Settings.Save()
     Endif
   Endif
-
+  
   If $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, Null] = Null Then
     $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = 2048
     $Settings.Save()
   Endif
-
+  
   If $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, Null] = Null Then
     $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
     $Settings.Save()
   Endif
-
+  
   If $Settings[Constants.IMPORT_SHOW_SUMMARY, Null] = Null Then
     $Settings[Constants.IMPORT_SHOW_SUMMARY] = True
     $Settings.Save()
   Endif
-
+  
   $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
   $AppTheme = $Settings[Constants.GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_OS]
   $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
   $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 10000]
   $ImportShowSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
-
+  
 End
 
 Public Function InitializeLogger() As LoggerPort
-
+  
   $LogMessage = New LogMessage($Titulo, "InitializeLogger", ("Creating logger with configured data"))
   $Logger.Info($LogMessage)
-
+  
   $Logger.SetAppName(Application.Name)
   $Logger.SetMinLevel($Settings[Constants.LOGGER_LEVEL, $Logger.GetDefaultLevelDebug()])
   $Logger.SetOutput($Settings[Constants.LOGGER_OUTPUT, $Logger.GetDefaultOutputBoth()])
   $Logger.SetLogFile($Settings[Constants.LOGGER_LOGFILE, $Logger.GetLogFile()])
   $Logger.SetMaxFileSize($Settings[Constants.LOGGER_MAXFILESIZE, $Logger.GetMaxFileSize()])
   $Logger.SetMaxFiles($Settings[Constants.LOGGER_MAXFILES, $Logger.GetMaxFiles()])
-
+  
   Return $Logger
-
+  
 End
 
 Public Sub SetWhichGallery()
-
+  
   If Enumeration.GalleryType_Private = $Settings[Constants.GLOBAL_GALLERY_TYPE] Then
     $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Shared
-  Else
+  Else 
     $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Private
   Endif
   $Settings.Save()
   $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
-
+  
 End
 
 '================================================
@@ -151,16 +151,16 @@ End
 '
 '================================================
 Private Sub FirstInitializeSettings() '' Initial configuration setup
-
+  
   $LogMessage = New LogMessage($Titulo, "FirstInitializeSettings", ("Creating ini file with initial data"))
   $Logger.Info($LogMessage)
-
+  
   If Not Exist($SettingPath &/ Constants.CONFIG_NAME) Then
     If Not Exist($SettingPath) Then
       Mkdir $SettingPath
     Endif
   Endif
-
+  
   $Settings[Constants.GLOBAL_VERSION] = Application.Version
   $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Private
   $Settings[Constants.GLOBAL_GALLERY_TYPE] = Me.WhichGallery
@@ -170,98 +170,98 @@ Private Sub FirstInitializeSettings() '' Initial configuration setup
   $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
   $Settings[Constants.IMPORT_SHOW_SUMMARY] = True
   $Settings.Save()
-
+  
 Catch
   $LogMessage = New LogMessage($Titulo, "FirstInitializeSettings", ("Error while creating settings directory") & Error.Text)
   $Logger.Error($LogMessage)
   Error.Raise($LogMessage.ToText())
-
+  
 End
 
 Private Function FirstInitializeLogger() As LoggerPort
-
+  
   $LogMessage = New LogMessage($Titulo, "FirstInitializeLogger", ("Creating logger with initial data"))
   $Logger.Info($LogMessage)
-
+  
   If Not Exist($LogPath) Then
     Mkdir $LogPath
   Endif
-
+  
   $Settings[Constants.LOGGER_LEVEL] = $Logger.GetMinLevel()
   $Settings[Constants.LOGGER_OUTPUT] = $Logger.GetDefaultOutputBoth()
   $Settings[Constants.LOGGER_LOGFILE] = $LogPath
   $Settings[Constants.LOGGER_MAXFILESIZE] = $Logger.GetMaxFileSize()
   $Settings[Constants.LOGGER_MAXFILES] = $Logger.GetMaxFiles()
   $Settings.Save()
-
+  
 End
 
 Private Sub MigrateLoggerSettings()
-
+  
   Dim bChanged As Boolean
-
+  
   bChanged = MigrateSetting(Constants.LOGGER_PROVIDER, "Log4Gambas/Provider", "log4gambas") Or bChanged
   bChanged = MigrateSetting(Constants.LOGGER_LEVEL, "Log4Gambas/Level", $Logger.GetDefaultLevelDebug()) Or bChanged
   bChanged = MigrateSetting(Constants.LOGGER_OUTPUT, "Log4Gambas/Output", $Logger.GetDefaultOutputBoth()) Or bChanged
   bChanged = MigrateSetting(Constants.LOGGER_LOGFILE, "Log4Gambas/LogFile", $LogPath) Or bChanged
   bChanged = MigrateSetting(Constants.LOGGER_MAXFILESIZE, "Log4Gambas/MaxFilesSize", $Logger.GetMaxFileSize()) Or bChanged
   bChanged = MigrateSetting(Constants.LOGGER_MAXFILES, "Log4Gambas/MaxFiles", $Logger.GetMaxFiles()) Or bChanged
-
+  
   If bChanged Then
     $Settings.Save()
   Endif
-
+  
 End
 
 Private Function MigrateSetting(sNewKey As String, sLegacyKey As String, vDefaultValue As Variant) As Boolean
-
+  
   If $Settings[sNewKey, Null] <> Null Then
     Return False
   Endif
-
+  
   If $Settings[sLegacyKey, Null] <> Null Then
     $Settings[sNewKey] = $Settings[sLegacyKey]
   Else
     $Settings[sNewKey] = vDefaultValue
   Endif
-
+  
   Return True
-
+  
 End
 
 Private Function FindOSTheme() As Integer
-
+  
   Dim iBgColor As Integer = Color.Background
   Dim fBrightness As Float
   Dim vR, vG, iB As Integer
-
+  
   ' Extract RGB components
   vR = Color[iBgColor].Red
   vG = Color[iBgColor].Green
   iB = Color[iBgColor].Blue
-
+  
   ' Compute brightness (luminance)
   fBrightness = (vR * 0.299 + vG * 0.587 + iB * 0.114)
-
+  
   ' If brightness is below 128, use dark theme
   If fBrightness < 128 Then
     Return Enumeration.APP_THEME_DARK
   Else
     Return Enumeration.APP_THEME_LIGHT
   Endif
-
+  
   Return 0
-
+  
 End
 
 Private Function DetectShareEnabled() As Boolean
-
+  
   Dim sGroupAvailable As String
   Dim aGroup As Array
   Dim aUsers As Array
   Dim bEncontrado As Boolean
   Dim cell As String
-
+  
   ' Verify the group exists
   $LogMessage = New LogMessage($Titulo, "DetectShareEnabled", ("Checking group existence") & " " & Constants.GRUPO_GACELA)
   $Logger.Debug($LogMessage)
@@ -269,7 +269,7 @@ Private Function DetectShareEnabled() As Boolean
   If sGroupAvailable = "" Then
     Return False
   Endif
-
+  
   ' Verify the user is in the group
   aGroup = Split(sGroupAvailable, ":")
   aUsers = Split(aGroup[aGroup.Count - 1], ",")
@@ -281,29 +281,29 @@ Private Function DetectShareEnabled() As Boolean
   If Not bEncontrado Then
     Return False
   Endif
-
+  
   ' Verify the directory exists
   If Not Exist(Constants.GACELA_SHARED_GALLERY_DIRECTORY) Then
     Return False
   Endif
-
+  
   ' Verify write permissions
   If Exist(Constants.GACELA_SHARED_GALLERY_DIRECTORY) Then
     Try File.Save(Constants.GACELA_SHARED_GALLERY_DIRECTORY &/ ".test", "test")
     If Error Then Return False
     Try Kill Constants.GACELA_SHARED_GALLERY_DIRECTORY &/ ".test"
   Endif
-
+  
   $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED] = True
   $Settings.Save()
-
+  
   Return True
-
-Catch
+  
+Catch 
   $LogMessage = New LogMessage($Titulo, "DetectShareEnabled", ("Error detecting whether the shared directory is active") & " " & Error.Text)
   $Logger.Error($LogMessage)
   Error.Propagate
-
+  
 End
 
 ' =======================================================
@@ -312,163 +312,163 @@ End
 '
 ' =======================================================
 Function IsFirstRun_Read() As Boolean
-
+  
   Return $IsFirstRun
-
+  
 End
 
 Function WhichGallery_Read() As Integer
-
+  
   Return $WhichGallery
-
+  
 End
 
 Function GalleryPath_Read() As String
-
+  
   If $WhichGallery = Enumeration.GalleryType_Private Then
     Return User.Home &/ Constants.GACELA_GALLERY_DIRECTORY
   Else
     Return Constants.GACELA_SHARED_GALLERY_DIRECTORY
   Endif
-
+  
 End
 
 Function IsSharedGalleryAvailable_Read() As Boolean
-
+  
   Return $IsSharedEnabled
-
+  
 End
 
 Function DeleteOriginals_Read() As Boolean
-
+  
   Return $Settings[Constants.IMPORT_DELETE_ORIGINALS, False]
-
+  
 End
 
 Sub DeleteOriginals_Write(value As Boolean)
-
+  
   $Settings[Constants.IMPORT_DELETE_ORIGINALS] = Value
   $Settings.Save()
-
+  
 End
 
 Private Function LogLevel_Read() As Integer
-
+  
   Return $Settings[Constants.LOGGER_LEVEL]
-
+  
 End
 
 Private Sub LogLevel_Write(Value As Integer)
-
+  
   $Settings[Constants.LOGGER_LEVEL] = Value
   $Settings.Save()
-
+  
   $Logger.SetMinLevel($Settings[Constants.LOGGER_LEVEL, $Logger.GetDefaultLevelDebug()])
-
+  
 End
 
 Private Function LogOutput_Read() As Integer
-
+  
   Return $Settings[Constants.LOGGER_OUTPUT]
-
+  
 End
 
 Private Sub LogOutput_Write(Value As Integer)
-
+  
   $Settings[Constants.LOGGER_OUTPUT] = Value
   $Settings.Save()
-
+  
   $Logger.SetOutput($Settings[Constants.LOGGER_OUTPUT, $Logger.GetDefaultOutputBoth()])
-
+  
 End
 
 Private Function LogSize_Read() As Integer
-
+  
   Return $Settings[Constants.LOGGER_MAXFILESIZE] / 1024 / 1024
-
+  
 End
 
 Private Sub LogSize_Write(Value As Integer)
-
+  
   $Logger.SetMaxFileSize(Value * 1024 * 1024)
-
+  
   $Settings[Constants.LOGGER_MAXFILESIZE] = $Logger.GetMaxFileSize()
   $Settings.Save()
-
-
+  
+  
 End
 
 Private Function LogFiles_Read() As Integer
-
+  
   Return $Settings[Constants.LOGGER_MAXFILES]
-
+  
 End
 
 Private Sub LogFiles_Write(Value As Integer)
-
+  
   $Settings[Constants.LOGGER_MAXFILES] = Value
   $Settings.Save()
-
+  
   $Logger.SetMaxFiles($Settings[Constants.LOGGER_MAXFILES, $Logger.GetMaxFiles()])
-
+  
 End
 
 Private Function LogPath_Read() As String
-
+  
   Return $Settings[Constants.LOGGER_LOGFILE]
-
+  
 End
 
 Private Sub LogPath_Write(Value As String)
-
+  
   $Settings[Constants.LOGGER_LOGFILE] = Value
   $Settings.Save()
-
+  
   $Logger.SetLogFile($Settings[Constants.LOGGER_LOGFILE, $Logger.GetLogFile()])
-
+  
 End
 
 Private Function DeletedMaxSizeMB_Read() As Integer
-
+  
   $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
   Return $DeletedMaxSizeMB
-
+  
 End
 
 Private Sub DeletedMaxSizeMB_Write(Value As Integer)
-
+  
   $DeletedMaxSizeMB = Value
   $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = Value
   $Settings.Save()
-
+  
 End
 
 Private Function DeletedMaxCount_Read() As Integer
-
+  
   $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 1000]
   Return $DeletedMaxCount
-
+  
 End
 
 Private Sub DeletedMaxCount_Write(Value As Integer)
-
+  
   $DeletedMaxCount = Value
   $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = Value
   $Settings.Save()
-
+  
 End
 
 Private Function ImportShowSummary_Read() As Boolean
-
+  
   $ImportShowSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
   Return $ImportShowSummary
-
+  
 End
 
 Private Sub ImportShowSummary_Write(Value As Boolean)
-
+  
   $ImportShowSummary = Value
   $Settings[Constants.IMPORT_SHOW_SUMMARY] = Value
   $Settings.Save()
-
+  
 End
