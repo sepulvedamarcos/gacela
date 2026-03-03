@@ -10,13 +10,14 @@ Public Const GLOBAL_DELETED_MAX_SIZE_MB As String = "Global/DeletedMaxSizeMB"
 Public Const GLOBAL_DELETED_MAX_COUNT As String = "Global/DeletedMaxCount"
 Public Const IMPORT_SHOW_SUMMARY As String = "Import/ShowSummary"
 
-' Constants that define the Log4Gambas section
-Public Const LOG4GAMBAS_LEVEL As String = "Log4Gambas/Level"
-Public Const LOG4GAMBAS_OUTPUT As String = "Log4Gambas/Output"
-Public Const LOG4GAMBAS_MAXFILES As String = "Log4Gambas/MaxFiles"
-Public Const LOG4GAMBAS_SIZELOG As String = "Log4Gambas/SizeLog"
-Public Const LOG4GAMBAS_LOGFILE As String = "Log4Gambas/LogFile"
-Public Const LOG4GAMBAS_MAXFILESIZE As String = "Log4Gambas/MaxFilesSize"
+' Constants that define the Logger section
+Public Const LOGGER_PROVIDER As String = "Logger/Provider"
+Public Const LOGGER_LEVEL As String = "Logger/Level"
+Public Const LOGGER_OUTPUT As String = "Logger/Output"
+Public Const LOGGER_MAXFILES As String = "Logger/MaxFiles"
+Public Const LOGGER_SIZELOG As String = "Logger/SizeLog"
+Public Const LOGGER_LOGFILE As String = "Logger/LogFile"
+Public Const LOGGER_MAXFILESIZE As String = "Logger/MaxFilesSize"
 
 ' Constants that define Imports
 Public Const IMPORT_DELETE_ORIGINALS As String = "Import/DeleteOriginals"  '' Delete originals after import

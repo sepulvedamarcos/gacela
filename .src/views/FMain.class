@@ -4,9 +4,10 @@ Private $Width As Integer = 160
 Private $Height As Integer = 90
 
 Private $Configuration As Configuration
-Private $Log4Gambas As LoggerPort
+Private $Logger As LoggerPort
 Private $PhotoService As PhotoService
 Private $Titulo As String = "[FMain] "
+Private $LogMessage As LogMessage
 Private $StatusDefaultText As String
 Private StatusTimer As Timer
 Private $LastImportSummary As ImportSummary
@@ -17,14 +18,15 @@ Property LastImportSummary As ImportSummary
 Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService)
   
   $Configuration = cConfiguration
-  $Log4Gambas = oLogger
+  $Logger = oLogger
   $PhotoService = cPhotoService
   
 End
 
 Public Sub Form_Open()
   
-  $Log4Gambas.Debug(LogPrefix("Form_Open") & "On form open we load photo records")
+  $LogMessage = New LogMessage($Titulo, "Form_Open", "On form open we load photo records")
+  $Logger.Debug($LogMessage)
   
   SelectGallery($Configuration.WhichGallery)
   
@@ -42,11 +44,13 @@ Public Sub Form_Drop()
   Dim sFileDrop As String
   Dim sNamesErr As String
   
-  $Log4Gambas.Debug(LogPrefix("Form_Drop") & "Drag and drop files")
+  $LogMessage = New LogMessage($Titulo, "Form_Drop", "Drag and drop files")
+  $Logger.Debug($LogMessage)
   
   aFilesDrop = Drag.Paste("text/uri-list")
   For Each sFileDrop In aFilesDrop
-    $Log4Gambas.Debug(LogPrefix("Form_Drop") & "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
+    $LogMessage = New LogMessage($Titulo, "Form_Drop", "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
+  $Logger.Debug($LogMessage)
     If LCase(File.Ext(sFileDrop)) = "jpg" Or LCase(File.Ext(sFileDrop)) = "png" Then
     Else
       sNamesErr = sNamesErr & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop)
@@ -225,7 +229,8 @@ Private Sub CreatePhotoPanels(photos As PhotoEntity[])
   Dim cFormPhoto As FPhoto
   Dim cPhoto As PhotoEntity
   
-  $Log4Gambas.Info("Creating initial panels")
+  $LogMessage = New LogMessage($Titulo, "CreatePhotoPanels", "Creating initial panels")
+  $Logger.Info($LogMessage)
   For Each cPhoto In photos
     oPanelPhoto = New Panel(PanelGalleryContent)
     oPanelPhoto.Width = $Width
@@ -258,7 +263,7 @@ Private Sub ImportProcess(Optional listFiles As String[])
   Dim cSelector As FImportDialog
   Dim oImportSummary As FImportSummary
   
-  cSelector = New FImportDialog(Me, $PhotoService, $Log4Gambas, listFiles)
+  cSelector = New FImportDialog(Me, $PhotoService, $Logger, listFiles)
   vResp = cSelector.ShowModal()
   
   If vResp = Enumeration.DLG_OK Then
@@ -266,7 +271,7 @@ Private Sub ImportProcess(Optional listFiles As String[])
     If $LastImportSummary <> Null Then
       ShowStatus(("Import finished. OK: ") & $LastImportSummary.OkCount & (" NOK: ") & $LastImportSummary.FailCount, 5000)
       If $Configuration.ImportShowSummary Then
-        oImportSummary = New FImportSummary($LastImportSummary, $Log4Gambas, $Configuration)
+        oImportSummary = New FImportSummary($LastImportSummary, $Logger, $Configuration)
         oImportSummary.ShowModal()
       Endif
     Endif
@@ -322,7 +327,7 @@ Private Sub ShowConfigurationPanel()
   
   Dim oForm As FConfiguration
   
-  oForm = New FConfiguration($Log4Gambas, $Configuration)
+  oForm = New FConfiguration($Logger, $Configuration)
   oForm.ShowModal()
   
 End
@@ -331,12 +336,6 @@ Private Sub StatusTimer_Timer()
   
   StatusTimer.Stop()
   LabelStatusBar.Text = $StatusDefaultText
-  
-End
-
-Private Function LogPrefix(methodName As String) As String
-  
-  Return $Titulo & "[" & methodName & "] "
   
 End
 

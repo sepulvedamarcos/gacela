@@ -1,15 +1,15 @@
 ' Gambas class file
 
 Private $Configuration As Configuration
-Private $log4Gambas As LoggerPort
+Private $Logger As LoggerPort
 
-Public Sub _new(oLog4Gambas As LoggerPort, oConfiguration As Configuration)
+Public Sub _new(oLogger As LoggerPort, oConfiguration As Configuration)
   
-  $Log4Gambas = oLog4Gambas
+  $Logger = oLogger
   $Configuration = oConfiguration
   
-  ComboBoxOutput.List = $log4Gambas.Outputs
-  ComboBoxLevel.list = $log4Gambas.Levels
+  ComboBoxOutput.List = $Logger.Outputs
+  ComboBoxLevel.list = $Logger.Levels
   
 End
 

@@ -3,35 +3,32 @@
 ' Startup module for the Advanced Shared Albums Manager on Linux
 
 Private $Configuration As Configuration
-Private $Log4Gambas As LoggerPort
+Private $Logger As LoggerPort
 Private $PhotoRepository As PhotoRepository
 Private $PhotoService As PhotoService
 Private $Titulo As String = "[Main] "
 
+Private $LogMessage As LogMessage
 Public Sub Main()
   Dim cFormMain As FMain
 
   $Configuration = New Configuration
-  $Log4Gambas = $Configuration.InitializeLogger()
-  $Log4Gambas.Info(LogPrefix("Main") & ("Starting Gacela") & " V" & Application.Version)
+  $Logger = $Configuration.InitializeLogger()
+  $LogMessage = New LogMessage($Titulo, "Main", ("Starting Gacela") & " V" & Application.Version)
+  $Logger.Info($LogMessage)
   
   $Configuration.InitializeEnvironment()
   
-  $PhotoRepository = New PhotoRepository($Configuration, $Log4Gambas)
+  $PhotoRepository = New PhotoRepository($Configuration, $Logger)
   
-  $PhotoService = New PhotoService($Log4Gambas, $PhotoRepository, $Configuration)
+  $PhotoService = New PhotoService($Logger, $PhotoRepository, $Configuration)
   
-  cFormMain = New FMain($Configuration, $Log4Gambas, $PhotoService)
+  cFormMain = New FMain($Configuration, $Logger, $PhotoService)
   cFormMain.Show()
   
 Catch
-  Print LogPrefix("Main") & ("A critical problem was detected and the application will stop: ") & Error.Text
-  Message.Error(LogPrefix("Main") & ("A critical problem was detected and the application will stop: ") & Error.Text)
+  $LogMessage = New LogMessage($Titulo, "Main", ("A critical problem was detected and the application will stop: ") & Error.Text)
+  Print $LogMessage.ToText()
+  Message.Error($LogMessage.ToText())
 
-End
-
-Private Function LogPrefix(methodName As String) As String
-  
-  Return $Titulo & "[" & methodName & "] "
-  
 End

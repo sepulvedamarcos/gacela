@@ -6,46 +6,50 @@
 '
 '
 Private $DB As Connection
-Private $Log4Gambas As LoggerPort
+Private $Logger As LoggerPort
 Private $Configuration As Configuration
 Private $DbGalleryDirectory As String
 Private $Titulo As String = "[SQLiteContext] "
+Private $LogMessage As LogMessage
 Private $IsNewBD As Boolean = False
 
 Property Read DBConnection As Connection            '' Object connection to database
 Property Read IsNewDatabase As Boolean
 
-Public Sub _new(cConfiguration As Configuration, oLog4gambas As LoggerPort)
-  
-  $Log4Gambas = oLog4gambas
+Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort)
+
+  $Logger = oLogger
   $Configuration = cConfiguration
-  $Log4gambas.Info(LogPrefix("_new") & ("Initializing SQLite database context"))
-  
+  $LogMessage = New LogMessage($Titulo, "_new", ("Initializing SQLite database context"))
+  $Logger.Info($LogMessage)
+
   SwitchGallery()
-  
+
 End
 
 Public Sub SwitchGallery()
-  
+
   Dim sNewGalleryPath As String
-  
+
   $IsNewBD = False
   If $Configuration.WhichGallery = Enumeration.GalleryType_Private Then
     sNewGalleryPath = User.Home &/ Constants.GACELA_GALLERY_DIRECTORY
   Else
     sNewGalleryPath = Constants.GACELA_SHARED_GALLERY_DIRECTORY
   Endif
-  
+
   If $DbGalleryDirectory = sNewGalleryPath Then
-    $Log4Gambas.Debug(LogPrefix("SwitchGallery") & ("Gallery path has not changed. No reconnection required."))
+    $LogMessage = New LogMessage($Titulo, "SwitchGallery", ("Gallery path has not changed. No reconnection required."))
+  $Logger.Debug($LogMessage)
     Return
   Endif
-  
+
   $DbGalleryDirectory = sNewGalleryPath
   InitializeDatabase()
-  $Log4Gambas.Info(LogPrefix("SwitchGallery") & ("Switching database context to:") & " " & $DbGalleryDirectory)
+  $LogMessage = New LogMessage($Titulo, "SwitchGallery", ("Switching database context to:") & " " & $DbGalleryDirectory)
+  $Logger.Info($LogMessage)
   ConnectDatabase()
-  
+
 End
 
 ' ==================================================
@@ -54,77 +58,88 @@ End
 '
 ' ==================================================
 Private Sub ConnectDatabase()
-  
+
   $DB = New Connection
   $DB.Type = Constants.DATABASE_SQLITE3
   $DB.Host = $DbGalleryDirectory
   $DB.Name = Constants.DATABASE_NAME
-  
-  $Log4Gambas.Debug(LogPrefix("ConnectDatabase") & ("Database path:") & " " & $DbGalleryDirectory)
-  $Log4Gambas.Debug(LogPrefix("ConnectDatabase") & ("Database name:") & " " & Constants.DATABASE_NAME)
-  $Log4Gambas.Debug(LogPrefix("ConnectDatabase") & ("Database type:") & " " & Constants.DATABASE_SQLITE3)
-  
+
+  $LogMessage = New LogMessage($Titulo, "ConnectDatabase", ("Database path:") & " " & $DbGalleryDirectory)
+  $Logger.Debug($LogMessage)
+  $LogMessage = New LogMessage($Titulo, "ConnectDatabase", ("Database name:") & " " & Constants.DATABASE_NAME)
+  $Logger.Debug($LogMessage)
+  $LogMessage = New LogMessage($Titulo, "ConnectDatabase", ("Database type:") & " " & Constants.DATABASE_SQLITE3)
+  $Logger.Debug($LogMessage)
+
   Try $DB.Open()
-  
+
   If Error Then
-    $Log4Gambas.Fatal(LogPrefix("ConnectDatabase") & ("Could not connect to the database:") & " " & Error.Text)
+    $LogMessage = New LogMessage($Titulo, "ConnectDatabase", ("Could not connect to the database:") & " " & Error.Text)
+  $Logger.Fatal($LogMessage)
     ERROR.Propagate
   Endif
-  
-  $Log4Gambas.Debug(LogPrefix("ConnectDatabase") & ("Connection established with:") & " " & $DbGalleryDirectory &/ Constants.DATABASE_NAME)
-  
+
+  $LogMessage = New LogMessage($Titulo, "ConnectDatabase", ("Connection established with:") & " " & $DbGalleryDirectory &/ Constants.DATABASE_NAME)
+  $Logger.Debug($LogMessage)
+
 End
 
 Private Sub InitializeDatabase()
-  
-  $Log4Gambas.Info(LogPrefix("InitializeDatabase") & ("Checking for Gacela database"))
+
+  $LogMessage = New LogMessage($Titulo, "InitializeDatabase", ("Checking for Gacela database"))
+  $Logger.Info($LogMessage)
   If Not Exist($DbGalleryDirectory &/ Constants.DATABASE_NAME) Then
-    $Log4Gambas.Debug(LogPrefix("InitializeDatabase") & ("Database file does not exist. Starting creation:") & " " & $DbGalleryDirectory &/ Constants.DATABASE_NAME)
+    $LogMessage = New LogMessage($Titulo, "InitializeDatabase", ("Database file does not exist. Starting creation:") & " " & $DbGalleryDirectory &/ Constants.DATABASE_NAME)
+  $Logger.Debug($LogMessage)
     $IsNewBD = True
-    
+
     CreateDatabase()
   Endif
-  
+
 Catch
-  $Log4Gambas.Error(LogPrefix("InitializeDatabase") & ("An error occurred while initializing the database") & " " & Error.Text)
-  ERROR.Propagate 
-  
+  $LogMessage = New LogMessage($Titulo, "InitializeDatabase", ("An error occurred while initializing the database") & " " & Error.Text)
+  $Logger.Error($LogMessage)
+  ERROR.Propagate
+
 End
 
 Private Sub CreateDatabase()
-  
+
   'Create a temporary connection to create the DB
   $DB = New Connection
   $DB.Type = Constants.DATABASE_SQLITE3
   $DB.Host = $DbGalleryDirectory
   $DB.Name = "" 'Clear the name so the physical DB can be created
-  
+
   $DB.Open()
   If Error Then
-    $Log4Gambas.Fatal(LogPrefix("CreateDatabase") & ("Cannot open connection to create DB:") & " " & Error.Text)
+    $LogMessage = New LogMessage($Titulo, "CreateDatabase", ("Cannot open connection to create DB:") & " " & Error.Text)
+  $Logger.Fatal($LogMessage)
     ERROR.Propagate
   Endif
-  
+
   If Not $DB.Databases.Exist(Constants.DATABASE_NAME) Then 'We already know the DB file does not exist; now ask via connect
     '' NOTE: This is where the database is created
     $DB.Databases.Add(Constants.DATABASE_NAME)
     Wait 0.5 ' Small pause to ensure physical file creation
     If Error Then
-      $Log4Gambas.Fatal(LogPrefix("CreateDatabase") & ("Cannot create database:") & " " & Error.Text)
+      $LogMessage = New LogMessage($Titulo, "CreateDatabase", ("Cannot create database:") & " " & Error.Text)
+  $Logger.Fatal($LogMessage)
       $DB.Close()
       ERROR.Propagate
     Endif
-    
+
     If $DB.Databases.Count = 0 Then ' Extreme fallback: create DB from a preexisting one
       Copy "clear_database" &/ Constants.DATABASE_NAME To $DbGalleryDirectory &/ Constants.DATABASE_NAME
       Wait 0.5
     Endif
-    
+
   Endif
   $DB.Close()
-  
-  $Log4Gambas.Info(LogPrefix("CreateDatabase") & ("Database created successfully"))
-  
+
+  $LogMessage = New LogMessage($Titulo, "CreateDatabase", ("Database created successfully"))
+  $Logger.Info($LogMessage)
+
 End
 
 
@@ -134,19 +149,13 @@ End
 '
 ' ====================================================
 Private Function DBConnection_Read() As Connection
-  
+
   Return $DB
-  
+
 End
 
 Private Function IsNewDatabase_Read() As Boolean
-  
-  Return $IsNewBD
-  
-End
 
-Private Function LogPrefix(methodName As String) As String
-  
-  Return $Titulo & "[" & methodName & "] "
-  
+  Return $IsNewBD
+
 End

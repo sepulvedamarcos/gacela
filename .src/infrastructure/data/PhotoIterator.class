@@ -11,7 +11,7 @@ Private $iPageSize As Integer = 15
 Private $iCurrentPage As Integer = 0
 Private $aCachedPhotos As PhotoEntity[]
 Private $iTotalCount As Integer = 0
-Private $Log4Gambas As LoggerPort
+Private $Logger As LoggerPort
 Private $bHasMorePages As Boolean = True
 ' Filters
 Private $bFilterGarbage As Boolean = False
@@ -24,7 +24,9 @@ Private $sSearchText As String = ""
 Private $iFilterAlbumId As Integer = 0
 Private $sSortBy As String = "import_date"  ' import_date, file_name, creation_date
 Private $sSortOrder As String = "DESC"      ' ASC, DESC
+Private $Titulo As String = "[PhotoIterator] "
 
+Private $LogMessage As LogMessage
 ' ==================================================
 '
 '          Public methods
@@ -32,7 +34,7 @@ Private $sSortOrder As String = "DESC"      ' ASC, DESC
 ' ==================================================
 Public Sub _new(cRepository As PhotoRepository, oLogger As LoggerPort)
   $cRepository = cRepository
-  $Log4Gambas = oLogger
+  $Logger = oLogger
   $aCachedPhotos = New PhotoEntity[]
 
   ' Count total with current filters
@@ -41,12 +43,12 @@ Public Sub _new(cRepository As PhotoRepository, oLogger As LoggerPort)
 End
 
 Public Sub SetFilterAlbum(albumId As Integer)
-  
+
   If $iFilterAlbumId = albumId Then Return
-  
+
   $iFilterAlbumId = albumId
   Reset()
-  
+
 End
 
 'Public Function HasNext() As Boolean '' Check if there are more items
@@ -62,7 +64,7 @@ End
 'Public Function Next() As PhotoEntity '' Get next item
 '
 '  If $iCurrentIndex >= $aCachedPhotos.Count Then
-'    $Log4Gambas.Warning("No more items in cache. Call LoadNextBatch() first")
+'    $Logger.Warning("No more items in cache. Call LoadNextBatch() first")
 '    Return Null
 '  Endif
 '
@@ -80,14 +82,16 @@ Public Function LoadNextBatch() As PhotoEntity[] '' Load next batch for infinite
 
   ' If there are no more pages
   If Not $bHasMorePages Then
-    $Log4Gambas.Debug("No more pages to load")
+    $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "No more pages to load")
+  $Logger.Debug($LogMessage)
     Return oNewPhotos
   Endif
 
   $iCurrentPage = $iCurrentPage + 1
   iOffset = ($iCurrentPage - 1) * $iPageSize
 
-  $Log4Gambas.Debug("Loading page " & $iCurrentPage & " (iOffset=" & iOffset & ", limit=" & $iPageSize & ")")
+  $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Loading page " & $iCurrentPage & " (iOffset=" & iOffset & ", limit=" & $iPageSize & ")")
+  $Logger.Debug($LogMessage)
 
   ' Load next batch from $cRepository
   oNewPhotos = $cRepository.FindWithFilters(BuildFilterQuery(), $sSortBy, $sSortOrder, $iPageSize, iOffset)
@@ -99,15 +103,18 @@ Public Function LoadNextBatch() As PhotoEntity[] '' Load next batch for infinite
   ' If fewer than expected were loaded, there are no more pages
   If oNewPhotos.Count < $iPageSize Then
     $bHasMorePages = False
-    $Log4Gambas.Debug("Last page reached")
+    $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Last page reached")
+  $Logger.Debug($LogMessage)
   Endif
 
-  $Log4Gambas.Debug("Batch loaded: " & oNewPhotos.Count & " photos. Cached total: " & $aCachedPhotos.Count)
+  $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Batch loaded: " & oNewPhotos.Count & " photos. Cached total: " & $aCachedPhotos.Count)
+  $Logger.Debug($LogMessage)
 
   Return oNewPhotos
 
 Catch
-  $Log4Gambas.Error("Error loading next batch: " & Error.Text)
+  $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Error loading next batch: " & Error.Text)
+  $Logger.Error($LogMessage)
 
 End
 
@@ -119,7 +126,8 @@ Public Sub Reset() '' Reset iterator
   $bHasMorePages = True
   UpdateTotalCount()
 
-  $Log4Gambas.Debug("Iterator reset")
+  $LogMessage = New LogMessage($Titulo, "Reset", "Iterator reset")
+  $Logger.Debug($LogMessage)
 
 End
 
@@ -224,7 +232,7 @@ End
 'Public Sub LoadPage(pageNumber As Integer)
 '
 '  If pageNumber < 0 Or pageNumber >= GetTotalPages() Then
-'    $Log4Gambas.Warning("Page out of range: " & pageNumber)
+'    $Logger.Warning("Page out of range: " & pageNumber)
 '    Return
 '  Endif
 '
@@ -251,14 +259,14 @@ End
 '
 '  Dim iOffset As Integer = $iCurrentPage * $iPageSize
 '
-'  $Log4Gambas.Debug("Loading page " & $iCurrentPage & ", iOffset=" & iOffset & ", limit=" & $iPageSize)
+'  $Logger.Debug("Loading page " & $iCurrentPage & ", iOffset=" & iOffset & ", limit=" & $iPageSize)
 '
 '  $aCachedPhotos = $cRepository.FindWithFilters(BuildFilterQuery(), BuildFilterParams(), $sSortBy, $sSortOrder, $iPageSize, iOffset)
 '
-'  $Log4Gambas.Debug("Page loaded: " & $aCachedPhotos.Count & " photos")
+'  $Logger.Debug("Page loaded: " & $aCachedPhotos.Count & " photos")
 '
 'Catch
-'  $Log4Gambas.Error("Error loading page: " & Error.Text)
+'  $Logger.Error("Error loading page: " & Error.Text)
 '  $aCachedPhotos = New PhotoEntity[]
 '
 'End
@@ -267,10 +275,12 @@ Private Sub UpdateTotalCount()
 
   $iTotalCount = $cRepository.CountWithFilters(BuildFilterQuery())
 
-  $Log4Gambas.Debug("Total photos with filters: " & $iTotalCount)
+  $LogMessage = New LogMessage($Titulo, "UpdateTotalCount", "Total photos with filters: " & $iTotalCount)
+  $Logger.Debug($LogMessage)
 
 Catch
-  $Log4Gambas.Error("Error counting photos: " & Error.Text)
+  $LogMessage = New LogMessage($Titulo, "UpdateTotalCount", "Error counting photos: " & Error.Text)
+  $Logger.Error($LogMessage)
   $iTotalCount = 0
   Error.Propagate
 
@@ -311,7 +321,7 @@ Private Function BuildFilterQuery() As String
   If $sSearchText <> "" Then
     aConditions.Add("LOWER(file_name) LIKE &7")
   Endif
-  
+
   ' Filter: by album
   If $iFilterAlbumId > 0 Then
     aConditions.Add("EXISTS (SELECT 1 FROM " & PhotoRepository.TABLE_PHOTOS_ALBUMS & " pa WHERE pa.photo_id = " & PhotoRepository.TABLE_PHOTOS & ".photo_id AND pa.album_id = " & $iFilterAlbumId & ")")

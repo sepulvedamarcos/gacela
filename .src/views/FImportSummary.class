@@ -1,17 +1,19 @@
 ' Gambas class file
 
-Private $Log4Gambas As LoggerPort
+Private $Logger As LoggerPort
 Private $Configuration As Configuration
 Private $Summary As ImportSummary
+Private $Titulo As String = "[FImportSummary] "
 
+Private $LogMessage As LogMessage
 Public Sub _new(oSummary As ImportSummary, oLogger As LoggerPort, oConfiguration As Configuration)
-  
+
   $Summary = oSummary
-  $Log4Gambas = oLogger
+  $Logger = oLogger
   $Configuration = oConfiguration
-  
+
   ' CheckBoxShowImportSummary.Value = False
-  
+
   If $Summary <> Null Then
     LabelTotalAmount.Text = Str($Summary.Total)
     LabelSuccessful.Text = Str($Summary.OkCount)
@@ -21,84 +23,79 @@ Public Sub _new(oSummary As ImportSummary, oLogger As LoggerPort, oConfiguration
     LabelSuccessful.Text = "0"
     LabelFailed.Text = "0"
   Endif
-  
+
   InitializeGrid()
-  
+
 End
 
 Public Sub Form_Open()
-  
+
   BindGrid()
-  
+
 Catch
-  $Log4Gambas.Debug(LogPrefix("Form_Open") & ("Some error occurrs") & " " & Error.Text)
+  $LogMessage = New LogMessage($Titulo, "Form_Open", ("Some error occurrs") & " " & Error.Text)
+  $Logger.Debug($LogMessage)
   Error.Propagate
-  
+
 End
 
 Public Sub BtnOK_Click()
-  
+
   $Configuration.ImportShowSummary = IIf(CheckBoxNotShowImportSummary.Value, False, True)
-  
+
   Me.Close(Enumeration.DLG_OK)
-  
+
 End
 
 Public Sub BtnCancel_Click()
-  
+
   Me.Close()
-  
+
 End
 
 Private Sub InitializeGrid()
-  
+
   With GridViewSummary
     .Columns.Count = 3
     .Rows.Count = 0
     .Header = GridView.Horizontal
     .Resizable = False
-    
+
     .Columns[0].Text = ("Result")
     .Columns[0].Alignment = Align.Center
     .Columns[0].Width = 60
-    
+
     .Columns[1].Text = ("Reason")
     .Columns[1].Alignment = Align.Left
     .Columns[1].Width = 75
-    
+
     .Columns[2].Text = ("Image")
     .Columns[2].Alignment = Align.Left
   End With
-  
+
 End
 
 Private Sub BindGrid()
-  
+
   Dim oImportSummaryItem As ImportSummaryItem[]
   Dim oISI As ImportSummaryItem
   Dim iRow As Integer = 0
-  
+
   If $Summary <> Null Then
     oImportSummaryItem = $Summary.Items
     For Each oSumm As ImportSummaryItem In oImportSummaryItem
       iRow = GridViewSummary.Rows.Count
       GridViewSummary.Rows.Count = GridViewSummary.Rows.Count + 1
-      If oSumm.Status = ImportSummary.STATUS_FAIL Then 
+      If oSumm.Status = ImportSummary.STATUS_FAIL Then
         GridViewSummary[iRow, 0].Picture = Picture["icon:/16/cancel"]
       Else
         GridViewSummary[iRow, 0].Picture = Picture["icon:/16/ok"]
       Endif
       GridViewSummary[iRow, 0].Alignment = Align.Center
-      
+
       GridViewSummary[iRow, 1].Text = Trim(oSumm.Reason)
       GridViewSummary[iRow, 2].Text = Trim(oSumm.FileName)
     Next
   Endif
-  
-End
 
-Private Function LogPrefix(methodName As String) As String
-  
-  Return "[FImportSummary] " & "[" & methodName & "] "
-  
 End
