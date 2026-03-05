@@ -30,6 +30,28 @@
       Picture = Picture["icon:/medium/quit"]
     }
   }
+  { MenuEdit Menu
+    Text = ("Edit")
+    { EditMenu_SelectAll Menu
+      Text = ("Select all")
+    }
+    { EditMenu_UnselectAll Menu
+      Text = ("Unselect all")
+    }
+    { Menu3 Menu
+    }
+    { EditMenu_AddSelectedToAlbums Menu
+      Text = ("Add selected to albums")
+    }
+    { EditMenu_RemoveSelectedFromAlbums Menu
+      Text = ("Remove selected from albums")
+    }
+    { Menu12 Menu
+    }
+    { Menu13 Menu
+      Text = ("Move to thrash")
+    }
+  }
   { MainMenuView Menu
     Text = ("View")
     { ViewGallery_PrivateCollection Menu
@@ -88,7 +110,7 @@
   }
   { HBoxToolBar HBox
     MoveScaled(0,0,137,8)
-    Spacing = True
+    Margin = True
     Padding = 2
     { ToolButtonImport ToolButton
       MoveScaled(0,0,8,8)
@@ -111,6 +133,12 @@
       Picture = Picture["icon:/32/trash"]
       Border = True
     }
+    { ToolButtonAlbum ToolButton
+      MoveScaled(26,0,8,8)
+      Enabled = False
+      Picture = Picture["icon:/32/exclusive"]
+      Border = True
+    }
     { SpringToolBar Spring
       MoveScaled(73,1,4,6)
       Direction = Direction.LeftToRight
@@ -128,6 +156,12 @@
       MoveScaled(129,0,8,8)
       ToolTip = ("Exit")
       Picture = Picture["icon:/medium/logout"]
+      Border = True
+    }
+    { ToolButtonTags ToolButton
+      MoveScaled(34,0,8,8)
+      Enabled = False
+      Picture = Picture["icon:/32/tag"]
       Border = True
     }
   }

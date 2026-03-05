@@ -1,0 +1,41 @@
+' Gambas class file
+
+' Local filesystem implementation for FileStoragePort.
+Inherits FileStoragePort
+
+Public Function EnsureDirectory(path As String) As Boolean
+
+  If path = "" Then Return False
+  If Not Exist(path) Then Mkdir path
+  Return True
+
+Catch
+  Error.Propagate
+
+End
+
+Public Function SaveFile(sourcePath As String, targetPath As String) As Boolean
+
+  Copy sourcePath To targetPath
+  Return True
+
+Catch
+  Error.Propagate
+
+End
+
+Public Function DeleteFile(path As String) As Boolean
+
+  Kill path
+  Return True
+
+Catch
+  Error.Propagate
+
+End
+
+Public Function Exists(path As String) As Boolean
+
+  Return Exist(path)
+
+End

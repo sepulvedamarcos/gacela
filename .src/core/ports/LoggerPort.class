@@ -3,8 +3,6 @@
 ' Port for application logging. Keep the app decoupled from a concrete logger library.
 ' it's a contract to imeplemnt like interface
 
-Property Read Levels As String[]
-Property Read Outputs As String[]
 
 Public Sub Debug(message As LogMessage)
   Error.Raise("LoggerPort.Debug not implemented")
@@ -74,15 +72,15 @@ Public Function GetDefaultOutputBoth() As Integer
   Error.Raise("LoggerPort.GetDefaultOutputBoth not implemented")
 End
 
+Public Function GetLevels() As String[]
+  Error.Raise("LoggerPort.GetLevels not implemented")
+End
+
+Public Function GetOutputs() As String[]
+  Error.Raise("LoggerPort.GetOutputs not implemented")
+End
+
 Public Function FormatMessage(message As LogMessage) As String
   If message = Null Then Return ""
   Return message.ToText()
-End
-
-Private Function Levels_Read() As String[]
-  Return New String[]
-End
-
-Private Function Outputs_Read() As String[]
-  Return New String[]
 End

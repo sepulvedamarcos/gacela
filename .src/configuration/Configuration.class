@@ -29,6 +29,8 @@ Property Read WhichGallery As Integer                                         ''
 Property Read IsFirstRun As Boolean                                           '' First execution indicator
 Property Read GalleryPath As String                                           '' Gallery path
 Property Read IsSharedGalleryAvailable As Boolean                             '' Shared gallery is available
+Property Read DatabaseProvider As String
+Property Read StorageProvider As String
 Property DeleteOriginals As Boolean                                           '' Delete originals after import
 Property LogLevel As Integer
 Property LogOutput As Integer
@@ -109,11 +111,33 @@ Public Sub InitializeEnvironment()
     $Settings.Save()
   Endif
   
+  If $Settings[Constants.GLOBAL_DATABASE_PROVIDER, Null] = Null Then
+    $Settings[Constants.GLOBAL_DATABASE_PROVIDER] = Constants.DATABASE_PROVIDER_SQLITE
+    $Settings.Save()
+  Endif
+  
+  If $Settings[Constants.GLOBAL_STORAGE_PROVIDER, Null] = Null Then
+    $Settings[Constants.GLOBAL_STORAGE_PROVIDER] = Constants.STORAGE_PROVIDER_LOCAL
+    $Settings.Save()
+  Endif
+  
   $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
   $AppTheme = $Settings[Constants.GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_OS]
   $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
   $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 10000]
   $ImportShowSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
+  
+End
+
+Private Function DatabaseProvider_Read() As String
+
+  Return LCase($Settings[Constants.GLOBAL_DATABASE_PROVIDER, Constants.DATABASE_PROVIDER_SQLITE])
+  
+End
+
+Private Function StorageProvider_Read() As String
+
+  Return LCase($Settings[Constants.GLOBAL_STORAGE_PROVIDER, Constants.STORAGE_PROVIDER_LOCAL])
   
 End
 
@@ -354,7 +378,7 @@ End
 
 Private Function LogLevel_Read() As Integer
   
-  Return $Settings[Constants.LOGGER_LEVEL]
+  Return $Settings[Constants.LOGGER_LEVEL, $Logger.GetDefaultLevelDebug()]
   
 End
 
@@ -369,7 +393,7 @@ End
 
 Private Function LogOutput_Read() As Integer
   
-  Return $Settings[Constants.LOGGER_OUTPUT]
+  Return $Settings[Constants.LOGGER_OUTPUT, $Logger.GetDefaultOutputBoth()]
   
 End
 
@@ -384,7 +408,7 @@ End
 
 Private Function LogSize_Read() As Integer
   
-  Return $Settings[Constants.LOGGER_MAXFILESIZE] / 1024 / 1024
+  Return $Settings[Constants.LOGGER_MAXFILESIZE, $Logger.GetMaxFileSize()] / 1024 / 1024
   
 End
 
@@ -400,7 +424,7 @@ End
 
 Private Function LogFiles_Read() As Integer
   
-  Return $Settings[Constants.LOGGER_MAXFILES]
+  Return $Settings[Constants.LOGGER_MAXFILES, $Logger.GetMaxFiles()]
   
 End
 
@@ -415,7 +439,7 @@ End
 
 Private Function LogPath_Read() As String
   
-  Return $Settings[Constants.LOGGER_LOGFILE]
+  Return $Settings[Constants.LOGGER_LOGFILE, $Logger.GetLogFile()]
   
 End
 

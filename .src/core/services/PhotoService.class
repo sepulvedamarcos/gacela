@@ -6,7 +6,8 @@
 '
 '
 Private $Logger As LoggerPort
-Private $PhotoRepository As PhotoRepository
+Private $PhotoRepository As PhotoRepositoryPort
+Private $FileStorage As FileStoragePort
 Private $Configuration As Configuration
 Private $Iterator As PhotoIterator
 Private $Titulo As String = "PhotoService"
@@ -18,11 +19,12 @@ Private $ImageMetadata As ImageMetadataAdapter
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepository, cConfiguration As Configuration)
+Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort, cConfiguration As Configuration, cFileStorage As FileStoragePort)
   
   $Logger = oLogger
   $PhotoRepository = cPhotoRepository
   $Configuration = cConfiguration
+  $FileStorage = cFileStorage
   $Iterator = New PhotoIterator($PhotoRepository, $Logger)
   $ImageMetadata = New ImageMetadataAdapter($Logger)
   
@@ -294,6 +296,56 @@ Catch
   
 End
 
+Public Function AddPhotosToAlbums(photoIds As Integer[], albumIds As Integer[]) As Integer
+  
+  Dim iPhotoId As Integer
+  Dim iAlbumId As Integer
+  Dim iCount As Integer
+  
+  If photoIds = Null Or albumIds = Null Then Return 0
+  
+  For Each iPhotoId In photoIds
+    For Each iAlbumId In albumIds
+      If $PhotoRepository.AddPhotoToAlbum(iPhotoId, iAlbumId, 0, User.Name) Then
+        iCount += 1
+      Endif
+    Next
+  Next
+  
+  Return iCount
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "AddPhotosToAlbums", "Problems adding selected photos to albums")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Function RemovePhotosFromAlbums(photoIds As Integer[], albumIds As Integer[]) As Integer
+  
+  Dim iPhotoId As Integer
+  Dim iAlbumId As Integer
+  Dim iCount As Integer
+  
+  If photoIds = Null Or albumIds = Null Then Return 0
+  
+  For Each iPhotoId In photoIds
+    For Each iAlbumId In albumIds
+      If $PhotoRepository.RemovePhotoFromAlbum(iPhotoId, iAlbumId) Then
+        iCount += 1
+      Endif
+    Next
+  Next
+  
+  Return iCount
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "RemovePhotosFromAlbums", "Problems removing selected photos from albums")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
 ' ==================================================
 '
 '          Private methods
@@ -304,13 +356,13 @@ Private Function SaveImageIO(originalImage As String, sNewPath As String, sFilen
   
   $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Validating image existence and destination directory"))
   $Logger.Debug($LogMessage)
-  If Not Exist(sNewPath) Then
-    Mkdir sNewPath
+  If Not $FileStorage.Exists(sNewPath) Then
+    $FileStorage.EnsureDirectory(sNewPath)
   Endif
   
   $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Attempting to copy image into directory"))
   $Logger.Debug($LogMessage)
-  Copy originalImage To sNewPath &/ sFilename
+  $FileStorage.SaveFile(originalImage, sNewPath &/ sFilename)
   $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Image copy completed successfully in directory"))
   $Logger.Debug($LogMessage)
   
@@ -327,7 +379,7 @@ Private Function DeleteImageIO(originalImage As String) As Boolean
   
   $LogMessage = New LogMessage($Titulo, "DeleteImageIO", ("Attempting to delete image in directory"))
   $Logger.Debug($LogMessage)
-  Kill originalImage
+  $FileStorage.DeleteFile(originalImage)
   $LogMessage = New LogMessage($Titulo, "DeleteImageIO", ("Image deletion completed successfully in directory"))
   $Logger.Debug($LogMessage)
   
@@ -359,7 +411,7 @@ Private Function ValidateFileExist(sPath As String, sFilename As String) As Bool
   
   $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Validating physical file existence during import ") & sPath &/ sFilename)
   $Logger.Debug($LogMessage)
-  If Exist(sPath &/ sFilename) Then
+  If $FileStorage.Exists(sPath &/ sFilename) Then
     $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Physical file exists during import") & sPath &/ sFilename)
     $Logger.Debug($LogMessage)
     Return True
@@ -495,8 +547,8 @@ Private Function SavePhoto(sImagenPath As String, sDescription As String, Option
   Return Enumeration.RESPONSE_OK
   
 Catch
-  If Exist(sNewPath &/ sFilename) Then
-    Kill sNewPath &/ sFilename
+  If $FileStorage.Exists(sNewPath &/ sFilename) Then
+    $FileStorage.DeleteFile(sNewPath &/ sFilename)
   Endif
   $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Error importing photo: ") & Error.Text)
   $Logger.Error($LogMessage)

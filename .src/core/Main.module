@@ -4,7 +4,8 @@
 
 Private $Configuration As Configuration
 Private $Logger As LoggerPort
-Private $PhotoRepository As PhotoRepository
+Private $PhotoRepository As PhotoRepositoryPort
+Private $FileStorage As FileStoragePort
 Private $PhotoService As PhotoService
 Private $Titulo As String = "Main"
 
@@ -19,9 +20,10 @@ Public Sub Main()
   
   $Configuration.InitializeEnvironment()
   
-  $PhotoRepository = New PhotoRepository($Configuration, $Logger)
+  $PhotoRepository = DataSourceFactory.CreatePhotoRepository($Configuration, $Logger)
+  $FileStorage = DataSourceFactory.CreateFileStorage($Configuration, $Logger)
   
-  $PhotoService = New PhotoService($Logger, $PhotoRepository, $Configuration)
+  $PhotoService = New PhotoService($Logger, $PhotoRepository, $Configuration, $FileStorage)
   
   cFormMain = New FMain($Configuration, $Logger, $PhotoService)
   cFormMain.Show()

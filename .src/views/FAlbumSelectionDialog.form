@@ -1,0 +1,47 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,74,72)
+  Text = ("Select albums")
+  Resizable = False
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  Margin = True
+  Padding = 4
+  { LabelTitle Label
+    MoveScaled(1,1,72,4)
+    Text = ("Choose one or more albums")
+  }
+  { PanelAlbums Panel
+    MoveScaled(1,5,72,57)
+    Arrangement = Arrange.Vertical
+    { TableViewAlbums TableView
+      MoveScaled(3,2,61,34)
+      Expand = True
+      Mode = Select.Multiple
+    }
+  }
+  { Separator1 Separator
+    MoveScaled(1,62,72,2)
+    Expand = True
+  }
+  { HBoxButtons HBox
+    MoveScaled(1,65,72,4)
+    Expand = True
+    AutoResize = True
+    Spacing = True
+    Padding = 4
+    { Spring1 Spring
+      MoveScaled(15,0,4,4)
+    }
+    { BtnOK Button
+      MoveScaled(25,0,16,4)
+      Text = ("OK")
+      Default = True
+    }
+    { BtnCancel Button
+      MoveScaled(42,0,16,4)
+      Text = ("Cancel")
+    }
+  }
+}

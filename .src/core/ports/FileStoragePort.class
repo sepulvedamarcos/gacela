@@ -1,0 +1,19 @@
+' Gambas class file
+
+' File storage contract for local/cloud interchangeable implementations.
+
+Public Function EnsureDirectory(path As String) As Boolean
+  Error.Raise("FileStoragePort.EnsureDirectory not implemented")
+End
+
+Public Function SaveFile(sourcePath As String, targetPath As String) As Boolean
+  Error.Raise("FileStoragePort.SaveFile not implemented")
+End
+
+Public Function DeleteFile(path As String) As Boolean
+  Error.Raise("FileStoragePort.DeleteFile not implemented")
+End
+
+Public Function Exists(path As String) As Boolean
+  Error.Raise("FileStoragePort.Exists not implemented")
+End

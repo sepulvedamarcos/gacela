@@ -1,0 +1,119 @@
+' Gambas class file
+
+Private $PhotoService As PhotoService
+Private $Logger As LoggerPort
+Private $SelectedAlbumIds As Integer[]
+Private $AlbumPanel As Panel
+Private $Titulo As String = "FAlbumSelectionDialog"
+Private $LogMessage As LogMessage
+
+Property Read SelectedAlbumIds As Integer[]
+
+Public Sub _new(oPhotoService As PhotoService, oLogger As LoggerPort, sTitle As String)
+  
+  Dim oAlbums As AlbumEntity[]
+  Dim oAlbum As AlbumEntity
+  Dim oCheck As CheckBox
+  
+  $PhotoService = oPhotoService
+  $Logger = oLogger
+  $SelectedAlbumIds = New Integer[]
+  
+  If sTitle <> "" Then
+    Me.Text = sTitle
+  Endif
+  
+  InitializeGrid()
+  oAlbums = $PhotoService.FindAlbums("", 0, Constants.USE_SOFT_FALSE)
+  BindGrid(oAlbums)
+  
+  If oAlbums.Count = 0 Then
+    LabelTitle.Text = ("No albums available")
+    BtnOK.Enabled = False
+  Endif
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "_new", "Problem loading albums: " & Error.Text)
+  If $Logger <> Null Then $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Sub BtnOK_Click()
+  
+  Dim oCtrl As Control
+  Dim oCheck As CheckBox
+  
+  $SelectedAlbumIds = New Integer[]
+  
+  For Each oCtrl In $AlbumPanel.Children
+    If oCtrl Is CheckBox Then
+      oCheck = oCtrl
+      If oCheck.Value Then
+        $SelectedAlbumIds.Add(oCheck.Tag)
+      Endif
+    Endif
+  Next
+  
+  If $SelectedAlbumIds.Count = 0 Then
+    Message.Warning(("You must select at least one album"))
+    Return
+  Endif
+  
+  Me.Close(Enumeration.DLG_OK)
+  
+End
+
+Public Sub BtnCancel_Click()
+  
+  Me.Close(Enumeration.DLG_CANCEL)
+  
+End
+
+Private Function SelectedAlbumIds_Read() As Integer[]
+  
+  Dim iId As Integer
+  Dim aCopy As New Integer[]
+  
+  For Each iId In $SelectedAlbumIds
+    aCopy.Add(iId)
+  Next
+  
+  Return aCopy
+  
+End
+
+Private Sub InitializeGrid()
+  
+  With TableViewAlbums
+    .Columns.Count = 2
+    .Rows.Count = 0
+     .Header = GridView.Horizontal
+    ' .Resizable = False
+    
+    .Columns[0].Text = ("Albums")
+    .Columns[0].Alignment = Align.Left
+    ' .Columns[0].Width = 60
+    .Columns[0].Expand = True
+    
+    .Columns[1].Text = ("Description")
+    .Columns[1].Alignment = Align.Left
+    ' .Columns[1].Width = 75
+    .Columns[1].Expand = True
+
+  End With
+  
+End
+
+Private Sub BindGrid(oAlbums As AlbumEntity[])
+  
+  Dim iRow As Integer = 0
+  
+  For Each oAlbum As AlbumEntity In oAlbums
+    iRow = TableViewAlbums.Rows.Count
+    TableViewAlbums.Rows.Count = TableViewAlbums.Rows.Count + 1
+    TableViewAlbums[iRow, 0].Text = Trim(oAlbum.Name)
+    TableViewAlbums[iRow, 1].Text = Trim(oAlbum.Description)
+  Next
+  
+End

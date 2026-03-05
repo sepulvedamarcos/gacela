@@ -5,7 +5,7 @@
 ' Data iteration class
 '
 '
-Private $cRepository As PhotoRepository
+Private $cRepository As PhotoRepositoryPort
 Private $iCurrentIndex As Integer = 0
 Private $iPageSize As Integer = 15
 Private $iCurrentPage As Integer = 0
@@ -25,6 +25,8 @@ Private $iFilterAlbumId As Integer = 0
 Private $sSortBy As String = "import_date"  ' import_date, file_name, creation_date
 Private $sSortOrder As String = "DESC"      ' ASC, DESC
 Private $Titulo As String = "PhotoIterator"
+Private Const TABLE_PHOTOS As String = "photos"
+Private Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"
 
 Private $LogMessage As LogMessage
 ' ==================================================
@@ -32,7 +34,7 @@ Private $LogMessage As LogMessage
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cRepository As PhotoRepository, oLogger As LoggerPort)
+Public Sub _new(cRepository As PhotoRepositoryPort, oLogger As LoggerPort)
   $cRepository = cRepository
   $Logger = oLogger
   $aCachedPhotos = New PhotoEntity[]
@@ -324,7 +326,7 @@ Private Function BuildFilterQuery() As String
 
   ' Filter: by album
   If $iFilterAlbumId > 0 Then
-    aConditions.Add("EXISTS (SELECT 1 FROM " & PhotoRepository.TABLE_PHOTOS_ALBUMS & " pa WHERE pa.photo_id = " & PhotoRepository.TABLE_PHOTOS & ".photo_id AND pa.album_id = " & $iFilterAlbumId & ")")
+    aConditions.Add("EXISTS (SELECT 1 FROM " & TABLE_PHOTOS_ALBUMS & " pa WHERE pa.photo_id = " & TABLE_PHOTOS & ".photo_id AND pa.album_id = " & $iFilterAlbumId & ")")
   Endif
 
   Return aConditions.Join(" AND ")

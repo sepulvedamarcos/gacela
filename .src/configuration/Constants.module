@@ -6,6 +6,8 @@ Public Const GLOBAL_GALLERY_TYPE As String = "Global/GalleryType"
 Public Const GLOBAL_GALLERY_PHOTOS_PER_VIEW As String = "Global/PhotosPerView"
 Public Const GLOBAL_APPLICATION_THEME As String = "Global/Theme"
 Public Const GLOBAL_SHARED_GALLERY_ENABLED As String = "Global/SharedGallery"
+Public Const GLOBAL_DATABASE_PROVIDER As String = "Global/DatabaseProvider"
+Public Const GLOBAL_STORAGE_PROVIDER As String = "Global/StorageProvider"
 Public Const GLOBAL_DELETED_MAX_SIZE_MB As String = "Global/DeletedMaxSizeMB"
 Public Const GLOBAL_DELETED_MAX_COUNT As String = "Global/DeletedMaxCount"
 Public Const IMPORT_SHOW_SUMMARY As String = "Import/ShowSummary"
@@ -30,6 +32,8 @@ Public Const GACELA_DELETED_DIRECTORY As String = ".local/share/gacela/deleted" 
 Public Const GACELA_SHARED_GALLERY_DIRECTORY As String = "/var/lib/gacela"    '' Shared gallery directory
 Public Const DATABASE_NAME As String = "gacela.db"                    '' Database name
 Public Const DATABASE_SQLITE3 As String = "sqlite3"                   '' Database type
+Public Const DATABASE_PROVIDER_SQLITE As String = "sqlite"
+Public Const STORAGE_PROVIDER_LOCAL As String = "local"
 Public Const CONFIG_NAME As String = "gacela.conf"                    '' Settings file name
 
 Public Const GRUPO_GACELA As String = "gacela-shared"                  '' Gacela users group name

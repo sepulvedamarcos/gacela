@@ -1,0 +1,47 @@
+' Gambas class file
+
+' Repository contract for photo persistence. Allows swapping data source implementations.
+
+Public Function SwitchGallery() As Boolean
+  Error.Raise("PhotoRepositoryPort.SwitchGallery not implemented")
+End
+
+Public Function IsNewDatabase() As Boolean
+  Error.Raise("PhotoRepositoryPort.IsNewDatabase not implemented")
+End
+
+Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrder As String, limit As Integer, offset As Integer) As PhotoEntity[]
+  Error.Raise("PhotoRepositoryPort.FindWithFilters not implemented")
+End
+
+Public Function CountWithFilters(whereClause As String) As Integer
+  Error.Raise("PhotoRepositoryPort.CountWithFilters not implemented")
+End
+
+Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer
+  Error.Raise("PhotoRepositoryPort.CreateAlbum not implemented")
+End
+
+Public Function DeleteAlbum(id As Integer) As Integer
+  Error.Raise("PhotoRepositoryPort.DeleteAlbum not implemented")
+End
+
+Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean
+  Error.Raise("PhotoRepositoryPort.CreatePhoto not implemented")
+End
+
+Public Function AddPhotoToAlbum(photoId As Integer, albumId As Integer, Optional orderInAlbum As Integer = 0, Optional addedUser As String = "") As Boolean
+  Error.Raise("PhotoRepositoryPort.AddPhotoToAlbum not implemented")
+End
+
+Public Function RemovePhotoFromAlbum(photoId As Integer, albumId As Integer) As Boolean
+  Error.Raise("PhotoRepositoryPort.RemovePhotoFromAlbum not implemented")
+End
+
+Public Function ValidateHash256Exist(sHash256 As String) As Boolean
+  Error.Raise("PhotoRepositoryPort.ValidateHash256Exist not implemented")
+End
+
+Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[]
+  Error.Raise("PhotoRepositoryPort.FindAlbums not implemented")
+End

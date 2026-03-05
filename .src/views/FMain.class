@@ -274,6 +274,44 @@ Public Sub ToolButtonTrash_Click()
   Print $SelectionService.GetSelectedIds()
 
 End
+
+Public Sub EditMenu_SelectAll_Click()
+
+  SelectAllPhotos
+
+End
+
+Public Sub EditMenu_UnselectAll_Click()
+
+  ClearSelectedPhotos
+
+End
+
+Public Sub EditMenu_AddSelectedToAlbums_Click()
+  
+  AssignSelectedPhotosToAlbums(True)
+  
+End
+
+Public Sub EditMenu_RemoveSelectedFromAlbums_Click()
+  
+  AssignSelectedPhotosToAlbums(False)
+  
+End
+
+Public Sub ToolButtonAlbum_Click()
+
+  
+
+End
+
+Public Sub ToolButtonTags_Click()
+
+  
+
+End
+
+
 ' ==================================================
 '
 '          Private methods
@@ -470,7 +508,49 @@ Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional bHa
   Endif
 
   ToolButtonTrash.Enabled = bHasSelection
+  EditMenu_AddSelectedToAlbums.Enabled = bHasSelection
+  EditMenu_RemoveSelectedFromAlbums.Enabled = bHasSelection
 
 End
 
+Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
+  
+  Dim oDialog As FAlbumSelectionDialog
+  Dim aPhotoIds As Integer[]
+  Dim aAlbumIds As Integer[]
+  Dim iAffected As Integer
+  Dim iResp As Integer
+  Dim sText As String
+  
+  If $SelectionService = Null Or Not $SelectionService.HasSelection() Then
+    Message.Warning(("You must select at least one photo"))
+    Return
+  Endif
+  
+  If bIsAddOperation Then
+    sText = ("Add selected photos to albums")
+    oDialog = New FAlbumSelectionDialog($PhotoService, $Logger, sText)
+  Else
+    sText = ("Remove selected photos from albums")
+    oDialog = New FAlbumSelectionDialog($PhotoService, $Logger, sText)
+  Endif
+  iResp = oDialog.ShowModal()
+
+  If iResp <> Enumeration.DLG_OK Then Return
+  
+  aPhotoIds = $SelectionService.GetSelectedIds()
+  aAlbumIds = oDialog.SelectedAlbumIds
+  
+  If bIsAddOperation Then
+    iAffected = $PhotoService.AddPhotosToAlbums(aPhotoIds, aAlbumIds)
+    ShowStatus(("Relations created: ") & iAffected, 3500)
+  Else
+    iAffected = $PhotoService.RemovePhotosFromAlbums(aPhotoIds, aAlbumIds)
+    ShowStatus(("Relations removed: ") & iAffected, 3500)
+  Endif
+  
+  ClearSelectedPhotos()
+  ReloadGallery()
+  
+End
 

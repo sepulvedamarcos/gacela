@@ -8,8 +8,8 @@ Public Sub _new(oLogger As LoggerPort, oConfiguration As Configuration)
   $Logger = oLogger
   $Configuration = oConfiguration
   
-  ComboBoxOutput.List = $Logger.Outputs
-  ComboBoxLevel.list = $Logger.Levels
+  ComboBoxOutput.List = $Logger.GetOutputs()
+  ComboBoxLevel.List = $Logger.GetLevels()
   
 End
 
@@ -36,7 +36,7 @@ Public Sub btnOK_Click()
   $Configuration.DeletedMaxCount = SpinBoxMaxFileDeleted.Value
   $Configuration.DeletedMaxSizeMB = SpinBoxDeleteMaxSize.Value
   
-  ComboBoxLevel.Index = $Configuration.LogLevel
+  $Configuration.LogLevel = ComboBoxLevel.Index
   $Configuration.LogOutput = ComboBoxOutput.Index
   $Configuration.LogPath = DirBoxFilePath.Value
   $Configuration.LogSize = SpinBoxFileSize.Value
