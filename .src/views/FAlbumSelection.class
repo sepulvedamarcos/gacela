@@ -1,30 +1,29 @@
 ' Gambas class file
 
-Private $PhotoService As PhotoService
+Private $AlbumService As AlbumService
 Private $Logger As LoggerPort
 Private $SelectedAlbumIds As Integer[]
-Private $AlbumPanel As Panel
+Private $RowAlbumIds As Integer[]
 Private $Titulo As String = "FAlbumSelectionDialog"
 Private $LogMessage As LogMessage
 
 Property Read SelectedAlbumIds As Integer[]
 
-Public Sub _new(oPhotoService As PhotoService, oLogger As LoggerPort, sTitle As String)
+Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, sTitle As String)
   
   Dim oAlbums As AlbumEntity[]
-  Dim oAlbum As AlbumEntity
-  Dim oCheck As CheckBox
   
-  $PhotoService = oPhotoService
+  $AlbumService = oAlbumService
   $Logger = oLogger
   $SelectedAlbumIds = New Integer[]
+  $RowAlbumIds = New Integer[]
   
   If sTitle <> "" Then
     Me.Text = sTitle
   Endif
   
   InitializeGrid()
-  oAlbums = $PhotoService.FindAlbums("", 0, Constants.USE_SOFT_FALSE)
+  oAlbums = $AlbumService.FindAlbums("", 0, Constants.USE_SOFT_FALSE)
   BindGrid(oAlbums)
   
   If oAlbums.Count = 0 Then
@@ -41,17 +40,13 @@ End
 
 Public Sub BtnOK_Click()
   
-  Dim oCtrl As Control
-  Dim oCheck As CheckBox
+  Dim iRow As Integer
   
   $SelectedAlbumIds = New Integer[]
   
-  For Each oCtrl In $AlbumPanel.Children
-    If oCtrl Is CheckBox Then
-      oCheck = oCtrl
-      If oCheck.Value Then
-        $SelectedAlbumIds.Add(oCheck.Tag)
-      Endif
+  For iRow = 0 To TableViewAlbums.Rows.Max
+    If TableViewAlbums.Rows[iRow].Selected Then
+      $SelectedAlbumIds.Add($RowAlbumIds[iRow])
     Endif
   Next
   
@@ -109,11 +104,13 @@ Private Sub BindGrid(oAlbums As AlbumEntity[])
   
   Dim iRow As Integer = 0
   
+  $RowAlbumIds = New Integer[]
   For Each oAlbum As AlbumEntity In oAlbums
     iRow = TableViewAlbums.Rows.Count
     TableViewAlbums.Rows.Count = TableViewAlbums.Rows.Count + 1
     TableViewAlbums[iRow, 0].Text = Trim(oAlbum.Name)
     TableViewAlbums[iRow, 1].Text = Trim(oAlbum.Description)
+    $RowAlbumIds.Add(oAlbum.Id)
   Next
   
 End
