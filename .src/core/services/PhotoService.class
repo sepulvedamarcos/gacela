@@ -170,28 +170,17 @@ Catch
   
 End
 
-Public Function ImportPhotos(imagesPath As String[], Optional albumNam As String, Optional albumDes As String, Optional albumId As Integer = 0) As ImportSummary
+Public Function ImportPhotos(imagesPath As String[], Optional albumId As Integer = 0) As ImportSummary
   
   Dim sPhoto As String
   Dim iI As Integer
   Dim bDeleteOriginals As Boolean
-  Dim oAlbumEntity As New AlbumEntity
   Dim oSummary As New ImportSummary
   Dim iResp As Integer
   Dim oItem As ImportSummaryItem
   Dim sFileName As String
   Dim sReason As String
   Dim sMessage As String
-  
-  If albumId = 0 Then
-    If albumNam <> "" Then
-      oAlbumEntity.Name = albumNam
-      oAlbumEntity.Description = albumDes
-      oAlbumEntity.CreationUser = User.Name
-      albumId = $PhotoRepository.CreateAlbum(oAlbumEntity)
-    End If
-    
-  End If
   
   bDeleteOriginals = $Configuration.DeleteOriginals
   
@@ -236,111 +225,6 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumNam As String
   
 Catch
   $LogMessage = New LogMessage($Titulo, "ImportPhotos", "Error inserting photo " & Error.Text)
-  $Logger.Error($LogMessage)
-  Error.Propagate
-  
-End
-
-Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[]
-  
-  $LogMessage = New LogMessage($Titulo, "FindAlbums", "Search albums: [" & text & "] use softdelete [" & useSoftDelete & "]")
-  $Logger.Debug($LogMessage)
-  
-  Return $PhotoRepository.FindAlbums(text, id, useSoftDelete)
-  
-End
-
-Public Function AddAlbum(name As String, description As String) As Boolean
-  
-  Dim oAlbum As New AlbumEntity
-  Dim iKey As Integer
-  
-  oAlbum.Name = name
-  oAlbum.Description = description
-  oAlbum.CreationUser = User.Name
-  
-  $LogMessage = New LogMessage($Titulo, "AddAlbum", ("Creating album entity to persist"))
-  $Logger.Debug($LogMessage)
-  iKey = $PhotoRepository.CreateAlbum(oAlbum)
-  If iKey Then
-    Return True
-  Endif
-  
-  Return False
-  
-Catch
-  $LogMessage = New LogMessage($Titulo, "AddAlbum", ("Problems creating an album"))
-  $Logger.Error($LogMessage)
-  Error.Propagate
-  
-End
-
-Public Function RemoveAlbum(id As Integer) As Boolean
-  
-  Dim iKey As Integer
-  
-  $LogMessage = New LogMessage($Titulo, "RemoveAlbum", ("Deleting album entity") & Str(id))
-  $Logger.Debug($LogMessage)
-  iKey = $PhotoRepository.DeleteAlbum(id)
-  
-  If iKey Then 
-    Return True
-  Endif
-  
-  Return False
-  
-Catch
-  $LogMessage = New LogMessage($Titulo, "RemoveAlbum", ("Problems deleting an album"))
-  $Logger.Error($LogMessage)
-  Error.Propagate
-  
-End
-
-Public Function AddPhotosToAlbums(photoIds As Integer[], albumIds As Integer[]) As Integer
-  
-  Dim iPhotoId As Integer
-  Dim iAlbumId As Integer
-  Dim iCount As Integer
-  
-  If photoIds = Null Or albumIds = Null Then Return 0
-  
-  For Each iPhotoId In photoIds
-    For Each iAlbumId In albumIds
-      If $PhotoRepository.AddPhotoToAlbum(iPhotoId, iAlbumId, 0, User.Name) Then
-        iCount += 1
-      Endif
-    Next
-  Next
-  
-  Return iCount
-  
-Catch
-  $LogMessage = New LogMessage($Titulo, "AddPhotosToAlbums", "Problems adding selected photos to albums")
-  $Logger.Error($LogMessage)
-  Error.Propagate
-  
-End
-
-Public Function RemovePhotosFromAlbums(photoIds As Integer[], albumIds As Integer[]) As Integer
-  
-  Dim iPhotoId As Integer
-  Dim iAlbumId As Integer
-  Dim iCount As Integer
-  
-  If photoIds = Null Or albumIds = Null Then Return 0
-  
-  For Each iPhotoId In photoIds
-    For Each iAlbumId In albumIds
-      If $PhotoRepository.RemovePhotoFromAlbum(iPhotoId, iAlbumId) Then
-        iCount += 1
-      Endif
-    Next
-  Next
-  
-  Return iCount
-  
-Catch
-  $LogMessage = New LogMessage($Titulo, "RemovePhotosFromAlbums", "Problems removing selected photos from albums")
   $Logger.Error($LogMessage)
   Error.Propagate
   

@@ -1,7 +1,7 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,64,65)
+  MoveScaled(0,0,64,67)
   Text = ("Import Summary")
   Resizable = False
   Arrangement = Arrange.Vertical
@@ -47,19 +47,18 @@
     Expand = True
   }
   { HBox1 HBox
-    MoveScaled(1,60,62,4)
-    Spacing = True
+    MoveScaled(1,60,62,5)
     { Panel1 Panel
-      MoveScaled(21,0,4,4)
+      MoveScaled(6,1,4,3)
       Expand = True
     }
     { btnOK Button
-      MoveScaled(29,0,16,4)
+      MoveScaled(25,0,18,5)
       Text = ("OK")
       Default = True
     }
     { btnCancel Button
-      MoveScaled(46,0,16,4)
+      MoveScaled(43,0,18,5)
       Text = ("Cancel")
       Cancel = True
     }

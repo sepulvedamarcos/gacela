@@ -25,6 +25,14 @@
     }
     { Menu2 Menu
     }
+    { MainMenu_AlbumManage Menu
+      Text = ("Albums")
+    }
+    { Menu14 Menu
+      Text = ("Tags")
+    }
+    { Menu15 Menu
+    }
     { MainMenu_Exit Menu
       Text = ("Exit")
       Picture = Picture["icon:/medium/quit"]
@@ -135,8 +143,13 @@
     }
     { ToolButtonAlbum ToolButton
       MoveScaled(26,0,8,8)
-      Enabled = False
       Picture = Picture["icon:/32/exclusive"]
+      Border = True
+    }
+    { ToolButtonTags ToolButton
+      MoveScaled(34,0,8,8)
+      Enabled = False
+      Picture = Picture["icon:/32/tag"]
       Border = True
     }
     { SpringToolBar Spring
@@ -156,12 +169,6 @@
       MoveScaled(129,0,8,8)
       ToolTip = ("Exit")
       Picture = Picture["icon:/medium/logout"]
-      Border = True
-    }
-    { ToolButtonTags ToolButton
-      MoveScaled(34,0,8,8)
-      Enabled = False
-      Picture = Picture["icon:/32/tag"]
       Border = True
     }
   }

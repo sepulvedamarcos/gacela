@@ -6,10 +6,11 @@ Private $SelectedAlbumIds As Integer[]
 Private $RowAlbumIds As Integer[]
 Private $Titulo As String = "FAlbumSelectionDialog"
 Private $LogMessage As LogMessage
+Private $Action As Integer
 
 Property Read SelectedAlbumIds As Integer[]
 
-Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, sTitle As String)
+Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, iAction As Integer)
   
   Dim oAlbums As AlbumEntity[]
   
@@ -17,9 +18,19 @@ Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, sTitle As 
   $Logger = oLogger
   $SelectedAlbumIds = New Integer[]
   $RowAlbumIds = New Integer[]
+  $Action = iAction
   
-  If sTitle <> "" Then
-    Me.Text = sTitle
+VBoxListAlbums.Visible = True
+VBoxManageAlbum.visible = False
+Me.Width = VBoxButtons.Width + 10
+Me.Height = 410
+  
+  If iAction = Enumeration.ALBUM_ADD_ACTION Then 
+    Me.Text = ("Add selected photos to albums")
+  Else If iAction = Enumeration.ALBUM_REMOVE_ACTION Then
+    Me.Text = ("Remove selected photos from albums")
+  Else 
+    Me.text = ("Manage albums")
   Endif
   
   InitializeGrid()
@@ -30,6 +41,8 @@ Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, sTitle As 
     LabelTitle.Text = ("No albums available")
     BtnOK.Enabled = False
   Endif
+  
+  
   
 Catch
   $LogMessage = New LogMessage($Titulo, "_new", "Problem loading albums: " & Error.Text)
@@ -83,7 +96,7 @@ Private Sub InitializeGrid()
   With TableViewAlbums
     .Columns.Count = 2
     .Rows.Count = 0
-     .Header = GridView.Horizontal
+    .Header = GridView.Horizontal
     ' .Resizable = False
     
     .Columns[0].Text = ("Albums")
@@ -95,7 +108,7 @@ Private Sub InitializeGrid()
     .Columns[1].Alignment = Align.Left
     ' .Columns[1].Width = 75
     .Columns[1].Expand = True
-
+    
   End With
   
 End
@@ -112,5 +125,31 @@ Private Sub BindGrid(oAlbums As AlbumEntity[])
     TableViewAlbums[iRow, 1].Text = Trim(oAlbum.Description)
     $RowAlbumIds.Add(oAlbum.Id)
   Next
+  
+End
+
+Public Sub Form_Open()
+  
+End
+
+Public Sub ButtonNewAlbum_Click()
+
+VBoxListAlbums.Visible = False
+VBoxManageAlbum.visible = True
+
+
+End
+
+
+Public Sub BtnOKNew_Click()
+
+  
+
+End
+
+Public Sub BtnCancelNew_Click()
+
+VBoxListAlbums.Visible = True
+VBoxManageAlbum.visible = False
   
 End

@@ -1,5 +1,58 @@
 # Gambas Form File 3.0
 
-{ FComponents Form
-  MoveScaled(0,0,64,64)
+{ Form Form
+  MoveScaled(0,0,103,74)
+  Text = ("Form with all shared components ")
+  { VBoxButtons VBox
+    MoveScaled(3,13,84,8)
+    { Separator1 Separator
+      MoveScaled(0,0,72,2)
+    }
+    { HBoxButtons HBox
+      MoveScaled(0,2,82,5)
+      Spacing = True
+      Padding = 4
+      { ButtonNewAlbum Button
+        MoveScaled(1,0,18,4)
+        Text = ("New Album")
+      }
+      { Button3 Button
+        MoveScaled(19,0,18,4)
+        Text = ("Remove Album")
+      }
+      { Spring1 Spring
+        MoveScaled(38,0,4,4)
+      }
+      { BtnOK Button
+        MoveScaled(45,0,18,4)
+        Text = ("OK")
+      }
+      { BtnCancel Button
+        MoveScaled(63,0,18,4)
+        Text = ("Cancel")
+      }
+    }
+  }
+  { VBoxButtons2 VBox
+    MoveScaled(3,22,84,8)
+    { Separator2 Separator
+      MoveScaled(0,0,72,2)
+    }
+    { HBoxButtons2 HBox
+      MoveScaled(0,2,82,5)
+      Spacing = True
+      Padding = 4
+      { Spring2 Spring
+        MoveScaled(38,0,4,4)
+      }
+      { BtnOK2 Button
+        MoveScaled(45,0,18,4)
+        Text = ("OK")
+      }
+      { BtnCancel2 Button
+        MoveScaled(63,0,18,4)
+        Text = ("Cancel")
+      }
+    }
+  }
 }

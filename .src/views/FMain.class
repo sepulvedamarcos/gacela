@@ -6,6 +6,7 @@ Private $Height As Integer = 90
 Private $Configuration As Configuration
 Private $Logger As LoggerPort
 Private $PhotoService As PhotoService
+Private $AlbumService As AlbumService
 Private $SelectionService As PhotoSelectionService
 Private $Titulo As String = "FMain"
 Private $LogMessage As LogMessage
@@ -16,11 +17,12 @@ Private $AlbumPanel As Panel
 
 Property LastImportSummary As ImportSummary
 
-Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService)
+Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService, cAlbumService As AlbumService)
 
   $Configuration = cConfiguration
   $Logger = oLogger
   $PhotoService = cPhotoService
+  $AlbumService = cAlbumService
 
 End
 
@@ -301,11 +303,11 @@ End
 
 Public Sub ToolButtonAlbum_Click()
 
-  
+  ShowAlbumManager()
 
 End
 
-Public Sub ToolButtonTags_Click()
+Public Sub MainMenu_AlbumManage_Click()
 
   
 
@@ -348,7 +350,7 @@ Private Sub ImportProcess(Optional listFiles As String[])
   Dim cSelector As FImportDialog
   Dim oImportSummary As FImportSummary
 
-  cSelector = New FImportDialog(Me, $PhotoService, $Logger, listFiles)
+  cSelector = New FImportDialog(Me, $PhotoService, $AlbumService, $Logger, listFiles)
   vResp = cSelector.ShowModal()
 
   If vResp = Enumeration.DLG_OK Then
@@ -463,7 +465,7 @@ Private Sub AddAlbumExpander()
   $AlbumPanel.Height = $AlbumPanel.Height + iHeight
   iHeight = iHeight + 28
 
-  oAlbums = $PhotoService.FindAlbums()
+  oAlbums = $AlbumService.FindAlbums()
   For Each oAlbum As AlbumEntity In oAlbums
 
     oCKAlbum = New RadioButton($AlbumPanel) As "AlbumRadio"
@@ -515,7 +517,7 @@ End
 
 Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   
-  Dim oDialog As FAlbumSelectionDialog
+  Dim oDialog As FAlbumSelection
   Dim aPhotoIds As Integer[]
   Dim aAlbumIds As Integer[]
   Dim iAffected As Integer
@@ -528,11 +530,9 @@ Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   Endif
   
   If bIsAddOperation Then
-    sText = ("Add selected photos to albums")
-    oDialog = New FAlbumSelectionDialog($PhotoService, $Logger, sText)
+    oDialog = New FAlbumSelection($AlbumService, $Logger, Enumeration.ALBUM_ADD_ACTION)
   Else
-    sText = ("Remove selected photos from albums")
-    oDialog = New FAlbumSelectionDialog($PhotoService, $Logger, sText)
+    oDialog = New FAlbumSelection($AlbumService, $Logger, Enumeration.ALBUM_REMOVE_ACTION)
   Endif
   iResp = oDialog.ShowModal()
 
@@ -542,15 +542,23 @@ Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   aAlbumIds = oDialog.SelectedAlbumIds
   
   If bIsAddOperation Then
-    iAffected = $PhotoService.AddPhotosToAlbums(aPhotoIds, aAlbumIds)
+    iAffected = $AlbumService.AddPhotosToAlbums(aPhotoIds, aAlbumIds)
     ShowStatus(("Relations created: ") & iAffected, 3500)
   Else
-    iAffected = $PhotoService.RemovePhotosFromAlbums(aPhotoIds, aAlbumIds)
+    iAffected = $AlbumService.RemovePhotosFromAlbums(aPhotoIds, aAlbumIds)
     ShowStatus(("Relations removed: ") & iAffected, 3500)
   Endif
   
   ClearSelectedPhotos()
   ReloadGallery()
+  
+End
+
+Private Sub ShowAlbumManager()
+  
+  Dim oDialog As FAlbumSelection
+  oDialog = New FAlbumSelection($AlbumService, $Logger, Enumeration.ALBUM_MANAGE_ACTION)
+  oDialog.ShowModal()
   
 End
 

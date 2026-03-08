@@ -6,6 +6,7 @@
 '
 '
 Private $PhotoService As PhotoService
+Private $AlbumService As AlbumService
 Private $Logger As LoggerPort
 Private $Titulo As String = "FImportDialog"
 Private $LogMessage As LogMessage
@@ -18,9 +19,10 @@ Private $Fmain As Fmain
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, oLogger As LoggerPort, aFilesDrop As String[])
+Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, cAlbumService As AlbumService, oLogger As LoggerPort, aFilesDrop As String[])
 
   $PhotoService = cPhotoService
+  $AlbumService = cAlbumService
   $Logger = oLogger
   $FilesDrop = aFilesDrop
   $Fmain = cFmain
@@ -59,7 +61,7 @@ Public Sub BtnOK_Click()
   Else
     $LogMessage = New LogMessage($Titulo, "BtnOK_Click", ("Starting photo import processing"))
   $Logger.Info($LogMessage)
-    oSummary = $PhotoService.ImportPhotos(ListEditorPhotos.List, Null, Null, $IdAlbum)
+    oSummary = $PhotoService.ImportPhotos(ListEditorPhotos.List, $IdAlbum)
   Endif
 
   $Fmain.LastImportSummary = oSummary
@@ -195,7 +197,7 @@ Public Sub ListEditorAvailableAlbums_Add()
 
   $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Add", ("New album: " & "{" & TextBoxAlbum.Text & "}{" & TextAreaAlbumDescription.Text & "}"))
   $Logger.Debug($LogMessage)
-  If $PhotoService.AddAlbum(TextBoxAlbum.Text, TextAreaAlbumDescription.Text) Then
+  If $AlbumService.AddAlbum(TextBoxAlbum.Text, TextAreaAlbumDescription.Text) Then
     $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Add", ("New album added successfully, loading it into the list"))
   $Logger.Debug($LogMessage)
     FindAlbums()
@@ -257,7 +259,7 @@ Public Sub ListEditorAvailableAlbums_Select()
       If cAlb.name = ListEditorAvailableAlbums.Text Then
         $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Select", ("Deletion data matches, sending id") & " [" & cAlb.Id & "] [" & ListEditorAvailableAlbums.Text & "]")
   $Logger.Debug($LogMessage)
-        If $PhotoService.RemoveAlbum(cAlb.Id) Then
+        If $AlbumService.RemoveAlbum(cAlb.Id) Then
           TextBoxAlbum.Text = ""
           TextAreaAlbumDescription.Text = ""
           FindAlbums()
@@ -291,7 +293,7 @@ Private Sub FindAlbums(Optional text As String)
 
   $LogMessage = New LogMessage($Titulo, "FindAlbums", "Searching for album [" & text & "]")
   $Logger.Debug($LogMessage)
-  aAlbums = $PhotoService.FindAlbums(text, 0, Constants.USE_SOFT_FALSE)
+  aAlbums = $AlbumService.FindAlbums(text, 0, Constants.USE_SOFT_FALSE)
 
   ListEditorAvailableAlbums.Clear
   ListEditorAvailableAlbums.Index = -1
@@ -301,5 +303,11 @@ Private Sub FindAlbums(Optional text As String)
     ListEditorAvailableAlbums.Add(cAlbum.Name)
 
   Next
+
+End
+
+Public Sub Form_Open()
+
+  
 
 End

@@ -7,6 +7,7 @@ Private $Logger As LoggerPort
 Private $PhotoRepository As PhotoRepositoryPort
 Private $FileStorage As FileStoragePort
 Private $PhotoService As PhotoService
+Private $AlbumService As AlbumService
 Private $Titulo As String = "Main"
 
 Private $LogMessage As LogMessage
@@ -24,8 +25,9 @@ Public Sub Main()
   $FileStorage = DataSourceFactory.CreateFileStorage($Configuration, $Logger)
   
   $PhotoService = New PhotoService($Logger, $PhotoRepository, $Configuration, $FileStorage)
+  $AlbumService = New AlbumService($Logger, $PhotoRepository)
   
-  cFormMain = New FMain($Configuration, $Logger, $PhotoService)
+  cFormMain = New FMain($Configuration, $Logger, $PhotoService, $AlbumService)
   cFormMain.Show()
   
 Catch
