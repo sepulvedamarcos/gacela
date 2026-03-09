@@ -18,7 +18,7 @@ Public Const TABLE_ALBUMS As String = "albums"
 Public Const TABLE_TAGS As String = "tags"
 Public Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"
 Public Const TABLE_PHOTOS_TAGS As String = "photos_tags"
-Public Const SCHEMA_VERSION As String = "1.1"
+Public Const SCHEMA_VERSION As String = "1.2"
 
 Private $TableNotExist As String = ("Table does not exist, creating ...")
 Private $TableCreate As String = ("Table created")
@@ -30,7 +30,7 @@ Property Read DBContext As SQLiteContext
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort)
+Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort) '' Opens the SQLite context and validates schema.
   
   $Logger = oLogger
   $Configuration = cConfiguration
@@ -39,7 +39,7 @@ Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort)
   
 End
 
-Public Function SwitchGallery() As Boolean
+Public Function SwitchGallery() As Boolean '' Switches active gallery storage and refreshes schema.
   
   $DbContext.SwitchGallery()
   EnsureSchema()
@@ -49,7 +49,7 @@ Catch
 
 End
 
-Public Function IsNewDatabase() As Boolean
+Public Function IsNewDatabase() As Boolean '' Indicates whether the current gallery database was newly created.
   
   Return $DbContext.IsNewDatabase
   
@@ -157,7 +157,7 @@ Catch
   
 End
 
-Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer
+Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer '' Persists a new album and returns its identifier.
   
   Dim oResult As Result
   Dim iLastRecord As Integer
@@ -169,6 +169,8 @@ Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer
   oResult["description"] = cAlbum.Description
   oResult["creation_date"] = Now
   oResult["creation_user"] = cAlbum.CreationUser
+  oResult["modification_date"] = Null
+  oResult["modification_user"] = Null
   oResult["thumbnail"] = ""
   oResult["soft_delete"] = False
   oResult.Update()
@@ -188,18 +190,47 @@ Catch
   
 End
 
-Public Function DeleteAlbum(id As Integer) As Integer
+Public Function EditAlbum(cAlbum As AlbumEntity) As Boolean '' Updates editable album fields in the local database.
+  
+  Dim oResult As Result
+  
+  If cAlbum = Null Then Return False
+  If cAlbum.Id <= 0 Then Return False
+  
+  $DbContext.DBConnection.Begin()
+  
+  oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_ALBUMS)
+  oResult["album_id"] = cAlbum.Id
+  oResult["name"] = cAlbum.Name
+  oResult["description"] = cAlbum.Description
+  oResult["modification_date"] = Now
+  oResult["modification_user"] = User.Name
+  oResult.Update()
+  
+  $DbContext.DBConnection.Commit
+  Return True
+  
+Catch
+  $DbContext.DBConnection.Rollback
+  $LogMessage = New LogMessage($Titulo, "EditAlbum", "Problems editing album, rolling back")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Function DeleteAlbum(id As Integer) As Integer '' Soft-deletes an album and removes its current relations.
   
   Dim oResult As Result
   
   $DbContext.DBConnection.Begin()
+  $DbContext.DBConnection.Exec("DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE album_id = &1", id)
   oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_ALBUMS)
   oResult["album_id"] = id
   oResult["soft_delete"] = 1
   oResult.Update()
   
   $DbContext.DBConnection.Commit
-  Return $DbContext.DBConnection.LastInsertId
+  Return id
   
 Catch
   $DbContext.DBConnection.Rollback
@@ -339,7 +370,7 @@ Catch
   
 End
 
-Public Function AddPhotoToAlbum(photoId As Integer, albumId As Integer, Optional orderInAlbum As Integer = 0, Optional addedUser As String = "") As Boolean
+Public Function AddPhotoToAlbum(photoId As Integer, albumId As Integer, Optional orderInAlbum As Integer = 0, Optional addedUser As String = "") As Boolean '' Creates a photo-album relation if it does not exist.
   
   Dim oResult As Result
   Dim iExists As Integer
@@ -376,12 +407,28 @@ Catch
   
 End
 
-Public Function RemovePhotoFromAlbum(photoId As Integer, albumId As Integer) As Boolean
+Public Function RemovePhotoFromAlbum(photoId As Integer, albumId As Integer) As Boolean '' Removes a photo-album relation and soft-deletes empty albums.
+  
+  Dim oResult As Result
+  Dim iPhotosInAlbum As Integer
   
   If photoId <= 0 Or albumId <= 0 Then Return False
   
   $DbContext.DBConnection.Begin
   $DbContext.DBConnection.Exec("DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1 AND album_id = &2", photoId, albumId)
+  
+  oResult = $DbContext.DBConnection.Exec("SELECT COUNT(*) AS iTotal FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE album_id = &1", albumId)
+  If oResult.Available Then
+    iPhotosInAlbum = oResult["iTotal"]
+  Endif
+  
+  If iPhotosInAlbum = 0 Then
+    oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_ALBUMS)
+    oResult["album_id"] = albumId
+    oResult["soft_delete"] = True
+    oResult.Update()
+  Endif
+  
   $DbContext.DBConnection.Commit
   
   Return True
@@ -394,7 +441,7 @@ Catch
   
 End
 
-Public Function ValidateHash256Exist(sHash256 As String) As Boolean
+Public Function ValidateHash256Exist(sHash256 As String) As Boolean '' Checks whether a photo hash already exists.
   
   Dim sQuery As String
   Dim iTotal As Integer
@@ -426,25 +473,31 @@ Catch
   
 End
 
-Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[]
+Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[] '' Retrieves albums and their photo counts.
   
   Dim sQuery As String
   Dim oResult As Result
   Dim sCon As String = " WHERE "
   
-  sQuery = "SELECT * FROM " & LocalRepositoryAdapter.TABLE_ALBUMS
+  sQuery = "SELECT a.*, COUNT(pa.photo_id) AS photo_count " &
+    "FROM " & LocalRepositoryAdapter.TABLE_ALBUMS & " AS a " &
+    "LEFT JOIN " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " AS pa ON pa.album_id = a.album_id"
   If useSoftDelete <> -1 Then
-    sQuery &= " WHERE soft_delete = " & useSoftDelete
+    sQuery &= " WHERE a.soft_delete = " & useSoftDelete
     sCon = " AND "
   Endif
   
   If id <> 0 Then
-    sQuery &= sCon & " album_id = " & id
+    sQuery &= sCon & " a.album_id = " & id
+    sCon = " AND "
   Endif
   
   If text <> "" Then
-    sQuery &= sCon & " LOWER(name) LIKE '%" & Lower(text) & "%'"
+    sQuery &= sCon & " LOWER(a.name) LIKE '%" & Lower(text) & "%'"
   Endif
+
+  sQuery &= " GROUP BY a.album_id, a.name, a.description, a.creation_date, a.creation_user, a.modification_date, a.modification_user, a.thumbnail, a.soft_delete"
+  sQuery &= " ORDER BY LOWER(a.name)"
   
   $LogMessage = New LogMessage($Titulo, "FindAlbums", "Query [" & sQuery & "]")
   $Logger.Debug($LogMessage)
@@ -630,6 +683,8 @@ Private Sub CreateAlbumsTable(oDb As Connection)
     .Fields.Add("description", db.String)              '' Album description
     .Fields.Add("creation_date", db.Date)              '' Album creation date
     .Fields.Add("creation_user", db.String, 50)        '' User who created the album
+    .Fields.Add("modification_date", db.Date)          '' Album last modification date
+    .Fields.Add("modification_user", db.String, 50)    '' User who last modified the album
     .Fields.Add("thumbnail", db.Blob)                  '' ← MINIATURA (BLOB)
     .Fields.Add("soft_delete", db.Boolean)             '' Soft delete
     .PrimaryKey = ["album_id"]                         '' Create primary key
@@ -767,6 +822,11 @@ Private Sub RunMigrations(oDb As Connection)
   sCurrentVersion = GetDbVersion(oDb)
   If sCurrentVersion = "1.0" Then
     Migrate_1_0_to_1_1(oDb)
+    sCurrentVersion = "1.1"
+  Endif
+  
+  If sCurrentVersion = "1.1" Then
+    Migrate_1_1_to_1_2(oDb)
   Endif
   
 End
@@ -794,6 +854,46 @@ Private Sub Migrate_1_0_to_1_1(oDb As Connection)
   
   ' Placeholder for future migration logic.
   SetDbVersion(oDb, "1.1")
+  
+End
+
+Private Sub Migrate_1_1_to_1_2(oDb As Connection)
+  
+  If Not TableHasColumn(oDb, LocalRepositoryAdapter.TABLE_ALBUMS, "modification_date") Then
+    Try oDb.Exec("ALTER TABLE " & LocalRepositoryAdapter.TABLE_ALBUMS & " ADD COLUMN modification_date DATE")
+    If Error Then
+      $LogMessage = New LogMessage($Titulo, "Migrate_1_1_to_1_2", "Error adding modification_date column: " & Error.Text)
+      $Logger.Error($LogMessage)
+      Error.Propagate
+    Endif
+  Endif
+  
+  If Not TableHasColumn(oDb, LocalRepositoryAdapter.TABLE_ALBUMS, "modification_user") Then
+    Try oDb.Exec("ALTER TABLE " & LocalRepositoryAdapter.TABLE_ALBUMS & " ADD COLUMN modification_user TEXT(50)")
+    If Error Then
+      $LogMessage = New LogMessage($Titulo, "Migrate_1_1_to_1_2", "Error adding modification_user column: " & Error.Text)
+      $Logger.Error($LogMessage)
+      Error.Propagate
+    Endif
+  Endif
+  
+  SetDbVersion(oDb, "1.2")
+  
+End
+
+Private Function TableHasColumn(oDb As Connection, sTableName As String, sColumnName As String) As Boolean
+  
+  Dim oResult As Result
+  
+  oResult = oDb.Exec("PRAGMA table_info(" & sTableName & ")")
+  While oResult.Available
+    If oResult["name"] = sColumnName Then
+      Return True
+    Endif
+    oResult.MoveNext()
+  Wend
+  
+  Return False
   
 End
 
@@ -854,8 +954,11 @@ Private Sub MapAlbumEntitys(oResult As Result) As AlbumEntity[] '' Map albums
     cAlbum.Description = oResult["description"]
     cAlbum.CreationDate = oResult["creation_date"]
     cAlbum.CreationUser = oResult["creation_user"]
+    cAlbum.ModificationDate = oResult["modification_date"]
+    cAlbum.ModificationUser = oResult["modification_user"]
     cAlbum.Thumbnail = oResult["thumbnail"]
     cAlbum.SoftDelete = oResult["soft_delete"]
+    cAlbum.PhotoCount = oResult["photo_count"]
     oAlbums.Add(cAlbum)
     
     oResult.MoveNext()

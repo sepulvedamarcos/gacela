@@ -1,0 +1,47 @@
+' Gambas class file
+
+Private $SelectedIds As Integer[]
+
+Public Sub _new()
+
+  $SelectedIds = New Integer[]
+
+End
+
+Public Function HasSelection() As Boolean
+
+  Return $SelectedIds.Count > 0
+
+End
+
+Public Function GetSelectedIds() As Integer[]
+
+  Dim aCopy As New Integer[]
+  Dim iAlbumId As Integer
+
+  For Each iAlbumId In $SelectedIds
+    aCopy.Add(iAlbumId)
+  Next
+
+  Return aCopy
+
+End
+
+Public Sub ReplaceSelection(aAlbumIds As Integer[])
+
+  Dim iAlbumId As Integer
+
+  $SelectedIds = New Integer[]
+  If aAlbumIds = Null Then Return
+
+  For Each iAlbumId In aAlbumIds
+    $SelectedIds.Add(iAlbumId)
+  Next
+
+End
+
+Public Sub Clear()
+
+  $SelectedIds = New Integer[]
+
+End

@@ -518,28 +518,30 @@ End
 Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   
   Dim oDialog As FAlbumSelection
+  Dim oAlbumSelection As AlbumSelectionService
   Dim aPhotoIds As Integer[]
   Dim aAlbumIds As Integer[]
   Dim iAffected As Integer
   Dim iResp As Integer
-  Dim sText As String
   
   If $SelectionService = Null Or Not $SelectionService.HasSelection() Then
     Message.Warning(("You must select at least one photo"))
     Return
   Endif
+
+  oAlbumSelection = New AlbumSelectionService
   
   If bIsAddOperation Then
-    oDialog = New FAlbumSelection($AlbumService, $Logger, Enumeration.ALBUM_ADD_ACTION)
+    oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_ADD_ACTION)
   Else
-    oDialog = New FAlbumSelection($AlbumService, $Logger, Enumeration.ALBUM_REMOVE_ACTION)
+    oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_REMOVE_ACTION)
   Endif
   iResp = oDialog.ShowModal()
 
   If iResp <> Enumeration.DLG_OK Then Return
   
   aPhotoIds = $SelectionService.GetSelectedIds()
-  aAlbumIds = oDialog.SelectedAlbumIds
+  aAlbumIds = oAlbumSelection.GetSelectedIds()
   
   If bIsAddOperation Then
     iAffected = $AlbumService.AddPhotosToAlbums(aPhotoIds, aAlbumIds)
@@ -551,14 +553,17 @@ Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   
   ClearSelectedPhotos()
   ReloadGallery()
+  ReloadAlbums()
   
 End
 
 Private Sub ShowAlbumManager()
   
   Dim oDialog As FAlbumSelection
-  oDialog = New FAlbumSelection($AlbumService, $Logger, Enumeration.ALBUM_MANAGE_ACTION)
+  Dim oAlbumSelection As AlbumSelectionService
+
+  oAlbumSelection = New AlbumSelectionService
+  oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_MANAGE_ACTION)
   oDialog.ShowModal()
   
 End
-

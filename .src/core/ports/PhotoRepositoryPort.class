@@ -22,6 +22,10 @@ Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer
   Error.Raise("PhotoRepositoryPort.CreateAlbum not implemented")
 End
 
+Public Function EditAlbum(cAlbum As AlbumEntity) As Boolean '' Updates an existing album record.
+  Error.Raise("PhotoRepositoryPort.EditAlbum not implemented")
+End
+
 Public Function DeleteAlbum(id As Integer) As Integer
   Error.Raise("PhotoRepositoryPort.DeleteAlbum not implemented")
 End

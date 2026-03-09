@@ -1,100 +1,219 @@
 ' Gambas class file
 
 Private $AlbumService As AlbumService
+Private $SelectionService As AlbumSelectionService
 Private $Logger As LoggerPort
-Private $SelectedAlbumIds As Integer[]
-Private $RowAlbumIds As Integer[]
-Private $Titulo As String = "FAlbumSelectionDialog"
+Private $Titulo As String = "FAlbumSelection"
 Private $LogMessage As LogMessage
 Private $Action As Integer
+Private $Edit As Boolean
+Private $EditCode As AlbumEntity
 
-Property Read SelectedAlbumIds As Integer[]
+' =============================================================================
+'
+'   Public methods
+'
+' =============================================================================
 
-Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, iAction As Integer)
-  
-  Dim oAlbums As AlbumEntity[]
+Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, oSelectionService As AlbumSelectionService, iAction As Integer)
   
   $AlbumService = oAlbumService
+  $SelectionService = oSelectionService
   $Logger = oLogger
-  $SelectedAlbumIds = New Integer[]
-  $RowAlbumIds = New Integer[]
   $Action = iAction
+  If $SelectionService <> Null Then $SelectionService.Clear()
   
-VBoxListAlbums.Visible = True
-VBoxManageAlbum.visible = False
-Me.Width = VBoxButtons.Width + 10
-Me.Height = 410
+  VBoxListAlbums.Visible = True
+  VBoxManageAlbum.visible = False
+  Me.Width = VBoxButtons.Width + 10
+  Me.Height = 410
   
   If iAction = Enumeration.ALBUM_ADD_ACTION Then 
     Me.Text = ("Add selected photos to albums")
+    ButtonAccept.Text = ("Selected")
   Else If iAction = Enumeration.ALBUM_REMOVE_ACTION Then
     Me.Text = ("Remove selected photos from albums")
+    ButtonAccept.Text = ("Selected")
   Else 
     Me.text = ("Manage albums")
+    ButtonAccept.Visible = False
   Endif
   
   InitializeGrid()
-  oAlbums = $AlbumService.FindAlbums("", 0, Constants.USE_SOFT_FALSE)
-  BindGrid(oAlbums)
-  
-  If oAlbums.Count = 0 Then
-    LabelTitle.Text = ("No albums available")
-    BtnOK.Enabled = False
-  Endif
-  
-  
+  FindAlbums()
   
 Catch
+  
   $LogMessage = New LogMessage($Titulo, "_new", "Problem loading albums: " & Error.Text)
   If $Logger <> Null Then $Logger.Error($LogMessage)
   Error.Propagate
   
 End
 
-Public Sub BtnOK_Click()
+Public Sub ButtonAccept_Click()
   
-  Dim iRow As Integer
+  Dim oAlbum As AlbumEntity
+  Dim aSelectedAlbumIds As New Integer[]
   
-  $SelectedAlbumIds = New Integer[]
-  
-  For iRow = 0 To TableViewAlbums.Rows.Max
-    If TableViewAlbums.Rows[iRow].Selected Then
-      $SelectedAlbumIds.Add($RowAlbumIds[iRow])
-    Endif
+  For Each oAlbum In GetSelectedAlbums()
+    aSelectedAlbumIds.Add(oAlbum.Id)
   Next
   
-  If $SelectedAlbumIds.Count = 0 Then
+  If aSelectedAlbumIds.Count = 0 Then
     Message.Warning(("You must select at least one album"))
     Return
+  Endif
+  
+  If $SelectionService <> Null Then
+    $SelectionService.ReplaceSelection(aSelectedAlbumIds)
   Endif
   
   Me.Close(Enumeration.DLG_OK)
   
 End
 
-Public Sub BtnCancel_Click()
+Public Sub ButtonExit_Click()
   
+  If $SelectionService <> Null Then $SelectionService.Clear()
   Me.Close(Enumeration.DLG_CANCEL)
   
 End
 
-Private Function SelectedAlbumIds_Read() As Integer[]
+Public Sub ButtonAddNew_Click()
   
-  Dim iId As Integer
-  Dim aCopy As New Integer[]
+  Dim oAlbumE As AlbumEntity
   
-  For Each iId In $SelectedAlbumIds
-    aCopy.Add(iId)
-  Next
+  If TextBoxAlbum.Text = "" Then
+    Message.Warning(("You must add an album to continue"))
+    TextBoxAlbum.SetFocus()
+    Return
+  Endif
   
-  Return aCopy
+  If $EditCode <> Null Then
+    oAlbumE = FindAlbumByName(TextBoxAlbum.Text)
+    If oAlbumE = Null Then
+      $EditCode.Name = TextBoxAlbum.Text
+      $EditCode.Description = TextAreaAlbumDescription.Text
+      If $AlbumService.EditAlbum($EditCode) Then
+        
+        $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("New album editing successfully, loading it into the list"))
+        $Logger.Debug($LogMessage)
+        FindAlbums()
+        
+        ChangePanels(False)
+        $EditCode = Null
+      Else
+        
+        $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("Failed to edit album"))
+        $Logger.Error($LogMessage)
+        Message.Error(("Error while editing a album"))
+        
+      Endif
+      
+    Endif
+    
+  Else 
+    If FindAlbumByName(TextBoxAlbum.Text) <> Null Then
+      $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("The item already exists."))
+      $Logger.Debug($LogMessage)
+      Message.Warning(("The item already exists."))
+      TextBoxAlbum.SetFocus()
+      Return
+    Endif
+    
+    If $AlbumService.AddAlbum(TextBoxAlbum.Text, TextAreaAlbumDescription.Text) Then
+      
+      $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("New album added successfully, loading it into the list"))
+      $Logger.Debug($LogMessage)
+      FindAlbums()
+      
+      ChangePanels(True)
+      
+    Else
+      $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("Failed to add new album"))
+      $Logger.Error($LogMessage)
+      Message.Error(("Error while adding a new album"))
+      
+    Endif
+  Endif
   
 End
+
+Public Sub ButtonCancel_Click()
+  
+  ChangePanels(False)
+  
+End
+
+Public Sub ButtonNewAlbum_Click()
+  
+  VBoxListAlbums.Visible = False
+  VBoxManageAlbum.visible = True
+  
+  TextBoxAlbum.Text = ""
+  TextBoxAlbum.SetFocus()
+  TextAreaAlbumDescription.Text = ""
+  
+End
+
+Public Sub ButtonEdit_Click()
+  
+  Dim oAlbumE As AlbumEntity
+  
+  If TableViewAlbums.Rows.Selection.Count > 1 Then 
+    Message.Error("Only one selection is allowed.")
+    TableViewAlbums.Rows.UnSelectAll()
+    Return
+  Endif
+  
+  ChangePanels(True)
+  
+  $EditCode = FindAlbumByRow(TableViewAlbums.Rows.Selection[0])
+  
+  TextBoxAlbum.Text = $EditCode.Name
+  TextAreaAlbumDescription.Text = $EditCode.Description
+  TextBoxAlbum.SetFocus
+  
+End
+
+Public Sub ButtonRemoveAlbums_Click()
+  
+  Dim aSelectedAlbums As AlbumEntity[]
+  Dim oAlbum As AlbumEntity
+  Dim iRemoved As Integer
+  
+  aSelectedAlbums = GetSelectedAlbums()
+  If aSelectedAlbums.Count = 0 Then
+    Message.Warning(("You must select at least one album"))
+    Return
+  Endif
+  
+  If Message.Question(BuildRemoveAlbumsMessage(aSelectedAlbums), ("Yes"), ("No")) <> 1 Then Return
+  
+  For Each oAlbum In aSelectedAlbums
+    If $AlbumService.RemoveAlbum(oAlbum.Id) Then
+      iRemoved += 1
+    Endif
+  Next
+  
+  If iRemoved > 0 Then
+    Wait 0.5
+    FindAlbums()
+    ' Message.Info(("Albums removed: ") & iRemoved)
+  Endif
+  
+End
+
+' =============================================================================
+'
+'   Private methods
+'
+' =============================================================================
 
 Private Sub InitializeGrid()
   
   With TableViewAlbums
-    .Columns.Count = 2
+    .Columns.Count = 3
     .Rows.Count = 0
     .Header = GridView.Horizontal
     ' .Resizable = False
@@ -109,6 +228,11 @@ Private Sub InitializeGrid()
     ' .Columns[1].Width = 75
     .Columns[1].Expand = True
     
+    .Columns[2].Text = ("Count")
+    .Columns[2].Alignment = Align.Right
+    .Columns[2].Width = 45
+    .Columns[2].Expand = True
+    
   End With
   
 End
@@ -117,39 +241,119 @@ Private Sub BindGrid(oAlbums As AlbumEntity[])
   
   Dim iRow As Integer = 0
   
-  $RowAlbumIds = New Integer[]
+  TableViewAlbums.Rows.Count = 0
   For Each oAlbum As AlbumEntity In oAlbums
     iRow = TableViewAlbums.Rows.Count
     TableViewAlbums.Rows.Count = TableViewAlbums.Rows.Count + 1
     TableViewAlbums[iRow, 0].Text = Trim(oAlbum.Name)
     TableViewAlbums[iRow, 1].Text = Trim(oAlbum.Description)
-    $RowAlbumIds.Add(oAlbum.Id)
+    TableViewAlbums[iRow, 2].Text = Trim(CStr(oAlbum.PhotoCount)) & " "
+  Next
+  TableViewAlbums.Tag = oAlbums
+  
+End
+
+Private Function FindAlbumByName(sAlbumName As String) As AlbumEntity
+  
+  Dim oAlbum As AlbumEntity
+  
+  $LogMessage = New LogMessage($Titulo, "SearchAlbumOnList", ("Search new album on list"))
+  $Logger.Debug($LogMessage)
+  
+  For Each oAlbum In GetAlbums()
+    If oAlbum.Name = sAlbumName Then
+      Return oAlbum
+    Endif
   Next
   
-End
-
-Public Sub Form_Open()
+  Return Null
   
 End
 
-Public Sub ButtonNewAlbum_Click()
-
-VBoxListAlbums.Visible = False
-VBoxManageAlbum.visible = True
-
-
-End
-
-
-Public Sub BtnOKNew_Click()
-
+Private Sub FindAlbums()
   
-
+  Dim oAlbums As AlbumEntity[]
+  
+  oAlbums = $AlbumService.FindAlbums("", 0, Constants.USE_SOFT_FALSE)
+  BindGrid(oAlbums)
+  
+  If oAlbums.Count = 0 Then
+    LabelTitle.Text = ("No albums available")
+    ButtonAccept.Enabled = False
+  Endif
+  
 End
 
-Public Sub BtnCancelNew_Click()
+Private Sub ChangePanels(bPanel As Boolean)
+  
+  If bPanel Then
+    VBoxListAlbums.Visible = False
+    VBoxManageAlbum.Visible = True
+    TextBoxAlbum.SetFocus()
+    
+  Else
+    VBoxListAlbums.Visible = True
+    VBoxManageAlbum.Visible = False
+    TableViewAlbums.SetFocus()
+    
+  End If
+  
+End
 
-VBoxListAlbums.Visible = True
-VBoxManageAlbum.visible = False
+Private Function GetSelectedAlbums() As AlbumEntity[]
+  
+  Dim aSelected As New AlbumEntity[]
+  Dim oAlbum As AlbumEntity
+  Dim iRow As Integer
+  
+  For iRow = 0 To TableViewAlbums.Rows.Max
+    If TableViewAlbums.Rows[iRow].Selected Then
+      oAlbum = FindAlbumByRow(iRow)
+      If oAlbum <> Null Then
+        aSelected.Add(oAlbum)
+      Endif
+    Endif
+  Next
+  
+  Return aSelected
+  
+End
+
+Private Function GetAlbums() As AlbumEntity[]
+  
+  If TableViewAlbums.Tag = Null Then Return New AlbumEntity[]
+  
+  Return TableViewAlbums.Tag
+  
+End
+
+Private Function FindAlbumByRow(iRow As Integer) As AlbumEntity
+  
+  Dim aAlbums As AlbumEntity[]
+  
+  aAlbums = GetAlbums()
+  If iRow < 0 Then Return Null
+  If iRow > aAlbums.Max Then Return Null
+  
+  Return aAlbums[iRow]
+  
+End
+
+Private Function BuildRemoveAlbumsMessage(aAlbums As AlbumEntity[]) As String
+  
+  Dim oAlbum As AlbumEntity
+  Dim iPhotoCount As Integer
+  Dim sMessage As String
+  
+  For Each oAlbum In aAlbums
+    iPhotoCount += oAlbum.PhotoCount
+  Next
+  
+  sMessage = ("Are you sure you want to remove the selected albums?")
+  If iPhotoCount > 0 Then
+    sMessage &= "\n\n" & ("This action will also remove ") & iPhotoCount & (" associated image relations.")
+  Endif
+  
+  Return sMessage
   
 End
