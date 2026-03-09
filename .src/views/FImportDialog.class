@@ -43,7 +43,7 @@ Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, cAlbumService As
 
 End
 
-Public Sub BtnOK_Click()
+Public Sub btnAccept_Click()
 
   Dim iResp As Integer
   Dim aAl As AlbumEntity[]
@@ -75,7 +75,7 @@ Catch
 
 End
 
-Public Sub BtnCancel_Click()
+Public Sub btnExit_Click()
 
   Me.Close
 
@@ -281,7 +281,7 @@ Public Sub ListEditorAvailableAlbums_Select()
 
 End
 
-' ==================================================
+' =============================================================================
 '
 '          Private methods
 '
@@ -306,8 +306,3 @@ Private Sub FindAlbums(Optional text As String)
 
 End
 
-Public Sub Form_Open()
-
-  
-
-End

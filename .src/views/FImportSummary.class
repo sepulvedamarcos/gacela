@@ -39,7 +39,7 @@ Catch
 
 End
 
-Public Sub BtnOK_Click()
+Public Sub btnAccept_Click()
 
   $Configuration.ImportShowSummary = IIf(CheckBoxNotShowImportSummary.Value, False, True)
 
@@ -47,7 +47,7 @@ Public Sub BtnOK_Click()
 
 End
 
-Public Sub BtnCancel_Click()
+Public Sub btnExit_Click()
 
   Me.Close()
 

@@ -30,7 +30,7 @@ Public Sub Form_Open()
 End
 
 
-Public Sub btnOK_Click()
+Public Sub ButtonAccept_Click()
   
   $Configuration.DeleteOriginals = SwitchButtonDeleteOriginal.Value
   $Configuration.DeletedMaxCount = SpinBoxMaxFileDeleted.Value
@@ -48,7 +48,7 @@ Public Sub btnOK_Click()
   
 End
 
-Public Sub btnCancel_Click()
+Public Sub ButtonExit_Click()
   
   Me.Close
   

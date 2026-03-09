@@ -119,28 +119,26 @@
       Index = 0
     }
   }
-  { Separator1 Separator
-    MoveScaled(0,54,104,2)
-    Expand = True
-  }
-  { HBox1 HBox
-    MoveScaled(0,56,90,7)
-    Expand = True
-    AutoResize = True
-    Spacing = True
-    Padding = 4
-    { Spring2 Spring
-      MoveScaled(2,1,4,4)
+  { VBoxButtons2 VBox
+    MoveScaled(0,54,84,8)
+    { Separator2 Separator
+      MoveScaled(0,0,72,2)
     }
-    { btnOK Button
-      MoveScaled(48,2,16,4)
-      Text = ("OK")
-      Default = True
-    }
-    { btnCancel Button
-      MoveScaled(65,2,16,4)
-      Text = ("Cancel")
-      Cancel = True
+    { HBoxButtons2 HBox
+      MoveScaled(0,2,82,5)
+      Spacing = True
+      Padding = 4
+      { Spring2 Spring
+        MoveScaled(38,0,4,4)
+      }
+      { ButtonAccept Button
+        MoveScaled(45,0,18,4)
+        Text = ("Accept")
+      }
+      { ButtonExit Button
+        MoveScaled(63,0,18,4)
+        Text = ("Exit")
+      }
     }
   }
 }

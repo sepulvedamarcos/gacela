@@ -208,6 +208,9 @@
         MoveScaled(1,1,90,7)
         Arrangement = Arrange.Horizontal
         Padding = 8
+        { ButtonBox2 ButtonBox
+          MoveScaled(1,2,24,4)
+        }
         { MenuButton1 MenuButton
           MoveScaled(25,1,20,5)
           Text = ("Search")

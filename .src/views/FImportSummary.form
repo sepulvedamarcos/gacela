@@ -52,14 +52,14 @@
       MoveScaled(6,1,4,3)
       Expand = True
     }
-    { btnOK Button
-      MoveScaled(25,0,18,5)
-      Text = ("OK")
+    { btnAccept Button
+      MoveScaled(22,0,18,5)
+      Text = ("Accept")
       Default = True
     }
-    { btnCancel Button
+    { btnExit Button
       MoveScaled(43,0,18,5)
-      Text = ("Cancel")
+      Text = ("Exit")
       Cancel = True
     }
   }

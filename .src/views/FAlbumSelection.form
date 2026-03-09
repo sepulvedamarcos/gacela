@@ -38,23 +38,27 @@
         Spacing = True
         Padding = 4
         { ButtonNewAlbum Button
-          MoveScaled(1,0,18,4)
-          Text = ("New Album")
+          MoveScaled(1,0,12,4)
+          Text = ("New")
         }
-        { Button3 Button
-          MoveScaled(19,0,18,4)
-          Text = ("Remove Album")
+        { ButtonRemoveAlbums Button
+          MoveScaled(13,0,12,4)
+          Text = ("Remove")
+        }
+        { ButtonEdit Button
+          MoveScaled(25,0,12,4)
+          Text = ("Edit")
         }
         { Spring1 Spring
           MoveScaled(38,0,4,4)
         }
-        { BtnOK Button
+        { ButtonAccept Button
           MoveScaled(45,0,18,4)
-          Text = ("OK")
+          Text = ("Accept")
         }
-        { BtnCancel Button
+        { ButtonExit Button
           MoveScaled(63,0,18,4)
-          Text = ("Cancel")
+          Text = ("Exit")
         }
       }
     }
@@ -96,11 +100,11 @@
         { Spring2 Spring
           MoveScaled(3,0,4,4)
         }
-        { BtnOKNew Button
+        { ButtonAddNew Button
           MoveScaled(26,0,18,4)
           Text = ("OK")
         }
-        { BtnCancelNew Button
+        { ButtonCancel Button
           MoveScaled(47,0,18,4)
           Text = ("Cancel")
         }
