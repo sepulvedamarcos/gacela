@@ -7,7 +7,8 @@ Private $Configuration As Configuration
 Private $Logger As LoggerPort
 Private $PhotoService As PhotoService
 Private $AlbumService As AlbumService
-Private $SelectionService As PhotoSelectionService
+Private $TagService As TagService
+Private $PhotoSelectionService As PhotoSelectionService
 Private $Titulo As String = "FMain"
 Private $LogMessage As LogMessage
 Private $StatusDefaultText As String
@@ -17,12 +18,13 @@ Private $AlbumPanel As Panel
 
 Property LastImportSummary As ImportSummary
 
-Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService, cAlbumService As AlbumService)
+Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService, cAlbumService As AlbumService, cTagService As TagService) '' Initializes main form dependencies.
 
   $Configuration = cConfiguration
   $Logger = oLogger
   $PhotoService = cPhotoService
   $AlbumService = cAlbumService
+  $TagService = cTagService
 
 End
 
@@ -31,7 +33,7 @@ Public Sub Form_Open()
   $LogMessage = New LogMessage($Titulo, "Form_Open", "On form open we load photo records")
   $Logger.Debug($LogMessage)
 
-  $SelectionService = New PhotoSelectionService As "SelectionService"
+  $PhotoSelectionService = New PhotoSelectionService As "SelectionService"
 
   SelectGallery($Configuration.WhichGallery)
 
@@ -118,6 +120,12 @@ Public Sub PanelGalleryContent_Scroll()
 End
 
 Public Sub ViewGallery_Exit_Click()
+
+  Me.Close
+
+End
+
+Public Sub MainMenu_Exit_Click()
 
   Me.Close
 
@@ -273,7 +281,7 @@ End
 
 Public Sub ToolButtonTrash_Click()
 
-  Print $SelectionService.GetSelectedIds()
+  Print $PhotoSelectionService.GetSelectedIds()
 
 End
 
@@ -307,10 +315,36 @@ Public Sub ToolButtonAlbum_Click()
 
 End
 
+Public Sub ToolButtonTags_Click() '' Opens the tag manager dialog.
+
+  ShowTagManager()
+
+End
+
 Public Sub MainMenu_AlbumManage_Click()
 
-  
+  ShowAlbumManager()
 
+End
+
+Public Sub MainMenu_TagManage_Click() '' Opens the tag manager from the main menu.
+
+  ShowTagManager()
+
+End
+
+Public Sub PanelGalleryContent_MouseDown()
+    
+  Dim oPanel As FPhoto
+  
+  If $PhotoSelectionService.HasSelection() Then
+    $PhotoSelectionService.Clear()
+    
+     For Each oFPhoto As FPhoto In PanelGalleryContent.Children
+       oFPhoto.SetSelected(False)
+     Next
+  Endif
+  
 End
 
 
@@ -321,7 +355,7 @@ End
 ' ==================================================
 
 Private Sub CreatePhotoPanels(photos As PhotoEntity[])
-
+  
   Dim oFPhoto As FPhoto
   Dim cPhoto As PhotoEntity
 
@@ -329,7 +363,7 @@ Private Sub CreatePhotoPanels(photos As PhotoEntity[])
   $Logger.Info($LogMessage)
 
   For Each cPhoto In photos
-    oFPhoto = New FPhoto($SelectionService, cPhoto, PanelGalleryContent)
+    oFPhoto = New FPhoto($PhotoSelectionService, cPhoto, PanelGalleryContent)
     oFPhoto.Show()
   Next
 
@@ -397,8 +431,8 @@ End
 
 Private Sub ReloadGallery()
 
-  If $SelectionService <> Null Then
-    $SelectionService.Clear()
+  If $PhotoSelectionService <> Null Then
+    $PhotoSelectionService.Clear()
   Endif
 
   ClearPhotoGallery()
@@ -500,12 +534,12 @@ End
 Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional bHasSelection As Boolean = False)
 
   If iCount < 0 Then
-    If $SelectionService = Null Then
+    If $PhotoSelectionService = Null Then
       iCount = 0
       bHasSelection = False
     Else
-      iCount = $SelectionService.Count()
-      bHasSelection = $SelectionService.HasSelection()
+      iCount = $PhotoSelectionService.Count()
+      bHasSelection = $PhotoSelectionService.HasSelection()
     Endif
   Endif
 
@@ -518,30 +552,34 @@ End
 Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   
   Dim oDialog As FAlbumSelection
-  Dim oAlbumSelection As AlbumSelectionService
+  Dim oSelectionAlbum As AlbumSelectionService
   Dim aPhotoIds As Integer[]
   Dim aAlbumIds As Integer[]
   Dim iAffected As Integer
-  Dim iResp As Integer
+  Dim oSelectedAlbums As AlbumEntity[]
   
-  If $SelectionService = Null Or Not $SelectionService.HasSelection() Then
+  If $PhotoSelectionService = Null Or Not $PhotoSelectionService.HasSelection() Then
     Message.Warning(("You must select at least one photo"))
     Return
   Endif
 
-  oAlbumSelection = New AlbumSelectionService
+  oSelectionAlbum = New AlbumSelectionService
   
   If bIsAddOperation Then
-    oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_ADD_ACTION)
+    oDialog = New FAlbumSelection($AlbumService, $Logger, oSelectionAlbum, Enumeration.ALBUM_ADD_ACTION)
   Else
-    oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_REMOVE_ACTION)
+    oDialog = New FAlbumSelection($AlbumService, $Logger, oSelectionAlbum, Enumeration.ALBUM_REMOVE_ACTION)
   Endif
-  iResp = oDialog.ShowModal()
 
-  If iResp <> Enumeration.DLG_OK Then Return
+  If oDialog.ShowModal() <> Enumeration.DLG_OK Then Return
   
-  aPhotoIds = $SelectionService.GetSelectedIds()
-  aAlbumIds = oAlbumSelection.GetSelectedIds()
+  aPhotoIds = $PhotoSelectionService.GetSelectedIds()
+  oSelectedAlbums = oSelectionAlbum.GetSelectedAlbumEntities()
+  
+  aAlbumIds = New Integer[]
+  For Each oAlbum As AlbumEntity In oSelectedAlbums
+    aAlbumIds.Add(oAlbum.Id)
+  Next
   
   If bIsAddOperation Then
     iAffected = $AlbumService.AddPhotosToAlbums(aPhotoIds, aAlbumIds)
@@ -566,4 +604,34 @@ Private Sub ShowAlbumManager()
   oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_MANAGE_ACTION)
   oDialog.ShowModal()
   
+End
+
+Private Sub ShowTagManager() '' Opens the tag maintenance dialog.
+  
+  Dim oDialog As FTagSelection
+  Dim oTagSelection As TagSelectionService
+
+  oTagSelection = New TagSelectionService
+  oDialog = New FTagSelection($TagService, $Logger, oTagSelection, Enumeration.TAG_MANAGE_ACTION)
+  oDialog.ShowModal()
+  
+End
+
+
+Public Sub ButtonBoxPhotoFilter_Filter()
+
+  Print "ButtonBox1_Filter()" & ButtonBoxPhotoFilter.Text
+
+End
+
+Public Sub ButtonBoxPhotoFilter_Click()
+
+  Print "ButtonBox1_Click()" & ButtonBoxPhotoFilter.Text
+
+End
+
+Public Sub SearchByMenu_Album_Click()
+
+  ButtonBoxPhotoFilter.Placeholder = ("Filter by Album")
+
 End

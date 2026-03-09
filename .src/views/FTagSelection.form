@@ -1,0 +1,122 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,88,122)
+  Expand = True
+  Text = ("Select tags")
+  Resizable = False
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  Margin = True
+  Padding = 4
+  { VBoxListTags VBox
+    MoveScaled(1,1,86,57)
+    Expand = True
+    { ButtonBoxFilter ButtonBox
+      MoveScaled(1,1,72,4)
+      Placeholder = ("Search Tag")
+      Button = False
+      ClearButton = True
+      Filter = True
+    }
+    { LabelTitle Label
+      MoveScaled(1,6,72,4)
+      Text = ("Choose one or more tags")
+    }
+    { TableViewTags TableView
+      MoveScaled(1,10,61,20)
+      Expand = True
+      Mode = Select.Multiple
+    }
+    { VBoxButtons VBox
+      MoveScaled(1,48,84,8)
+      { Separator1 Separator
+        MoveScaled(0,0,72,2)
+      }
+      { HBoxButtons HBox
+        MoveScaled(0,2,82,5)
+        Spacing = True
+        Padding = 4
+        { ButtonNewTag Button
+          MoveScaled(1,0,12,4)
+          Text = ("New")
+        }
+        { ButtonRemoveTags Button
+          MoveScaled(13,0,12,4)
+          Text = ("Remove")
+        }
+        { ButtonEdit Button
+          MoveScaled(25,0,12,4)
+          Text = ("Edit")
+        }
+        { Spring1 Spring
+          MoveScaled(38,0,4,4)
+        }
+        { ButtonAccept Button
+          MoveScaled(45,0,18,4)
+          Text = ("Accept")
+        }
+        { ButtonExit Button
+          MoveScaled(63,0,18,4)
+          Text = ("Exit")
+        }
+      }
+    }
+  }
+  { VBoxManageTag VBox
+    MoveScaled(1,59,86,61)
+    Expand = True
+    { Label3 Label
+      MoveScaled(1,1,21,6)
+      Text = ("Create new tag")
+    }
+    { FrameManageTag VBox
+      MoveScaled(1,8,84,31)
+      Expand = True
+      { Label2 Label
+        MoveScaled(1,3,47,3)
+        Text = ("Tag name")
+      }
+      { TextBoxTag TextBox
+        MoveScaled(1,6,48,4)
+      }
+      { Label1 Label
+        MoveScaled(1,10,47,3)
+        Text = ("Tag Description")
+      }
+      { TextAreaTagDescription TextArea
+        MoveScaled(1,13,82,8)
+      }
+      { Label4 Label
+        MoveScaled(1,21,47,3)
+        Text = ("Tag Color")
+      }
+      { ColorButtonTag ColorButton
+        MoveScaled(1,24,17,4)
+        Value = &HFB7B03
+      }
+    }
+    { VBoxButtons2 VBox
+      MoveScaled(1,50,84,8)
+      { Separator2 Separator
+        MoveScaled(0,0,72,2)
+      }
+      { HBoxButtons2 HBox
+        MoveScaled(0,2,82,5)
+        Spacing = True
+        Padding = 4
+        { Spring2 Spring
+          MoveScaled(3,0,4,4)
+        }
+        { ButtonAddNew Button
+          MoveScaled(26,0,18,4)
+          Text = ("OK")
+        }
+        { ButtonCancel Button
+          MoveScaled(47,0,18,4)
+          Text = ("Cancel")
+        }
+      }
+    }
+  }
+}

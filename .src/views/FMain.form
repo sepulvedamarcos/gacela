@@ -28,7 +28,7 @@
     { MainMenu_AlbumManage Menu
       Text = ("Albums")
     }
-    { Menu14 Menu
+    { MainMenu_TagManage Menu
       Text = ("Tags")
     }
     { Menu15 Menu
@@ -38,7 +38,7 @@
       Picture = Picture["icon:/medium/quit"]
     }
   }
-  { MenuEdit Menu
+  { EditMenu Menu
     Text = ("Edit")
     { EditMenu_SelectAll Menu
       Text = ("Select all")
@@ -56,11 +56,11 @@
     }
     { Menu12 Menu
     }
-    { Menu13 Menu
-      Text = ("Move to thrash")
+    { EditMenu_Trash Menu
+      Text = ("Move to trash")
     }
   }
-  { MainMenuView Menu
+  { ViewGalleryMenu Menu
     Text = ("View")
     { ViewGallery_PrivateCollection Menu
       Text = ("Private gallery")
@@ -76,6 +76,7 @@
     }
     { Menu8 Menu
       Text = ("View deleted files")
+      Picture = Picture["icon:/22/trash-full"]
     }
   }
   { OptionsMenu Menu
@@ -96,7 +97,7 @@
       Picture = Picture["icon:/medium/options"]
     }
   }
-  { Menu4 Menu
+  { HelpMenu Menu
     Text = ("?")
     { HelpMenu_About Menu
       Text = ("About Gacela")
@@ -114,6 +115,26 @@
       Text = ("Shared gallery")
       Picture = Picture["icon:/medium/user-group"]
       Radio = True
+    }
+  }
+  { SearchByMenu Menu
+    Text = ("SearchBy")
+    Visible = False
+    { SearchByMenu_PhotoName Menu
+      Text = ("Photo Name")
+      Checked = True
+    }
+    { SearchByMenu_Description Menu
+      Text = ("Description")
+    }
+    { SearchByMenu_Date Menu
+      Text = ("Date")
+    }
+    { SearchByMenu_Album Menu
+      Text = ("Album")
+    }
+    { SearchByMenu_Tag Menu
+      Text = ("Tag")
     }
   }
   { HBoxToolBar HBox
@@ -148,7 +169,6 @@
     }
     { ToolButtonTags ToolButton
       MoveScaled(34,0,8,8)
-      Enabled = False
       Picture = Picture["icon:/32/tag"]
       Border = True
     }
@@ -180,7 +200,6 @@
       Arrangement = Arrange.Vertical
       { Panel3 Panel
         MoveScaled(0,3,26,63)
-        Background = Color.Pink
         Expand = True
         Arrangement = Arrange.Row
         Margin = True
@@ -208,32 +227,25 @@
         MoveScaled(1,1,90,7)
         Arrangement = Arrange.Horizontal
         Padding = 8
-        { ButtonBox2 ButtonBox
-          MoveScaled(1,2,24,4)
-        }
-        { MenuButton1 MenuButton
-          MoveScaled(25,1,20,5)
-          Text = ("Search")
-          Picture = Picture["icon:/medium/find"]
-          Menu = "buscar"
-        }
-        { ButtonBox1 ButtonBox
-          MoveScaled(46,1,43,5)
-          Expand = True
-          PopupMenu = "buscar"
+        { SpringToolBar2 Spring
+          MoveScaled(3,1,4,6)
           Direction = Direction.LeftToRight
-          Picture = Picture["icon:/medium/find"]
+        }
+        { ButtonBoxPhotoFilter ButtonBox
+          MoveScaled(22,1,67,5)
+          Expand = True
+          Placeholder = ("Filter by")
+          Button = False
           ClearButton = True
+          Filter = True
+          FilterMenu = "SearchByMenu"
+          FilterPicture = Picture["icon:/22/filter"]
         }
       }
       { HBox2 Panel
         MoveScaled(1,9,90,8)
         Arrangement = Arrange.Horizontal
         Border = Border.Sunken
-        { HBox3 HBox
-          MoveScaled(30,0,7,6)
-          Background = Color.LightBackground
-        }
         { Panel1 Panel
           MoveScaled(40,0,50,6)
           { ButtonZoomIn Button
@@ -266,7 +278,7 @@
         }
       }
       { PanelGalleryContent ScrollView
-        MoveScaled(3,20,41,24)
+        MoveScaled(2,20,41,24)
         Background = Color.SelectedBackground
         Expand = True
         Arrangement = Arrange.Row

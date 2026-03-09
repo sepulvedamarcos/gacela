@@ -1,0 +1,131 @@
+' Gambas class file
+
+' Domain model for representing a tag in Gacela.
+
+Private $iId As Integer = 0
+Private $sName As String = ""
+Private $sDescription As String = ""
+Private $sColor As String = ""
+Private $dCreationDate As Date
+Private $sCreationUser As String = ""
+Private $dModificationDate As Date
+Private $sModificationUser As String = ""
+Private $iPhotoCount As Integer = 0
+
+Property Id As Integer                '' Unique tag identifier.
+Property Name As String               '' Tag display name.
+Property Description As String        '' Tag description text.
+Property Color As String              '' Tag display color in hex format.
+Property CreationDate As Date         '' Tag creation date.
+Property CreationUser As String       '' User who created the tag.
+Property ModificationDate As Date     '' Tag last modification date.
+Property ModificationUser As String   '' User who last modified the tag.
+Property PhotoCount As Integer        '' Number of related photos.
+
+Private Function Id_Read() As Integer
+
+  Return $iId
+
+End
+
+Private Sub Id_Write(Value As Integer)
+
+  $iId = Value
+
+End
+
+Private Function Name_Read() As String
+
+  Return $sName
+
+End
+
+Private Sub Name_Write(Value As String)
+
+  $sName = Value
+
+End
+
+Private Function Description_Read() As String
+
+  Return $sDescription
+
+End
+
+Private Sub Description_Write(Value As String)
+
+  $sDescription = Value
+
+End
+
+Private Function Color_Read() As String
+
+  Return $sColor
+
+End
+
+Private Sub Color_Write(Value As String)
+
+  $sColor = Value
+
+End
+
+Private Function CreationDate_Read() As Date
+
+  Return $dCreationDate
+
+End
+
+Private Sub CreationDate_Write(Value As Date)
+
+  $dCreationDate = Value
+
+End
+
+Private Function CreationUser_Read() As String
+
+  Return $sCreationUser
+
+End
+
+Private Sub CreationUser_Write(Value As String)
+
+  $sCreationUser = Value
+
+End
+
+Private Function ModificationDate_Read() As Date
+
+  Return $dModificationDate
+
+End
+
+Private Sub ModificationDate_Write(Value As Date)
+
+  $dModificationDate = Value
+
+End
+
+Private Function ModificationUser_Read() As String
+
+  Return $sModificationUser
+
+End
+
+Private Sub ModificationUser_Write(Value As String)
+
+  $sModificationUser = Value
+
+End
+
+Private Function PhotoCount_Read() As Integer
+
+  Return $iPhotoCount
+
+End
+
+Private Sub PhotoCount_Write(Value As Integer)
+
+  $iPhotoCount = Value
+
+End

@@ -2,7 +2,7 @@
 Title=Gestor de Álbumes Compartidos en Linux Avanzado
 Startup=Main
 Icon=icons/app/camera.png
-Version=0.0.5
+Version=0.0.6
 Component=gb.image
 Component=gb.gui
 Component=gb.form

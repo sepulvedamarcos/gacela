@@ -8,6 +8,7 @@ Private $LogMessage As LogMessage
 Private $Action As Integer
 Private $Edit As Boolean
 Private $EditCode As AlbumEntity
+Private $AllowMultiple As Boolean
 
 ' =============================================================================
 '
@@ -15,12 +16,13 @@ Private $EditCode As AlbumEntity
 '
 ' =============================================================================
 
-Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, oSelectionService As AlbumSelectionService, iAction As Integer)
+Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, oSelectionService As AlbumSelectionService, iAction As Integer, Optional bAllowMultiple As Boolean = True)
   
   $AlbumService = oAlbumService
   $SelectionService = oSelectionService
   $Logger = oLogger
   $Action = iAction
+  $AllowMultiple = bAllowMultiple
   If $SelectionService <> Null Then $SelectionService.Clear()
   
   VBoxListAlbums.Visible = True
@@ -28,17 +30,7 @@ Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, oSelection
   Me.Width = VBoxButtons.Width + 10
   Me.Height = 410
   
-  If iAction = Enumeration.ALBUM_ADD_ACTION Then 
-    Me.Text = ("Add selected photos to albums")
-    ButtonAccept.Text = ("Selected")
-  Else If iAction = Enumeration.ALBUM_REMOVE_ACTION Then
-    Me.Text = ("Remove selected photos from albums")
-    ButtonAccept.Text = ("Selected")
-  Else 
-    Me.text = ("Manage albums")
-    ButtonAccept.Visible = False
-  Endif
-  
+  InitializePrincipalButtonBar()
   InitializeGrid()
   FindAlbums()
   
@@ -52,23 +44,23 @@ End
 
 Public Sub ButtonAccept_Click()
   
-  Dim oAlbum As AlbumEntity
-  Dim aSelectedAlbumIds As New Integer[]
+  Dim oAE As New AlbumEntity[]
   
-  For Each oAlbum In GetSelectedAlbums()
-    aSelectedAlbumIds.Add(oAlbum.Id)
+  oAE = TableViewAlbums.Tag
+  For i As Integer = 0 To TableViewAlbums.Rows.Count - 1
+    If TableViewAlbums.Rows[i].Selected Then
+      
+      $SelectionService.AddAlbumSelected(oAE[i])
+      
+    Endif
   Next
   
-  If aSelectedAlbumIds.Count = 0 Then
-    Message.Warning(("You must select at least one album"))
+  
+  If $SelectionService.HasSelection Then
+    Me.Close(Enumeration.DLG_OK)
     Return
-  Endif
-  
-  If $SelectionService <> Null Then
-    $SelectionService.ReplaceSelection(aSelectedAlbumIds)
-  Endif
-  
-  Me.Close(Enumeration.DLG_OK)
+  End If
+  Me.Close()
   
 End
 
@@ -158,9 +150,7 @@ End
 
 Public Sub ButtonEdit_Click()
   
-  Dim oAlbumE As AlbumEntity
-  
-  If TableViewAlbums.Rows.Selection.Count > 1 Then 
+  If TableViewAlbums.Rows.Selection.Count > 1 Then
     Message.Error("Only one selection is allowed.")
     TableViewAlbums.Rows.UnSelectAll()
     Return
@@ -216,7 +206,7 @@ Private Sub InitializeGrid()
     .Columns.Count = 3
     .Rows.Count = 0
     .Header = GridView.Horizontal
-    ' .Resizable = False
+    .Mode = IIf($AllowMultiple, Select.Multiple, Select.Single)
     
     .Columns[0].Text = ("Albums")
     .Columns[0].Alignment = Align.Left
@@ -355,5 +345,30 @@ Private Function BuildRemoveAlbumsMessage(aAlbums As AlbumEntity[]) As String
   Endif
   
   Return sMessage
+  
+End
+
+Private Sub InitializePrincipalButtonBar()
+  
+  If $Action = Enumeration.ALBUM_ADD_ACTION Then 
+    Me.Text = ("Add selected photos to albums")
+    ButtonAccept.Text = ("Selected")
+    
+  Else If $Action = Enumeration.ALBUM_REMOVE_ACTION Then
+    
+    '' TODO: aca deberia llegar el listado de imagenes selecionadas para premarcar los albumes que estan siendo usados y luego al deseleccionar uno de ellos o varios ejecutar la eliminacion de la tabla relacionada con las imagenes eso albumes deseleccionados
+    
+    Me.Text = ("Remove selected photos from albums")
+    ButtonAccept.Text = ("Selected")
+    ButtonNewAlbum.Visible = False
+    ButtonRemoveAlbums.Visible = False
+    ButtonEdit.Visible = False
+    
+  Else
+    
+    Me.text = ("Manage albums")
+    ButtonAccept.Visible = False
+    
+  Endif
   
 End

@@ -1,16 +1,16 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,108,67)
+  MoveScaled(0,0,109,67)
   Text = ("Photo import dialog")
   Resizable = False
   Spacing = True
   Margin = True
   Padding = 4
   { PanelList Panel
-    MoveScaled(0,0,108,56)
+    MoveScaled(1,1,107,56)
     { PictureBoxPreview PictureBox
-      MoveScaled(75,4,32,32)
+      MoveScaled(75,4,25,21)
       Alignment = Align.Center
       Border = Border.Plain
       Mode = PictureBox.Contain
@@ -24,105 +24,47 @@
       Text = ("Photos to import")
     }
     { ListEditorPhotos ListEditor
-      MoveScaled(1,4,73,40)
+      MoveScaled(1,4,73,33)
       Moveable = False
     }
     { CheckBoxEnableAlbum CheckBox
-      MoveScaled(1,45,72,4)
+      MoveScaled(75,29,33,4)
       Text = ("Import photos into an album")
     }
-    { LabelAlbumDescriptionSelected Label
-      MoveScaled(4,52,102,3)
-      Font = Font["-2"]
+    { !LabelAlbumNameSelected Label
+      MoveScaled(78,34,25,3)
+      #Public = True
+      AutoResize = True
+      Alignment = Align.Center
+      Border = Border.Plain
+      BorderWidth = 1
+      BorderRadius = 10
+      BorderColor = Color.DarkRoyal
     }
-    { LabelAlbumNameSelected Label
-      MoveScaled(4,49,25,3)
+    { ScrollView1 ScrollView
+      MoveScaled(76,38,29,16)
     }
   }
-  { VBoxButtons VBox
-    MoveScaled(0,58,108,9)
-    Background = Color.Pink
-    Margin = True
-    Padding = 2
-    { Separator1 Separator
-      MoveScaled(1,0,104,2)
-      Expand = True
+  { VBoxButtons2 VBox
+    MoveScaled(1,58,84,8)
+    { Separator2 Separator
+      MoveScaled(0,0,72,2)
     }
-    { HBox1 HBox
-      MoveScaled(0,2,107,7)
-      Background = Color.DarkGray
-      Expand = True
-      AutoResize = True
+    { HBoxButtons2 HBox
+      MoveScaled(0,2,82,5)
       Spacing = True
       Padding = 4
       { Spring2 Spring
-        MoveScaled(30,1,4,4)
+        MoveScaled(31,0,4,4)
       }
-      { btnAccept Button
-        MoveScaled(70,1,18,5)
+      { ButtonAccept Button
+        MoveScaled(41,0,18,4)
         Text = ("Accept")
-        Default = True
       }
-      { btnExit Button
-        MoveScaled(89,1,18,5)
+      { ButtonExit Button
+        MoveScaled(63,0,18,4)
         Text = ("Exit")
       }
-    }
-  }
-  { PanelAssociateAlbum Panel
-    MoveScaled(28,1,51,65)
-    Background = Color.Background
-    Border = Border.Sunken
-    { Label1 Label
-      MoveScaled(2,2,48,3)
-      Font = Font["+4"]
-      Text = ("Album selection")
-    }
-    { ButtonBoxFilter ButtonBox
-      MoveScaled(2,7,48,4)
-      Placeholder = ("Album to search")
-      Button = False
-      ClearButton = True
-      Filter = True
-    }
-    { ListEditorAvailableAlbums ListBox
-      MoveScaled(2,12,48,20)
-    }
-    { Label2 Label
-      MoveScaled(2,33,47,3)
-      Text = ("Album name and description")
-    }
-    { TextBoxAlbum TextBox
-      MoveScaled(2,36,48,4)
-    }
-    { TextAreaAlbumDescription TextArea
-      MoveScaled(2,41,48,8)
-    }
-    { HBox2 HBox
-      MoveScaled(1,58,49,6)
-      Expand = True
-      AutoResize = True
-      Spacing = True
-      Padding = 4
-      { Spring1 Spring
-        MoveScaled(1,1,4,4)
-      }
-      { btnOkAlbum Button
-        MoveScaled(10,1,16,5)
-        Text = ("OK")
-      }
-      { btnCancelAlbum Button
-        MoveScaled(29,1,16,5)
-        Text = ("Cancel")
-      }
-    }
-    { Separator2 Separator
-      MoveScaled(1,56,49,2)
-      Expand = True
-    }
-    { ButtonAddAlbum Button
-      MoveScaled(34,50,16,4)
-      Text = ("Add")
     }
   }
 }

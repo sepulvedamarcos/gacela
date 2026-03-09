@@ -8,6 +8,7 @@ Private $PhotoRepository As PhotoRepositoryPort
 Private $FileStorage As FileStoragePort
 Private $PhotoService As PhotoService
 Private $AlbumService As AlbumService
+Private $TagService As TagService
 Private $Titulo As String = "Main"
 
 Private $LogMessage As LogMessage
@@ -26,8 +27,9 @@ Public Sub Main()
   
   $PhotoService = New PhotoService($Logger, $PhotoRepository, $Configuration, $FileStorage)
   $AlbumService = New AlbumService($Logger, $PhotoRepository)
+  $TagService = New TagService($Logger, $PhotoRepository)
   
-  cFormMain = New FMain($Configuration, $Logger, $PhotoService, $AlbumService)
+  cFormMain = New FMain($Configuration, $Logger, $PhotoService, $AlbumService, $TagService)
   cFormMain.Show()
   
 Catch

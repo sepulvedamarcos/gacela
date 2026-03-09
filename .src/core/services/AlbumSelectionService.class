@@ -1,47 +1,53 @@
 ' Gambas class file
 
-Private $SelectedIds As Integer[]
+Private $SelectedEntities As AlbumEntity[]  '' list of album entities selected
+
+Property Read SelectedCount As Integer '' indicate how items selected
 
 Public Sub _new()
-
-  $SelectedIds = New Integer[]
-
+  
+  $SelectedEntities = New AlbumEntity[]
+  
 End
 
 Public Function HasSelection() As Boolean
-
-  Return $SelectedIds.Count > 0
-
+  
+  Return $SelectedEntities.Count > 0
+  
 End
 
-Public Function GetSelectedIds() As Integer[]
-
-  Dim aCopy As New Integer[]
-  Dim iAlbumId As Integer
-
-  For Each iAlbumId In $SelectedIds
-    aCopy.Add(iAlbumId)
+Public Function GetSelectedAlbumEntities() As AlbumEntity[]
+  
+  Dim oResponse As New AlbumEntity[]
+  
+  For Each oAlbum As AlbumEntity In $SelectedEntities
+    oResponse.Add(oAlbum)
   Next
-
-  Return aCopy
-
+  
+  Return oResponse
+  
 End
 
-Public Sub ReplaceSelection(aAlbumIds As Integer[])
-
-  Dim iAlbumId As Integer
-
-  $SelectedIds = New Integer[]
-  If aAlbumIds = Null Then Return
-
-  For Each iAlbumId In aAlbumIds
-    $SelectedIds.Add(iAlbumId)
+Public Sub AddAlbumSelected(oAlbum As AlbumEntity)
+  
+  If oAlbum = Null Then Return
+  
+  For Each oCurrentAlbum As AlbumEntity In $SelectedEntities
+    If oCurrentAlbum.Id = oAlbum.Id Then Return
   Next
-
+  
+  $SelectedEntities.Add(oAlbum)
+  
 End
 
 Public Sub Clear()
+  
+  $SelectedEntities = New AlbumEntity[]
+  
+End
 
-  $SelectedIds = New Integer[]
-
+Private Function SelectedCount_Read() As Integer
+  
+  Return $SelectedEntities.Count
+  
 End

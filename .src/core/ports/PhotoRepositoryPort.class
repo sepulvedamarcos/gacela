@@ -30,6 +30,18 @@ Public Function DeleteAlbum(id As Integer) As Integer
   Error.Raise("PhotoRepositoryPort.DeleteAlbum not implemented")
 End
 
+Public Function CreateTag(cTag As TagEntity) As Integer '' Creates a new tag record.
+  Error.Raise("PhotoRepositoryPort.CreateTag not implemented")
+End
+
+Public Function EditTag(cTag As TagEntity) As Boolean '' Updates an existing tag record.
+  Error.Raise("PhotoRepositoryPort.EditTag not implemented")
+End
+
+Public Function DeleteTag(id As Integer) As Integer '' Removes a tag record and its relations.
+  Error.Raise("PhotoRepositoryPort.DeleteTag not implemented")
+End
+
 Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean
   Error.Raise("PhotoRepositoryPort.CreatePhoto not implemented")
 End
@@ -42,10 +54,22 @@ Public Function RemovePhotoFromAlbum(photoId As Integer, albumId As Integer) As 
   Error.Raise("PhotoRepositoryPort.RemovePhotoFromAlbum not implemented")
 End
 
+Public Function AddPhotoToTag(photoId As Integer, tagId As Integer, Optional addedUser As String = "") As Boolean '' Creates a photo-tag relation.
+  Error.Raise("PhotoRepositoryPort.AddPhotoToTag not implemented")
+End
+
+Public Function RemovePhotoFromTag(photoId As Integer, tagId As Integer) As Boolean '' Removes a photo-tag relation.
+  Error.Raise("PhotoRepositoryPort.RemovePhotoFromTag not implemented")
+End
+
 Public Function ValidateHash256Exist(sHash256 As String) As Boolean
   Error.Raise("PhotoRepositoryPort.ValidateHash256Exist not implemented")
 End
 
 Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[]
   Error.Raise("PhotoRepositoryPort.FindAlbums not implemented")
+End
+
+Public Function FindTags(Optional text As String, Optional id As Integer = 0) As TagEntity[] '' Retrieves tag records with optional filters.
+  Error.Raise("PhotoRepositoryPort.FindTags not implemented")
 End
