@@ -2,15 +2,19 @@
 
 { Form Form
   MoveScaled(0,0,24,16)
-  { PanelPhoto Panel
-    MoveScaled(1,5,10,10)
-    { PictureBoxPhoto PictureBox
-      MoveScaled(2,2,6,6)
-    }
-  }
   { ButtonSeleccionar Button
     MoveScaled(1,1,3.4286,3.4286)
     Visible = False
     Picture = Picture["icon:/tiny/add"]
+  }
+  { PanelPhoto Panel
+    MoveScaled(1,5,10,10)
+    Expand = True
+    Arrangement = Arrange.Vertical
+    { PictureBoxPhoto PictureBox
+      MoveScaled(2,2,6,6)
+      Background = Color.DarkPurple
+      Expand = True
+    }
   }
 }

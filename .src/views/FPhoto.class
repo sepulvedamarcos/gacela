@@ -8,24 +8,24 @@ Property Read PhotoId As Integer
 Property Read IsSelected As Boolean
 
 Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntity)
-
+  
   $SelectionService = oSelectionService
   $PhotoId = cPhoto.Id
-
+  
   Me.Width = 160
   Me.Height = 100
-
+  
   PanelPhoto.x = 0
   PanelPhoto.y = 0
   PanelPhoto.Width = Me.Width
   PanelPhoto.Height = Me.Height
-
+  
   If cPhoto.HasThumbnail Then
     PictureBoxPhoto.Image = Image.FromString(cPhoto.Thumbnail)
   Else
     PictureBoxPhoto.Image = Image.Load(cPhoto.ImagePath &/ cPhoto.FileName)
   Endif
-
+  
   PictureBoxPhoto.Width = PanelPhoto.Width - 2
   PictureBoxPhoto.Height = PanelPhoto.Height - 2
   PictureBoxPhoto.Mode = PictureBox.Contain
@@ -33,93 +33,111 @@ Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntit
   PictureBoxPhoto.x = 2
   PictureBoxPhoto.y = 2
   PictureBoxPhoto.Padding = 8
-
+  
   If $SelectionService <> Null Then
     SetSelected($SelectionService.IsSelected($PhotoId), False)
   Else
     SetSelected(False, False)
   Endif
-
+  
 End
 
 Public Sub Form_Enter()
-
+  
   ButtonSeleccionar.Visible = True
   ButtonSeleccionar.Raise()
-
+  
   PictureBoxPhoto.Border = Border.Styled
-
+  
 End
 
 Public Sub Form_Leave()
-
+  
   ButtonSeleccionar.Visible = False
   PictureBoxPhoto.Border = Border.None
-
+  
 End
 
 Public Sub ButtonSeleccionar_Click()
-
+  
   SetSelected(Not $IsSelected)
-
+  
 End
 
 Public Sub SetSelected(bValue As Boolean, Optional bNotify As Boolean = True)
-
+  
   If $IsSelected = bValue Then
     RefreshSelectionVisual()
     Return
   Endif
-
+  
   $IsSelected = bValue
   RefreshSelectionVisual()
-
+  
   If Not bNotify Then Return
   If $SelectionService = Null Then Return
-
+  
   If $IsSelected Then
     $SelectionService.Select($PhotoId)
   Else
     $SelectionService.Unselect($PhotoId)
   Endif
-
+  
 End
 
 Public Sub Form_Show()
-
+  
   Me.Margin = True
   Me.Padding = 2
-
-End
-
-Public Sub PictureBoxPhoto_MouseDown()
-
+  
 End
 
 Public Sub PictureBoxPhoto_DblClick()
-
+  
   Message.Info("ejale")
-
+  
 End
 
+Public Sub ResizeScaledForm(iSize As Integer)
+  
+  If iSize > 0 Then
+    Me.Width = Me.Width * 1.25
+    Me.Height = Me.Height * 1.25
+    PanelPhoto.Width = PanelPhoto.Width * (1.25)
+    PanelPhoto.Height = PanelPhoto.Height * (1.25)
+  Else
+    Me.Width = Me.Width / 1.25
+    Me.Height = Me.Height / 1.25
+    PanelPhoto.Width = PanelPhoto.Width / (1.25)
+    PanelPhoto.Height = PanelPhoto.Height / (1.25)
+  Endif
+  
+End
+
+' =============================================================================
+'
+'          Private methods
+'
+' =============================================================================
+
 Private Function PhotoId_Read() As Integer
-
+  
   Return $PhotoId
-
+  
 End
 
 Private Function IsSelected_Read() As Boolean
-
+  
   Return $IsSelected
-
+  
 End
 
 Private Sub RefreshSelectionVisual()
-
+  
   If $IsSelected Then
     PictureBoxPhoto.Background = Color.LightGray
   Else
     PictureBoxPhoto.Background = Color.Transparent
   Endif
-
+  
 End

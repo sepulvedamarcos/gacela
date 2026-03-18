@@ -56,7 +56,7 @@ Public Sub ButtonAccept_Click()
   Next
   
   
-  If $SelectionService.HasSelection Then
+  If $SelectionService.HasSelection() Then
     Me.Close(Enumeration.DLG_OK)
     Return
   End If

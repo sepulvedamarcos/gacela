@@ -15,10 +15,10 @@ Gestor de Álbumes Compartidos En Linux Avanzado
 
 ### ✨ Lo que hace único a Gacela
 
-- ** Multiusuario inteligente**: Galerías privadas y compartidas en la misma aplicación a solo un click
-- ** Previews instantáneos**: Miniaturas ultrarrápidas sin esperas
-- ** Base de datos única**: Todo organizado en SQLite autocontenido
-- ** Súper liviano**: Arranca en segundos, consume mínimos recursos
+- **Multiusuario inteligente**: Galerías privadas y compartidas en la misma aplicación a solo un click
+- **Previews instantáneos**: Miniaturas ultrarrápidas sin esperas
+- **Base de datos única**: Todo organizado en SQLite autocontenido
+- **Súper liviano**: Arranca en segundos, consume mínimos recursos
 
 ## 🚀 ¿Por qué elegir Gacela?
 
@@ -41,6 +41,8 @@ Gestor de Álbumes Compartidos En Linux Avanzado
 Gacela usa una arquitectura híbrida única:
 
 - **Thumbnails binarios**: Previsualizaciones ultrarrápidas integradas en la BD gracias a una miniatura
+- **Directorio autoalojado**: Directorio donde se manejan cada una de las imagenes que se compartan en gacela
+- **Orden**: Puedes seleccionar que gacela maneje tus imagenes y cada vez que las importes las sacara de donde estaban para tomar el control de ellas
 
 ### Beneficios de esta arquitectura
 
@@ -62,28 +64,14 @@ Gacela usa una arquitectura híbrida única:
 
 *[Screenshots placeholder ]*
 
-## 🔧 Instalación
-
-### Desde código fuente
-```bash
-git clone [https://github.com/sepulvedamarcos](https://github.com/sepulvedamarcos/gambas_gacela.git) gacela
-cd gacela
-#Instrucciones de compilación Gambas
-- Ir al menú de proyecto
-- Seleccionar opción de creación de ejecutable
-- Seleccionar opcion de crear instalador
-- Ejecutar el instalador
-```
-### Desde paquete deb
-Descargar el paquete .deb que esta disponible en el repositorio
 
 
 ## 🎯 Casos de uso perfectos
 
-- ** Familias**: Computadora compartida con fotos de todos
-- ** Pequeñas oficinas**: Archivo fotográfico colaborativo  
-- ** Servidores caseros**: NAS con acceso multiusuario
-- ** Colectivos**: Proyectos fotográficos grupales
+- **Familias**: Computadora compartida con fotos de todos
+- **Pequeñas oficinas**: Archivo fotográfico colaborativo
+- **Servidores caseros**: NAS con acceso multiusuario
+- **Colectivos**: Proyectos fotográficos grupales
 
 ## 🤝 Contribuir
 

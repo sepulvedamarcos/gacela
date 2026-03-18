@@ -1,7 +1,6 @@
 ' Gambas class file
 
-Private $Width As Integer = 160
-Private $Height As Integer = 90
+Private $Amplifier As Integer = 1
 
 Private $Configuration As Configuration
 Private $Logger As LoggerPort
@@ -19,42 +18,42 @@ Private $AlbumPanel As Panel
 Property LastImportSummary As ImportSummary
 
 Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService, cAlbumService As AlbumService, cTagService As TagService) '' Initializes main form dependencies.
-
+  
   $Configuration = cConfiguration
   $Logger = oLogger
   $PhotoService = cPhotoService
   $AlbumService = cAlbumService
   $TagService = cTagService
-
+  
 End
 
 Public Sub Form_Open()
-
+  
   $LogMessage = New LogMessage($Titulo, "Form_Open", "On form open we load photo records")
   $Logger.Debug($LogMessage)
-
+  
   $PhotoSelectionService = New PhotoSelectionService As "SelectionService"
-
+  
   SelectGallery($Configuration.WhichGallery)
-
+  
   $StatusDefaultText = LabelStatusBar.Text
   StatusTimer = New Timer
   StatusTimer.Enabled = False
-
+  
   AddAlbumExpander()
   UpdateSelectionActions()
-
+  
 End
 
 Public Sub Form_Drop()
-
+  
   Dim aFilesDrop As String[]
   Dim sFileDrop As String
   Dim sNamesErr As String
-
+  
   $LogMessage = New LogMessage($Titulo, "Form_Drop", "Drag and drop files")
   $Logger.Debug($LogMessage)
-
+  
   aFilesDrop = Drag.Paste("text/uri-list")
   For Each sFileDrop In aFilesDrop
     $LogMessage = New LogMessage($Titulo, "Form_Drop", "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
@@ -64,51 +63,63 @@ Public Sub Form_Drop()
       sNamesErr = sNamesErr & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop)
     Endif
   Next
-
+  
   If sNamesErr = "" Then
     ImportProcess(aFilesDrop)
   Else
     Message.Error(("Some of the files you are trying to import are not valid"))
   Endif
-
+  
 End
 
 Public Sub ButtonZoomIn_Click()
-
-  Dim vPane As Variant
-
-  For Each vPane In PanelGalleryContent.Children
-    vPane.Width = vPane.Width * 1.25
-    vPane.Height = vPane.Height * 1.25
-  Next
-
+  
+  Dim oPanel As FPhoto
+  
+  Print "zoom in " & CStr($Amplifier)
+  If $Amplifier < 8 Then
+    $Amplifier += 1
+    
+    For Each oPanel In PanelGalleryContent.Children
+      
+      oPanel.ResizeScaledForm(1)
+      
+    Next
+  Endif
+  
 End
 
 Public Sub ButtonZoomOut_Click()
-
-  Dim vPane As Variant
-
-  For Each vPane In PanelGalleryContent.Children
-    vPane.Width = vPane.Width / 1.25
-    vPane.Height = vPane.Height / 1.25
-  Next
-
+  
+  Dim oPanel As FPhoto
+  
+  Print "zoom out " & CStr($Amplifier)
+  If $Amplifier > 1 Then
+    $Amplifier -= 1
+    
+    For Each oPanel In PanelGalleryContent.Children
+      
+      oPanel.ResizeScaledForm(-1)
+      
+    Next
+  Endif
+  
 End
 
 Public Sub PanelGalleryContent_Scroll()
-
+  
   Dim fScrollPos As Float
   Dim fScrollMax As Float
   Dim fThreshold As Float = 0.8  ' 80% of scroll
   Dim aNewPhotos As PhotoEntity[]
-
+  
   ' Calculate scroll position (0.0 to 1.0)
   fScrollMax = PanelGalleryContent.ScrollHeight - PanelGalleryContent.ClientHeight
-
+  
   If fScrollMax <= 0 Then Return
-
+  
   fScrollPos = PanelGalleryContent.ScrollY / fScrollMax
-
+  
   ' If it reached 80% and not loading, load more
   If fScrollPos >= fThreshold Then
     aNewPhotos = $PhotoService.LoadNextPage()
@@ -116,124 +127,118 @@ Public Sub PanelGalleryContent_Scroll()
       CreatePhotoPanels(aNewPhotos)
     End If
   Endif
-
+  
 End
 
 Public Sub ViewGallery_Exit_Click()
-
+  
   Me.Close
-
-End
-
-Public Sub MainMenu_Exit_Click()
-
-  Me.Close
-
+  
 End
 
 Public Sub ToolButtonExit_Click()
-
+  
   Me.Close
-
+  
 End
 
 Public Sub ViewGallery_ShareCollection_Click()
-
+  
   SelectGallery(Enumeration.GalleryType_Shared)
-
+  
 End
 
 Public Sub ViewGallery_PrivateCollection_Click()
-
+  
   SelectGallery(Enumeration.GalleryType_Private)
-
+  
 End
 
 Public Sub CollectionToolMenu_Private_Click()
-
+  
   SelectGallery(Enumeration.GalleryType_Private)
-
+  
 End
 
 Public Sub CollectionToolMenu_Share_Click()
-
+  
   SelectGallery(Enumeration.GalleryType_Shared)
-
+  
 End
 
 Public Sub MainMenu_ExportImages_Click()
-
+  
 End
 
 Public Sub MainMenu_ImportImages_Click()
-
+  
   ImportProcess()
-
+  
 End
 
 Public Sub ToolButtonImport_Click()
-
+  
   ImportProcess()
-
+  
 End
 
 Public Sub HelpMenu_About_Click()
-
+  
   FAbout.ShowDialog
-
+  
 End
 
 Public Sub ToolButtonConfiguration_Click()
-
+  
   ShowConfigurationPanel
-
+  
 End
 
 Public Sub OptionsMenu_Configuration_Click()
-
+  
   ShowConfigurationPanel
-
+  
 End
 
 Public Sub ToolButtonViewTrash_Enter()
-
+  
   ShowStatus(("View deleted images"), 0)
-
+  
 End
 
 Public Sub ToolButtonViewTrash_Leave()
-
+  
   ShowStatus("", 0)
-
+  
 End
 
 Public Sub ShowStatus(sMessage As String, Optional iTimeoutMs As Integer = 2500)
-
+  
   If $StatusDefaultText = "" Then
     $StatusDefaultText = LabelStatusBar.Text
   Endif
-
+  
   LabelStatusBar.Text = sMessage
-
+  
   StatusTimer.Stop()
   If iTimeoutMs > 0 Then
     StatusTimer.Delay = iTimeoutMs
     StatusTimer.Start()
   Endif
-
+  
 End
 
 Public Sub ToolButtonViewTrash_Click()
-
+  
   ShowStatus(("Open deleted images folder"), 0)
-
+  
 End
 
 Public Sub AlbumRadio_Click()
-
+  
   Dim oRadio As RadioButton
   Dim iAlbumId As Integer
-
+  
   For Each oRadio In $AlbumPanel.Children
     If oRadio.Value = True Then
       iAlbumId = oRadio.Tag
@@ -242,59 +247,59 @@ Public Sub AlbumRadio_Click()
       Return
     Endif
   Next
-
+  
 End
 
 Public Sub SelectionService_SelectionChanged(iCount As Integer, bHasSelection As Boolean)
-
+  
   UpdateSelectionActions(iCount, bHasSelection)
-
+  
 End
 
 Public Sub SelectAllPhotos()
-
+  
   Dim oCtrl As Control
   Dim oPhoto As FPhoto
-
+  
   For Each oCtrl In PanelGalleryContent.Children
     If oCtrl Is FPhoto Then
       oPhoto = oCtrl
       oPhoto.SetSelected(True)
     Endif
   Next
-
+  
 End
 
 Public Sub ClearSelectedPhotos()
-
+  
   Dim oCtrl As Control
   Dim oPhoto As FPhoto
-
+  
   For Each oCtrl In PanelGalleryContent.Children
     If oCtrl Is FPhoto Then
       oPhoto = oCtrl
       oPhoto.SetSelected(False)
     Endif
   Next
-
+  
 End
 
 Public Sub ToolButtonTrash_Click()
-
+  
   Print $PhotoSelectionService.GetSelectedIds()
-
+  
 End
 
 Public Sub EditMenu_SelectAll_Click()
-
+  
   SelectAllPhotos
-
+  
 End
 
 Public Sub EditMenu_UnselectAll_Click()
-
+  
   ClearSelectedPhotos
-
+  
 End
 
 Public Sub EditMenu_AddSelectedToAlbums_Click()
@@ -310,43 +315,92 @@ Public Sub EditMenu_RemoveSelectedFromAlbums_Click()
 End
 
 Public Sub ToolButtonAlbum_Click()
-
+  
   ShowAlbumManager()
-
+  
 End
 
 Public Sub ToolButtonTags_Click() '' Opens the tag manager dialog.
-
+  
   ShowTagManager()
-
+  
 End
 
 Public Sub MainMenu_AlbumManage_Click()
-
+  
   ShowAlbumManager()
-
+  
 End
 
 Public Sub MainMenu_TagManage_Click() '' Opens the tag manager from the main menu.
-
+  
   ShowTagManager()
-
+  
 End
 
 Public Sub PanelGalleryContent_MouseDown()
-    
+  
   Dim oPanel As FPhoto
   
   If $PhotoSelectionService.HasSelection() Then
     $PhotoSelectionService.Clear()
     
-     For Each oFPhoto As FPhoto In PanelGalleryContent.Children
-       oFPhoto.SetSelected(False)
-     Next
+    For Each oFPhoto As FPhoto In PanelGalleryContent.Children
+      oFPhoto.SetSelected(False)
+    Next
   Endif
   
 End
 
+Public Sub ButtonBoxPhotoFilter_Filter()
+  
+  Print "ButtonBox1_Filter()" & ButtonBoxPhotoFilter.Text
+  
+  FindPhotoFilterActive()
+  
+End
+
+Public Sub ButtonBoxPhotoFilter_Click()
+  
+  Print "ButtonBox1_Click()" & ButtonBoxPhotoFilter.Text
+  
+End
+
+Public Sub SearchByMenu_Album_Click()
+  
+  ButtonBoxPhotoFilter.Placeholder = ("Filter by Album")
+  
+End
+
+Public Sub SearchByMenu_PhotoName_Click()
+  
+  ButtonBoxPhotoFilter.Placeholder = ("Filter by Name")
+  
+End
+
+Public Sub SearchByMenu_Description_Click()
+  
+  ButtonBoxPhotoFilter.Placeholder = ("Filter by Description")
+  
+End
+
+Public Sub SearchByMenu_Date_Click()
+  
+  ButtonBoxPhotoFilter.Placeholder = ("Filter by Date")
+  
+End
+
+Public Sub SearchByMenu_Tag_Click()
+  
+  ButtonBoxPhotoFilter.Placeholder = ("Filter by Tag")
+  
+End
+
+Public Sub SearchByMenu_UnFiltered_Click()
+  
+  ButtonBoxPhotoFilter.Placeholder = ("Unfilter")
+  
+End
 
 ' ==================================================
 '
@@ -357,36 +411,39 @@ End
 Private Sub CreatePhotoPanels(photos As PhotoEntity[])
   
   Dim oFPhoto As FPhoto
-  Dim cPhoto As PhotoEntity
-
+  Dim i As Integer
+  
   $LogMessage = New LogMessage($Titulo, "CreatePhotoPanels", "Creating initial panels")
   $Logger.Info($LogMessage)
-
-  For Each cPhoto In photos
+  
+  For Each cPhoto As PhotoEntity In photos
     oFPhoto = New FPhoto($PhotoSelectionService, cPhoto, PanelGalleryContent)
+    For i = 1 To $Amplifier
+      oFPhoto.ResizeScaledForm(1)
+    Next
     oFPhoto.Show()
   Next
-
+  
 End
 
 Private Sub ClearPhotoGallery()
-
+  
   ' Destroy all controls
   For Each ctrl As Control In PanelGalleryContent.Children
     ctrl.Delete()
   Next
-
+  
 End
 
 Private Sub ImportProcess(Optional listFiles As String[])
-
+  
   Dim vResp As Variant
   Dim cSelector As FImportDialog
   Dim oImportSummary As FImportSummary
-
+  
   cSelector = New FImportDialog(Me, $PhotoService, $AlbumService, $Logger, listFiles)
   vResp = cSelector.ShowModal()
-
+  
   If vResp = Enumeration.DLG_OK Then
     ReloadGallery()
     If $LastImportSummary <> Null Then
@@ -398,141 +455,141 @@ Private Sub ImportProcess(Optional listFiles As String[])
     Endif
     ReloadAlbums()
   Endif
-
+  
 End
 
 Private Sub SelectGallery(iGallery As Integer)
-
+  
   Select Case iGallery
     Case Enumeration.GalleryType_Private
       CollectionToolMenu_Private.Value = True
       CollectionToolMenu_Share.Value = False
       ViewGallery_PrivateCollection.Value = CollectionToolMenu_Private.Value
       ViewGallery_ShareCollection.Value = CollectionToolMenu_Share.Value
-
+      
       MenuButtonCollection.Picture = CollectionToolMenu_Private.Picture
       MenuButtonCollection.Text = CollectionToolMenu_Private.Text
-
+      
     Case Enumeration.GalleryType_Shared
       CollectionToolMenu_Private.Value = False
       CollectionToolMenu_Share.Value = True
       ViewGallery_PrivateCollection.Value = CollectionToolMenu_Private.Value
       ViewGallery_ShareCollection.Value = CollectionToolMenu_Share.Value
-
+      
       MenuButtonCollection.Picture = CollectionToolMenu_Share.Picture
       MenuButtonCollection.Text = CollectionToolMenu_Share.Text
-
+      
   End Select
-
+  
   $PhotoService.ToggleGallery(iGallery)
   ReloadGallery()
-
+  
 End
 
 Private Sub ReloadGallery()
-
+  
   If $PhotoSelectionService <> Null Then
     $PhotoSelectionService.Clear()
   Endif
-
+  
   ClearPhotoGallery()
   CreatePhotoPanels($PhotoService.LoadFirstPage())
-
+  
 End
 
 Private Sub ReloadAlbums()
-
+  
   ClearAlbumExpander()
   AddAlbumExpander()
-
+  
 End
 
 Private Sub ShowConfigurationPanel()
-
+  
   Dim oForm As FConfiguration
-
+  
   oForm = New FConfiguration($Logger, $Configuration)
   oForm.ShowModal()
-
+  
 End
 
 Private Sub StatusTimer_Timer()
-
+  
   StatusTimer.Stop()
   LabelStatusBar.Text = $StatusDefaultText
-
+  
 End
 
 Private Function LastImportSummary_Read() As ImportSummary
-
+  
   Return $LastImportSummary
-
+  
 End
 
 Private Sub LastImportSummary_Write(Value As ImportSummary)
-
+  
   $LastImportSummary = Value
-
+  
 End
 
 Private Sub AddAlbumExpander()
-
+  
   Dim oCKAlbum As RadioButton
   Dim iHeight As Integer = 28
   Dim oAlbums As AlbumEntity[]
-
+  
   ExpanderAlbum.Hidden = False
   Wait 0.5
-
+  
   $AlbumPanel = New Panel(ExpanderAlbum)
   $AlbumPanel.Arrangement = Arrange.Vertical
   $AlbumPanel.Width = ExpanderAlbum.Width
   $AlbumPanel.Background = Color.Royal
-
+  
   oCKAlbum = New RadioButton($AlbumPanel) As "AlbumRadio"
   oCKAlbum.Text = ("Todos")
   oCKAlbum.Tag = 0
   oCKAlbum.Height = 28
   oCKAlbum.Width = $AlbumPanel.Width
   oCKAlbum.Value = True
-
+  
   $AlbumPanel.Height = $AlbumPanel.Height + iHeight
   iHeight = iHeight + 28
-
+  
   oAlbums = $AlbumService.FindAlbums()
   For Each oAlbum As AlbumEntity In oAlbums
-
+    
     oCKAlbum = New RadioButton($AlbumPanel) As "AlbumRadio"
     oCKAlbum.Text = oAlbum.Name
     oCKAlbum.Tag = oAlbum.Id
     ' oCKAlbum.Background = Color.Red
     oCKAlbum.Height = 28
     oCKAlbum.Width = $AlbumPanel.Width
-
+    
     $AlbumPanel.Height = $AlbumPanel.Height + iHeight
     iHeight = iHeight + 28
   Next
-
+  
   ExpanderAlbum.Arrangement = Arrange.Fill
   ExpanderAlbum.Height = iHeight
   ExpanderAlbum.Hidden = True
-
+  
 End
 
 Private Sub ClearAlbumExpander()
-
+  
   If $AlbumPanel = Null Then Return
-
+  
   For Each ctrl As Control In $AlbumPanel.Children
     ctrl.Delete()
   Next
   $AlbumPanel.Delete()
   $AlbumPanel = Null
-
+  
 End
 
 Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional bHasSelection As Boolean = False)
-
+  
   If iCount < 0 Then
     If $PhotoSelectionService = Null Then
       iCount = 0
@@ -542,11 +599,11 @@ Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional bHa
       bHasSelection = $PhotoSelectionService.HasSelection()
     Endif
   Endif
-
+  
   ToolButtonTrash.Enabled = bHasSelection
   EditMenu_AddSelectedToAlbums.Enabled = bHasSelection
   EditMenu_RemoveSelectedFromAlbums.Enabled = bHasSelection
-
+  
 End
 
 Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
@@ -562,7 +619,7 @@ Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
     Message.Warning(("You must select at least one photo"))
     Return
   Endif
-
+  
   oSelectionAlbum = New AlbumSelectionService
   
   If bIsAddOperation Then
@@ -570,7 +627,7 @@ Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   Else
     oDialog = New FAlbumSelection($AlbumService, $Logger, oSelectionAlbum, Enumeration.ALBUM_REMOVE_ACTION)
   Endif
-
+  
   If oDialog.ShowModal() <> Enumeration.DLG_OK Then Return
   
   aPhotoIds = $PhotoSelectionService.GetSelectedIds()
@@ -599,7 +656,7 @@ Private Sub ShowAlbumManager()
   
   Dim oDialog As FAlbumSelection
   Dim oAlbumSelection As AlbumSelectionService
-
+  
   oAlbumSelection = New AlbumSelectionService
   oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_MANAGE_ACTION)
   oDialog.ShowModal()
@@ -610,28 +667,35 @@ Private Sub ShowTagManager() '' Opens the tag maintenance dialog.
   
   Dim oDialog As FTagSelection
   Dim oTagSelection As TagSelectionService
-
+  
   oTagSelection = New TagSelectionService
   oDialog = New FTagSelection($TagService, $Logger, oTagSelection, Enumeration.TAG_MANAGE_ACTION)
   oDialog.ShowModal()
   
 End
 
-
-Public Sub ButtonBoxPhotoFilter_Filter()
-
-  Print "ButtonBox1_Filter()" & ButtonBoxPhotoFilter.Text
-
-End
-
-Public Sub ButtonBoxPhotoFilter_Click()
-
-  Print "ButtonBox1_Click()" & ButtonBoxPhotoFilter.Text
-
-End
-
-Public Sub SearchByMenu_Album_Click()
-
-  ButtonBoxPhotoFilter.Placeholder = ("Filter by Album")
-
+Private Sub FindPhotoFilterActive()
+  
+  $LogMessage = New LogMessage($Titulo, "FindPhotoFilterActive()", "Find photo filter was active")
+  $Logger.Info($LogMessage)
+  
+  If SearchByMenu_Album.Value Then
+    Print "no implemented yet SearchByMenu_Album.Value"
+    
+  Else If SearchByMenu_PhotoName.Value Then
+    Print "no implemented yet SearchByMenu_PhotoName.Value"
+    
+  Else If SearchByMenu_Description.Value Then
+    Print "no implemented yet SearchByMenu_Description.Value"
+    
+  Else If SearchByMenu_Date.value Then
+    Print "no implemented yet SearchByMenu_Date.value"
+    
+  Else If SearchByMenu_Tag.value Then
+    Print "no implemented yet SearchByMenu_Tag.value"
+    
+  Endif
+  
+  'CreatePhotoPanels(photos As PhotoEntity[])
+  ' ReloadGallery()
 End

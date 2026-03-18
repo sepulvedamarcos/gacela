@@ -34,13 +34,6 @@ Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, cAlbumService As
   ListEditorPhotos.List = aFilesDrop
   ListEditorPhotos.Unique = True
   
-  ' PanelAssociateAlbum.Visible = False
-  ' PanelAssociateAlbum.Y = 4
-  ' PanelAssociateAlbum.X = 182
-  ' ListEditorAvailableAlbums.Wrap = True
-  
-  ' FindAlbums()
-  
 End
 
 Public Sub ButtonAccept_Click()
@@ -59,7 +52,7 @@ Public Sub ButtonAccept_Click()
   If iResp = 2 Then
     Return
   Else
-    $LogMessage = New LogMessage($Titulo, "BtnOK_Click", ("Starting photo import processing"))
+    $LogMessage = New LogMessage($Titulo, "ButtonAccept_Click()", ("Starting photo import processing"))
     $Logger.Info($LogMessage)
     oSummary = $PhotoService.ImportPhotos(ListEditorPhotos.List, $IdAlbum)
   Endif
@@ -69,55 +62,19 @@ Public Sub ButtonAccept_Click()
   Me.Close(Enumeration.DLG_OK)
   
 Catch
-  $LogMessage = New LogMessage($Titulo, "BtnOK_Click", ("A problem occurred while importing the images") & " [" & Error.Text & "]")
+  $LogMessage = New LogMessage($Titulo, "ButtonAccept_Click()", ("A problem occurred while importing the images") & " [" & Error.Text & "]")
   $Logger.Error($LogMessage)
   Message.Error(("A problem occurred while importing the images") & " [" & Error.Text & "]")
   
 End
 
-Public Sub ButtonExit_Click()
-  
-  Me.Close
-  
-End
-
-' Public Sub ButtonAddAlbum_Click()
-
-' Dim iCuenta As Integer
-' 
-' If TextBoxAlbum.Text <> "" Then
-'   For Each sItem As String In ListEditorAvailableAlbums.List
-'     If sItem = TextBoxAlbum.Text Then
-'       iCuenta += 1
-'     Endif
-'   Next
-'   If iCuenta = 0 Then
-'     ListEditorAvailableAlbums_Add()
-'     ListEditorAvailableAlbums.Index = ListEditorAvailableAlbums.Count - 1
-'   Endif
-' Else
-'   Message.Warning(("You must add an album to continue"))
-'   TextBoxAlbum.SetFocus
-' Endif
-
-' End
-
-' Public Sub ButtonBoxFilter_Click()
-'   
-'   $LogMessage = New LogMessage($Titulo, "ButtonBoxFilter_Click", "Filter click with text [" & ButtonBoxFilter.Text & "]")
-'   $Logger.Debug($LogMessage)
-'   TextAreaAlbumDescription.Text = ""
-'   FindAlbums(ButtonBoxFilter.Text)
-'   
-' End
-
 Public Sub CheckBoxEnableAlbum_Click()
   
   Dim oDialog As FAlbumSelection
   Dim oAlbumSelection As AlbumSelectionService
-  Dim aSelectedAlbums As AlbumEntity[]
-  Dim oAlbum As AlbumEntity
   Dim oLabel As Label
+  Dim iResponse As Integer
+  Dim bBol As Boolean = False
   
   $LogMessage = New LogMessage($Titulo, "CheckBoxEnableAlbum_Click", ("Checkbox click to associate album ") & "[" & Str(CheckBoxEnableAlbum.Value) & "]")
   $Logger.Debug($LogMessage)
@@ -125,130 +82,30 @@ Public Sub CheckBoxEnableAlbum_Click()
   If CheckBoxEnableAlbum.Value Then
     
     oAlbumSelection = New AlbumSelectionService
-    oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_ADD_ACTION, False)
+    oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_ADD_ACTION, Null, False)
+    iResponse = oDialog.ShowModal()
     
-    If oDialog.ShowModal() == Enumeration.DLG_OK Then
+    If iResponse = Enumeration.DLG_OK Then
       If oAlbumSelection.HasSelection() Then
-        aSelectedAlbums = oAlbumSelection.GetSelectedAlbumEntities()
-        $IdAlbum = aSelectedAlbums[0].Id
-        
-        ScrollView1.Clear()
-        For Each oAlbum In aSelectedAlbums
-          oLabel = New Label(ScrollView1)
-          oLabel.Border = Border.Solid
-          oLabel.BorderWidth = 1
-          oLabel.BorderRadius = 10
-          oLabel.BorderColor = Color.DarkRoyal
-          oLabel.Text = oAlbum.Name
+        For Each oAlbum As AlbumEntity In oAlbumSelection.GetSelectedAlbumEntities()
+          LabelAlbumNameSelected.Text = oAlbum.Name
+          LabelAlbumNameSelected.Visible = True
         Next
-      Else
-        CheckBoxEnableAlbum.Value = False
       Endif
-    Else
-      CheckBoxEnableAlbum.Value = False
     Endif
-    
-    ' PanelList.Enabled = False
-    ' VBoxButtons.Enabled = False
-    ' PanelAssociateAlbum.Visible = True
-    
-  Else
-    $IdAlbum = 0
-    ScrollView1.Clear()
-    ' PanelAssociateAlbum.Visible = False
-    ' PanelList.Enabled = True
-    ' VBoxButtons.Enabled = True
-    
   Endif
   
 End
 
-' Public Sub BtnOkAlbum_Click()
-'   
-'   Dim sItem As String
-'   Dim iCuenta As Integer
-'   Dim oAlbums As AlbumEntity[]
-'   
-'   If TextBoxAlbum.Text = "" Or ListEditorAvailableAlbums.Text = "" Then
-'     Message.Warning(("You must select an album to continue or add new one"))
-'     ListEditorAvailableAlbums.SetFocus()
-'     Return
-'   Else
-'     If TextBoxAlbum.Text <> "" Then
-'       
-'       If TextBoxAlbum.Text = ListEditorAvailableAlbums.Text Then
-'         oAlbums = ListEditorAvailableAlbums.Tag
-'         $IdAlbum = oAlbums[ListEditorAvailableAlbums.Index].Id
-'       Else
-'         Message.Warning(("You must select an album to continue or add new one"))
-'         ListEditorAvailableAlbums.SetFocus()
-'         Return
-'         
-'       Endif
-'       
-'     Endif
-'   Endif
-'   
-'   PanelAssociateAlbum.Visible = False
-'   PanelList.Enabled = True
-'   VBoxButtons.Enabled = True
-'   
-'   $LogMessage = New LogMessage($Titulo, "BtnOkAlbum_Click", ("Select an album to associate") & " [" & TextBoxAlbum.Text & "]")
-'   $Logger.Debug($LogMessage)
-'   
-'   LabelAlbumNameSelected.Text = TextBoxAlbum.Text
-'   LabelAlbumDescriptionSelected.Text = TextAreaAlbumDescription.Text
-'   
-' End
-
-Public Sub BtnCancelAlbum_Click()
+Public Sub ButtonExit_Click()
   
-  $LogMessage = New LogMessage($Titulo, "BtnCancelAlbum_Click", ("Cancel album association, revert changes"))
+  $LogMessage = New LogMessage($Titulo, "ButtonExit_Click()", ("Cancel album association, revert changes"))
   $Logger.Debug($LogMessage)
   CheckBoxEnableAlbum.Value = False
   
+  Me.Close()
+  
 End
-
-' Public Sub ListEditorAvailableAlbums_Add()
-'   
-'   Dim cAlbum As AlbumEntity
-'   Dim aAlbums As AlbumEntity[]
-'   
-'   $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Add", ("Attempting to add a new album"))
-'   $Logger.Debug($LogMessage)
-'   If TextBoxAlbum.Text = "" Then
-'     Message.Warning(("You must enter an album name to continue"))
-'     TextBoxAlbum.SetFocus()
-'     Return
-'   Endif
-'   
-'   aAlbums = ListEditorAvailableAlbums.Tag
-'   For Each cAlbum In aAlbums
-'     If cAlbum.Name = TextBoxAlbum.Text Then
-'       Return
-'     Endif
-'   Next
-'   
-'   $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Add", ("New album: " & "{" & TextBoxAlbum.Text & "}{" & TextAreaAlbumDescription.Text & "}"))
-'   $Logger.Debug($LogMessage)
-'   If $AlbumService.AddAlbum(TextBoxAlbum.Text, TextAreaAlbumDescription.Text) Then
-'     $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Add", ("New album added successfully, loading it into the list"))
-'     $Logger.Debug($LogMessage)
-'     FindAlbums()
-'     
-'   Else
-'     $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Add", ("Failed to add new album"))
-'     $Logger.Error($LogMessage)
-'     Message.Error(("Error while adding a new album"))
-'     
-'   Endif
-'   
-' Catch
-'   $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Add", ("Problems creating an album"))
-'   $Logger.Error($LogMessage)
-'   Message.Error(("Problems creating an album"))
-'   
-' End
 
 Public Sub ListEditorPhotos_Add()
   
@@ -279,63 +136,3 @@ Public Sub ListEditorPhotos_Select()
   
 End
 
-' Public Sub ListEditorAvailableAlbums_Select()
-'   
-'   Dim aAlbums As AlbumEntity[]
-'   Dim cAlb As AlbumEntity
-'   
-'   If ListEditorAvailableAlbums.Index = -1 Then
-'     $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Select", ("Detected deletion of an album") & "[" & ListEditorAvailableAlbums.Text & "]")
-'     $Logger.Debug($LogMessage)
-'     
-'     aAlbums = ListEditorAvailableAlbums.Tag
-'     For Each cAlb In aAlbums
-'       If cAlb.name = ListEditorAvailableAlbums.Text Then
-'         $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Select", ("Deletion data matches, sending id") & " [" & cAlb.Id & "] [" & ListEditorAvailableAlbums.Text & "]")
-'         $Logger.Debug($LogMessage)
-'         If $AlbumService.RemoveAlbum(cAlb.Id) Then
-'           TextBoxAlbum.Text = ""
-'           TextAreaAlbumDescription.Text = ""
-'           FindAlbums()
-'         Endif
-'       Endif
-'     Next
-'     
-'     Return
-'   Endif
-'   
-'   aAlbums = ListEditorAvailableAlbums.Tag
-'   
-'   TextBoxAlbum.Text = aAlbums[ListEditorAvailableAlbums.Index].Name
-'   TextAreaAlbumDescription.Text = aAlbums[ListEditorAvailableAlbums.Index].Description
-'   $IdAlbum = aAlbums[ListEditorAvailableAlbums.Index].Id
-'   
-'   $LogMessage = New LogMessage($Titulo, "ListEditorAvailabeAlbums_Select", ("Album selection") & "[" & TextBoxAlbum.Text & "][" & Str($IdAlbum) & "]")
-'   $Logger.Debug($LogMessage)
-'   
-' End
-
-' =============================================================================
-'
-'          Private methods
-'
-' ==================================================
-' Private Sub FindAlbums(Optional text As String)
-'   
-'   Dim aAlbums As AlbumEntity[]
-'   Dim cAlbum As AlbumEntity
-'   
-'   $LogMessage = New LogMessage($Titulo, "FindAlbums", "Searching for album [" & text & "]")
-'   $Logger.Debug($LogMessage)
-'   aAlbums = $AlbumService.FindAlbums(text, 0, Constants.USE_SOFT_FALSE)
-'   
-'   ListEditorAvailableAlbums.Clear
-'   ListEditorAvailableAlbums.Index = -1
-'   ListEditorAvailableAlbums.Tag = aAlbums
-'   For Each cAlbum In aAlbums
-'     
-'     ListEditorAvailableAlbums.Add(cAlbum.Name)
-'     
-'   Next
-'   
-' End

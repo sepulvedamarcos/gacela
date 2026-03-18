@@ -120,21 +120,30 @@
   { SearchByMenu Menu
     Text = ("SearchBy")
     Visible = False
+    { SearchByMenu_UnFiltered Menu
+      Text = ("Unfiltered")
+      Radio = True
+      Checked = True
+    }
     { SearchByMenu_PhotoName Menu
       Text = ("Photo Name")
-      Checked = True
+      Radio = True
     }
     { SearchByMenu_Description Menu
       Text = ("Description")
+      Radio = True
     }
     { SearchByMenu_Date Menu
       Text = ("Date")
+      Radio = True
     }
     { SearchByMenu_Album Menu
       Text = ("Album")
+      Radio = True
     }
     { SearchByMenu_Tag Menu
       Text = ("Tag")
+      Radio = True
     }
   }
   { HBoxToolBar HBox
@@ -220,7 +229,7 @@
       }
     }
     { PanelDerecho Panel
-      MoveScaled(29,2,93,47)
+      MoveScaled(29,3,93,47)
       Expand = True
       Arrangement = Arrange.Vertical
       { PanelBusqueda Panel
@@ -234,7 +243,7 @@
         { ButtonBoxPhotoFilter ButtonBox
           MoveScaled(22,1,67,5)
           Expand = True
-          Placeholder = ("Filter by")
+          Placeholder = ("Unfilter")
           Button = False
           ClearButton = True
           Filter = True

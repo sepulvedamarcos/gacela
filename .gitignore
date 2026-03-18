@@ -19,10 +19,3 @@ vgcore.*
 .app.png
 .icon.png
 #----
-AGENTS.md
-agent.md
-agents/GEMINI.md
-agents/proyecto.md
-#----
-agents/
-**/DIR_NOTES.local.md
