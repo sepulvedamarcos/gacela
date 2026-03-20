@@ -859,30 +859,59 @@ Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash 
   Dim oSummary As FSummary
   Dim eSummary As Summary
   Dim oProgress As FProgressBar
+  Dim oFQuestion As FQuestion
+  Dim sTitle, sText As String
+  Dim bConfirmed As Boolean = True
+  Dim oQuestionService As QuestionInteractionService
   
-  $LogMessage = New LogMessage($Titulo, "MoveSelectedImagesToTrashDirectorio", "Move selected images to trash")
+  $LogMessage = New LogMessage($Titulo, "MoveSelectedImagesToTrashDirectory", "Move selected images to trash")
   $Logger.Info($LogMessage)
   
-  oSelected = $PhotoSelectionService.GetSelectedEntities()
-  If oSelected.Count = 0 Then
-    Message.Warning(("No images selected"))
-    Return
+  oQuestionService = New QuestionInteractionService($Logger)
+  
+  ' 1. El SERVICIO decide si la UI debe actuar (Lógica de negocio en el core)
+  If oQuestionService.ShouldAsk($Configuration, Constants.DONTSHOWAGAIN_MOVETRASH) Then
+    
+    sTitle = ("Move images to trash")
+    sText = ("Are you sure you want to move the selected photos to trash directory")
+    
+    ' 2. El FORMULARIO orquestra la interacción (Capa de Vista)
+    oFQuestion = New FQuestion(oQuestionService, $Logger, sTitle, sText)
+    If oFQuestion.ShowModal() = Enumeration.DLG_OK Then
+      
+      ' 3. El SERVICIO guarda la decisión capturada por la UI (DRY/Persistencia)
+      oQuestionService.SaveUserDecision($Configuration, Constants.DONTSHOWAGAIN_MOVETRASH, oQuestionService.DontShowAgain)
+      bConfirmed = True
+    Else
+      bConfirmed = False
+    Endif
+    
   Endif
   
-  oProgress = New FProgressBar($PhotoService, ("Moving images to trash"))
-  oProgress.Show()
-  Wait 0.05
-  
-  eSummary = $PhotoService.MoveToTrash(oSelected)
-  
-  oProgress.Close()
-  
-  ReloadGallery()
-  
-  ShowStatus(("Move to trash has finished. OK: ") & eSummary.OkCount & (" and NOK: ") & eSummary.FailCount, 5000)
-  If $Configuration.MoveToTrashSummary Then
-    oSummary = New FSummary(eSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_TRASH)
-    oSummary.ShowModal()
+  ' 4. Continuamos si hay confirmación (ya sea por el usuario o por decisión automática del servicio)
+  If bConfirmed Then
+    oSelected = $PhotoSelectionService.GetSelectedEntities()
+    If oSelected.Count = 0 Then
+      Message.Warning(("No images selected"))
+      Return
+    Endif
+    
+    oProgress = New FProgressBar($PhotoService, ("Moving images to trash"))
+    oProgress.Show()
+    Wait 0.05
+    
+    eSummary = $PhotoService.MoveToTrash(oSelected)
+    
+    oProgress.Close()
+    
+    ReloadGallery()
+    
+    ShowStatus(("Move to trash has finished. OK: ") & eSummary.OkCount & (" and NOK: ") & eSummary.FailCount, 5000)
+    If $Configuration.MoveToTrashSummary Then
+      oSummary = New FSummary(eSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_TRASH)
+      oSummary.ShowModal()
+    Endif
+    
   Endif
   
 End
@@ -899,7 +928,7 @@ End
 
 Private Sub ZoomIn()
   
-  Dim oPanel As Control
+  Dim oPanel As FPhoto
   
   If $Amplifier < $MaxAmplifier Then
     $Amplifier += 1
@@ -908,7 +937,7 @@ Private Sub ZoomIn()
     
     For Each oPanel In PanelGalleryContent.Children
       If oPanel Is FPhoto Then
-        (oPanel As FPhoto).ResizeScaledForm(1)
+        oPanel.ResizeScaledForm(1)
       Endif
     Next
   Endif
@@ -917,7 +946,7 @@ End
 
 Private Sub ZoomOut()
   
-  Dim oPanel As Control
+  Dim oPanel As FPhoto
   
   If $Amplifier > 1 Then
     $Amplifier -= 1
@@ -926,7 +955,7 @@ Private Sub ZoomOut()
     
     For Each oPanel In PanelGalleryContent.Children
       If oPanel Is FPhoto Then
-        (oPanel As FPhoto).ResizeScaledForm(-1)
+        oPanel.ResizeScaledForm(-1)
       Endif
     Next
   Endif
@@ -934,15 +963,21 @@ Private Sub ZoomOut()
 End
 
 Public Sub SliderZoomer_Drag()
+
   ApplyZoom()
+
 End
 
 Public Sub SliderZoomer_Change()
+
   ApplyZoom()
+
 End
 
 Public Sub SliderZoomer_MouseDrag()
+
   ApplyZoom()
+
 End
 
 Private Sub ApplyZoom()
