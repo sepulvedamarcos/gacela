@@ -1,0 +1,52 @@
+' Gambas class file
+
+'' Service to manage the state of photo and album selection during an import session.
+
+Private $ImportData As New PhotoImport
+
+Property Read SelectedPaths As String[] '' Returns the list of currently selected paths.
+Property Read SelectedAlbumId As Integer '' Returns the ID of the currently selected album.
+
+Public Sub _new() '' Initializes a new import selection session.
+
+  $ImportData = New PhotoImport
+
+End
+
+Public Sub SetPaths(aPaths As String[]) '' Sets the collection of file paths to be imported.
+
+  $ImportData.SelectedPaths = aPaths
+
+End
+
+Public Sub AddPath(sPath As String) '' Adds a single file path to the import list if it doesn't already exist.
+
+  If Not $ImportData.SelectedPaths.Exist(sPath) Then
+    $ImportData.SelectedPaths.Add(sPath)
+  Endif
+
+End
+
+Public Sub SetAlbumId(iId As Integer) '' Sets the target album ID for the import session.
+
+  $ImportData.SelectedAlbumId = iId
+
+End
+
+Public Function GetImportData() As PhotoImport '' Returns the complete import data entity.
+
+  Return $ImportData
+
+End Function
+
+Private Function SelectedPaths_Read() As String[]
+
+  Return $ImportData.SelectedPaths
+
+End Function
+
+Private Function SelectedAlbumId_Read() As Integer
+
+  Return $ImportData.SelectedAlbumId
+
+End Function

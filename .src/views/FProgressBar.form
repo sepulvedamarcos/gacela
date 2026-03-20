@@ -1,0 +1,26 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,78,23)
+  { ProgressBarProcess ProgressBar
+    MoveScaled(3,5,73,4)
+  }
+  { Label1 Label
+    MoveScaled(3,10,12,3)
+    Text = ("Processing :")
+  }
+  { Label2 Label
+    MoveScaled(16,10,59,3)
+  }
+  { ButtonCancelProcess Button
+    MoveScaled(54,16,20,5)
+    Text = ("Cancel process")
+  }
+  { Label3 Label
+    MoveScaled(3,14,8,3)
+    Text = ("Count :")
+  }
+  { LabelItemsCount Label
+    MoveScaled(16,14,8,3)
+  }
+}

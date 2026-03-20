@@ -12,6 +12,7 @@ Private $TagService As TagService
 Private $Titulo As String = "Main"
 
 Private $LogMessage As LogMessage
+
 Public Sub Main()
   Dim cFormMain As FMain
 

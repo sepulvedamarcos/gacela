@@ -55,12 +55,12 @@ Public Sub ButtonAccept_Click()
     Endif
   Next
   
-  
   If $SelectionService.HasSelection() Then
     Me.Close(Enumeration.DLG_OK)
     Return
+  Else
+    Message.Warning(("You must select an album to continue"))
   End If
-  Me.Close()
   
 End
 
@@ -88,7 +88,7 @@ Public Sub ButtonAddNew_Click()
       $EditCode.Description = TextAreaAlbumDescription.Text
       If $AlbumService.EditAlbum($EditCode) Then
         
-        $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("New album editing successfully, loading it into the list"))
+        $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("Album editing successfully, loading it into the list"))
         $Logger.Debug($LogMessage)
         FindAlbums()
         
@@ -119,7 +119,7 @@ Public Sub ButtonAddNew_Click()
       $Logger.Debug($LogMessage)
       FindAlbums()
       
-      ChangePanels(True)
+      ChangePanels(False)
       
     Else
       $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("Failed to add new album"))
@@ -270,6 +270,9 @@ Private Sub FindAlbums()
   If oAlbums.Count = 0 Then
     LabelTitle.Text = ("No albums available")
     ButtonAccept.Enabled = False
+  Else
+    LabelTitle.Text = ("Choose one or more albums")
+    ButtonAccept.Enabled = True
   Endif
   
 End
@@ -352,14 +355,14 @@ Private Sub InitializePrincipalButtonBar()
   
   If $Action = Enumeration.ALBUM_ADD_ACTION Then 
     Me.Text = ("Add selected photos to albums")
-    ButtonAccept.Text = ("Selected")
+    ButtonAccept.Text = ("Select")
     
   Else If $Action = Enumeration.ALBUM_REMOVE_ACTION Then
     
     '' TODO: aca deberia llegar el listado de imagenes selecionadas para premarcar los albumes que estan siendo usados y luego al deseleccionar uno de ellos o varios ejecutar la eliminacion de la tabla relacionada con las imagenes eso albumes deseleccionados
     
     Me.Text = ("Remove selected photos from albums")
-    ButtonAccept.Text = ("Selected")
+    ButtonAccept.Text = ("Select")
     ButtonNewAlbum.Visible = False
     ButtonRemoveAlbums.Visible = False
     ButtonEdit.Visible = False

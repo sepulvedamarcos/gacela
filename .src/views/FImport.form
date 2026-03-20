@@ -1,7 +1,7 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,109,64)
+  MoveScaled(0,0,109,63)
   Text = ("Photo import dialog")
   Resizable = False
   Arrangement = Arrange.Vertical
@@ -44,25 +44,34 @@
     }
   }
   { VBoxButtons2 VBox
-    MoveScaled(1,55,84,8)
+    MoveScaled(2,55,106,8)
     Expand = True
     { Separator2 Separator
       MoveScaled(0,0,72,2)
     }
     { HBoxButtons2 HBox
-      MoveScaled(0,2,82,5)
+      MoveScaled(0,2,104,5)
       Spacing = True
       Padding = 4
+      { LabelMessageDeleteOriginals Label
+        MoveScaled(1,1,58,3)
+        Background = &H0DED1F34
+        Foreground = Color.ButtonBackground
+        Alignment = Align.Center
+        Border = Border.Plain
+        BorderRadius = 4
+        BorderColor = &HFFFFFF
+      }
       { Spring2 Spring
-        MoveScaled(31,0,4,4)
+        MoveScaled(65,0,4,4)
       }
       { ButtonAccept Button
-        MoveScaled(41,0,18,4)
+        MoveScaled(69,0,18,4)
         Text = ("Accept")
         Default = True
       }
       { ButtonExit Button
-        MoveScaled(63,0,18,4)
+        MoveScaled(86,0,18,4)
         Text = ("Exit")
         Cancel = True
       }

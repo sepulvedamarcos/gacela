@@ -33,7 +33,7 @@
       MoveScaled(12,8,39,3)
       Text = ("Images failed to import")
     }
-    { CheckBoxNotShowImportSummary CheckBox
+    { CheckBoxNotShowSummary CheckBox
       MoveScaled(11,52,41,3)
       Text = ("Do not show this dialog again")
     }

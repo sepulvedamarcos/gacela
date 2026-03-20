@@ -28,7 +28,8 @@ Private $SoftDeleteBy As String = ""
 Private $SoftDeleteAuto As Date
 Private $IsLocked As Boolean = False
 Private $LockedBy As String = ""
-Private $LockReason As String = ""
+Private $LockedReason As String = ""
+Private $LockedDate As Date
 ' =============================================
 '
 '            PUBLIC PROPERTIES
@@ -55,7 +56,8 @@ Property SoftDeleteBy As String           '' User who performed the deletion
 Property SoftDeleteAuto As Date           '' Date when it will be removed from the trash
 Property IsLocked As Boolean              '' Indicates if the image is locked for deletion
 Property LockedBy As String               '' User who locked the image
-Property Lockreason As String             '' Reason for image lock
+Property LockedReason As String           '' Reason for image lock
+Property LockedDate As Date               '' Date to locked
 Property Read HasThumbnail As Boolean     '' Indicates if it has a thumbnail
 '=================================================
 '
@@ -321,14 +323,26 @@ Private Sub LockedBy_Write(Value As String)
 
 End
 
-Private Function Lockreason_Read() As String
+Private Function LockedReason_Read() As String
 
-  Return $LockReason
+  Return $LockedReason
 
 End
 
-Private Sub Lockreason_Write(Value As String)
+Private Sub LockedReason_Write(Value As String)
 
-  $LockReason = value
+  $LockedReason = value
+
+End
+
+Private Function LockedDate_Read() As Date
+
+  Return $LockedDate
+
+End
+
+Private Sub LockedDate_Write(Value As Date)
+
+  $LockedDate = Value
 
 End

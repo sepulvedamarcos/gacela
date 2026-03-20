@@ -6,11 +6,11 @@ Private $Status As Integer
 Private $Reason As String
 Private $Message As String
 
-Property FilePath As String
-Property FileName As String
-Property Status As Integer
-Property Reason As String
-Property Message As String
+Property FilePath As String                                                '' Absolute path of the file processed
+Property FileName As String                                                '' Simple name of the file processed
+Property Status As Integer                                                 '' Success or Failure status code
+Property Reason As String                                                  '' Short reason for failure
+Property Message As String                                                 '' Detailed description of the result
 
 Private Function FilePath_Read() As String
   

@@ -4,83 +4,83 @@
 ' it's a contract to imeplemnt like interface
 
 
-Public Sub Debug(message As LogMessage)
+Public Sub Debug(message As LogMessage) '' Logs a debug level message.
   Error.Raise("LoggerPort.Debug not implemented")
 End
 
-Public Sub Info(message As LogMessage)
+Public Sub Info(message As LogMessage) '' Logs an info level message.
   Error.Raise("LoggerPort.Info not implemented")
 End
 
-Public Sub Warning(message As LogMessage)
+Public Sub Warning(message As LogMessage) '' Logs a warning level message.
   Error.Raise("LoggerPort.Warning not implemented")
 End
 
-Public Sub Error(message As LogMessage)
+Public Sub Error(message As LogMessage) '' Logs an error level message.
   Error.Raise("LoggerPort.Error not implemented")
 End
 
-Public Sub Fatal(message As LogMessage)
+Public Sub Fatal(message As LogMessage) '' Logs a fatal level message.
   Error.Raise("LoggerPort.Fatal not implemented")
 End
 
-Public Sub SetAppName(appName As String)
+Public Sub SetAppName(appName As String) '' Sets the application name for logging context.
   Error.Raise("LoggerPort.SetAppName not implemented")
 End
 
-Public Sub SetMinLevel(level As Integer)
+Public Sub SetMinLevel(level As Integer) '' Sets the minimum log level to be recorded.
   Error.Raise("LoggerPort.SetMinLevel not implemented")
 End
 
-Public Sub SetOutput(output As Integer)
+Public Sub SetOutput(output As Integer) '' Sets the output destination (console, file, both).
   Error.Raise("LoggerPort.SetOutput not implemented")
 End
 
-Public Sub SetLogFile(logFile As String)
+Public Sub SetLogFile(logFile As String) '' Sets the path to the log file.
   Error.Raise("LoggerPort.SetLogFile not implemented")
 End
 
-Public Sub SetMaxFileSize(sizeBytes As Integer)
+Public Sub SetMaxFileSize(sizeBytes As Integer) '' Sets the maximum size of the log file before rotation.
   Error.Raise("LoggerPort.SetMaxFileSize not implemented")
 End
 
-Public Sub SetMaxFiles(maxFiles As Integer)
+Public Sub SetMaxFiles(maxFiles As Integer) '' Sets the maximum number of rotated log files to keep.
   Error.Raise("LoggerPort.SetMaxFiles not implemented")
 End
 
-Public Function GetMinLevel() As Integer
+Public Function GetMinLevel() As Integer '' Returns the current minimum log level.
   Error.Raise("LoggerPort.GetMinLevel not implemented")
 End
 
-Public Function GetLogFile() As String
+Public Function GetLogFile() As String '' Returns the current log file path.
   Error.Raise("LoggerPort.GetLogFile not implemented")
 End
 
-Public Function GetMaxFileSize() As Integer
+Public Function GetMaxFileSize() As Integer '' Returns the current maximum log file size.
   Error.Raise("LoggerPort.GetMaxFileSize not implemented")
 End
 
-Public Function GetMaxFiles() As Integer
+Public Function GetMaxFiles() As Integer '' Returns the maximum number of log files.
   Error.Raise("LoggerPort.GetMaxFiles not implemented")
 End
 
-Public Function GetDefaultLevelDebug() As Integer
+Public Function GetDefaultLevelDebug() As Integer '' Returns the numeric value for Debug level.
   Error.Raise("LoggerPort.GetDefaultLevelDebug not implemented")
 End
 
-Public Function GetDefaultOutputBoth() As Integer
+Public Function GetDefaultOutputBoth() As Integer '' Returns the numeric value for 'Both' output.
   Error.Raise("LoggerPort.GetDefaultOutputBoth not implemented")
 End
 
-Public Function GetLevels() As String[]
+Public Function GetLevels() As String[] '' Returns a list of available log level names.
   Error.Raise("LoggerPort.GetLevels not implemented")
 End
 
-Public Function GetOutputs() As String[]
+Public Function GetOutputs() As String[] '' Returns a list of available output destination names.
   Error.Raise("LoggerPort.GetOutputs not implemented")
 End
 
-Public Function FormatMessage(message As LogMessage) As String
+Public Function FormatMessage(message As LogMessage) As String '' Formats a log message into a string.
   If message = Null Then Return ""
   Return message.ToText()
 End

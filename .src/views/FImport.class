@@ -10,28 +10,30 @@ Private $AlbumService As AlbumService
 Private $Logger As LoggerPort
 Private $Titulo As String = "FImportDialog"
 Private $LogMessage As LogMessage
-Private $FilesDrop As String[]
 Private $IdAlbum As Integer
 Private $Fmain As Fmain
+Private $Configuration As Configuration
+Private $ImportSelection As PhotoImportSelectionService
 
 ' ==================================================
 '
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, cAlbumService As AlbumService, oLogger As LoggerPort, aFilesDrop As String[])
+Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, cAlbumService As AlbumService, oLogger As LoggerPort, cImportSelection As PhotoImportSelectionService, oConfiguration As Configuration) '' Creates a new import dialog linked to the main window and selection service.
   
   $PhotoService = cPhotoService
   $AlbumService = cAlbumService
   $Logger = oLogger
-  $FilesDrop = aFilesDrop
+  $ImportSelection = cImportSelection
   $Fmain = cFmain
+  $Configuration = oConfiguration
   
   $LogMessage = New LogMessage($Titulo, "_new", ("Creating dialog window and album list"))
   $Logger.Info($LogMessage)
   
   ListEditorPhotos.ReadOnly = True
-  ListEditorPhotos.List = aFilesDrop
+  ListEditorPhotos.List = $ImportSelection.SelectedPaths
   ListEditorPhotos.Unique = True
   
 End
@@ -39,9 +41,6 @@ End
 Public Sub ButtonAccept_Click()
   
   Dim iResp As Integer
-  Dim aAl As AlbumEntity[]
-  Dim iId As Integer
-  Dim oSummary As ImportSummary
   
   If ListEditorPhotos.List.Count = 0 Then
     Message.Warning(("You must select photos to process"))
@@ -52,19 +51,16 @@ Public Sub ButtonAccept_Click()
   If iResp = 2 Then
     Return
   Else
-    $LogMessage = New LogMessage($Titulo, "ButtonAccept_Click()", ("Starting photo import processing"))
-    $Logger.Info($LogMessage)
-    oSummary = $PhotoService.ImportPhotos(ListEditorPhotos.List, $IdAlbum)
+    $ImportSelection.SetPaths(ListEditorPhotos.List)
+    $ImportSelection.SetAlbumId($IdAlbum)
   Endif
-  
-  $Fmain.LastImportSummary = oSummary
   
   Me.Close(Enumeration.DLG_OK)
   
 Catch
-  $LogMessage = New LogMessage($Titulo, "ButtonAccept_Click()", ("A problem occurred while importing the images") & " [" & Error.Text & "]")
+  $LogMessage = New LogMessage($Titulo, "ButtonAccept_Click()", ("A problem occurred while setting selection") & " [" & Error.Text & "]")
   $Logger.Error($LogMessage)
-  Message.Error(("A problem occurred while importing the images") & " [" & Error.Text & "]")
+  Message.Error(("A problem occurred while setting selection") & " [" & Error.Text & "]")
   
 End
 
@@ -88,11 +84,21 @@ Public Sub CheckBoxEnableAlbum_Click()
     If iResponse = Enumeration.DLG_OK Then
       If oAlbumSelection.HasSelection() Then
         For Each oAlbum As AlbumEntity In oAlbumSelection.GetSelectedAlbumEntities()
+          $IdAlbum = oAlbum.Id
           LabelAlbumNameSelected.Text = oAlbum.Name
           LabelAlbumNameSelected.Visible = True
         Next
       Endif
+    Else
+      $IdAlbum = 0
+      LabelAlbumNameSelected.Text = ""
+      LabelAlbumNameSelected.Visible = False
+      CheckBoxEnableAlbum.Value = False
     Endif
+  Else
+    $IdAlbum = 0
+    LabelAlbumNameSelected.Text = ""
+    LabelAlbumNameSelected.Visible = False
   Endif
   
 End
@@ -136,3 +142,9 @@ Public Sub ListEditorPhotos_Select()
   
 End
 
+Public Sub Form_Show()
+
+  If $Configuration.DeleteOriginals Then
+    LabelMessageDeleteOriginals.Text = ("Warning!, All images are delete from original position")
+  End If
+End

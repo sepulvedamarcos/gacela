@@ -1,100 +1,105 @@
 ' Gambas class file
 
-Private $SelectedIds As Integer[]
+Private $SelectedEntities As PhotoEntity[]
 
-Event SelectionChanged(iCount As Integer, bHasSelection As Boolean)
+Event SelectionChanged(iCount As Integer, bHasSelection As Boolean)        '' Fired when selection count or state changes
 
-Public Sub _new()
+Property Read SelectedCount As Integer                                     '' Current number of selected items
 
-  $SelectedIds = New Integer[]
-
+Public Sub _new()                                                          '' Initializes a new selection session
+  
+  $SelectedEntities = New PhotoEntity[]
+  
 End
 
-Public Function Count() As Integer
-
-  Return $SelectedIds.Count
-
+Public Function HasSelection() As Boolean                                  '' Returns true if at least one item is selected
+  
+  Return $SelectedEntities.Count > 0
+  
 End
 
-Public Function HasSelection() As Boolean
-
-  Return $SelectedIds.Count > 0
-
+Public Function IsSelected(iPhotoId As Integer) As Boolean                 '' Checks if a specific photo ID is currently selected
+  
+  Return FindIndexById(iPhotoId) >= 0
+  
 End
 
-Public Function IsSelected(iPhotoId As Integer) As Boolean
-
-  Return FindIndex(iPhotoId) >= 0
-
-End
-
-Public Function GetSelectedIds() As Integer[]
-
-  Dim aCopy As New Integer[]
-  Dim iPhotoId As Integer
-
-  For Each iPhotoId In $SelectedIds
-    aCopy.Add(iPhotoId)
+Public Function GetSelectedEntities() As PhotoEntity[]                    '' Returns a copy of the list of selected entities
+  
+  Dim oResponse As New PhotoEntity[]
+  
+  For Each oPhoto As PhotoEntity In $SelectedEntities
+    oResponse.Add(oPhoto)
   Next
-
-  Return aCopy
-
+  
+  Return oResponse
+  
 End
 
-Public Sub Toggle(iPhotoId As Integer)
-
-  If IsSelected(iPhotoId) Then
-    Unselect(iPhotoId)
-  Else
-    Select(iPhotoId)
-  Endif
-
+Public Function GetSelectedIds() As Integer[]                             '' Returns a list of IDs of the selected entities
+  
+  Dim aIds As New Integer[]
+  Dim oPhoto As PhotoEntity
+  
+  For Each oPhoto In $SelectedEntities
+    aIds.Add(oPhoto.Id)
+  Next
+  
+  Return aIds
+  
 End
 
-Public Sub Select(iPhotoId As Integer)
-
-  If FindIndex(iPhotoId) >= 0 Then Return
-
-  $SelectedIds.Add(iPhotoId)
+Public Sub Select(oPhoto As PhotoEntity)                                   '' Adds a photo entity to the selection
+  
+  If oPhoto = Null Then Return
+  If FindIndexById(oPhoto.Id) >= 0 Then Return
+  
+  $SelectedEntities.Add(oPhoto)
   RaiseSelectionChanged()
-
+  
 End
 
-Public Sub Unselect(iPhotoId As Integer)
-
+Public Sub Unselect(oPhoto As PhotoEntity)                                 '' Removes a photo entity from the selection
+  
   Dim iIndex As Integer
-
-  iIndex = FindIndex(iPhotoId)
+  
+  If oPhoto = Null Then Return
+  
+  iIndex = FindIndexById(oPhoto.Id)
   If iIndex < 0 Then Return
-
-  $SelectedIds.Remove(iIndex)
+  
+  $SelectedEntities.Remove(iIndex)
   RaiseSelectionChanged()
-
+  
 End
 
-Public Sub Clear()
-
-  If $SelectedIds.Count = 0 Then Return
-
-  $SelectedIds = New Integer[]
+Public Sub Clear()                                                         '' Clears all selected items
+  
+  $SelectedEntities = New PhotoEntity[]
   RaiseSelectionChanged()
-
+  
 End
 
-Private Function FindIndex(iPhotoId As Integer) As Integer
-
+Private Function FindIndexById(iPhotoId As Integer) As Integer
+  
   Dim iIndex As Integer
-
-  For iIndex = 0 To $SelectedIds.Max
-    If $SelectedIds[iIndex] = iPhotoId Then Return iIndex
+  
+  For iIndex = 0 To $SelectedEntities.Max
+    If $SelectedEntities[iIndex].Id = iPhotoId Then Return iIndex
   Next
-
+  
   Return -1
+  
+End
 
+Private Function SelectedCount_Read() As Integer
+  
+  Return $SelectedEntities.Count
+  
 End
 
 Private Sub RaiseSelectionChanged()
-
-  Raise SelectionChanged($SelectedIds.Count, HasSelection())
+  
+  Raise SelectionChanged($SelectedEntities.Count, HasSelection())
 
 End
