@@ -1,6 +1,7 @@
 ' Gambas class file
 
 Private $Amplifier As Integer = 1
+Private $MaxAmplifier As Integer = 10
 
 Private $Configuration As Configuration
 Private $Logger As LoggerPort
@@ -12,10 +13,17 @@ Private $Titulo As String = "FMain"
 Private $LogMessage As LogMessage
 Private $StatusDefaultText As String
 Private StatusTimer As Timer
-Private $LastImportSummary As ImportSummary
+Private $LastImportSummary As Summary
 Private $AlbumPanel As Panel
+Private $IsViewingTrash As Boolean = False
+Private $TrashPage As Integer = 0
+Private $SelectedGallery As Integer = 0
+Private $ShowToolbar As Boolean = True
+Private $ShowMenuBar As Boolean = True
+Private $ShowStatusbar As Boolean = True
+Private $IsZooming As Boolean = False
 
-Property LastImportSummary As ImportSummary
+Property LastImportSummary As Summary
 
 Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService, cAlbumService As AlbumService, cTagService As TagService) '' Initializes main form dependencies.
   
@@ -34,6 +42,7 @@ Public Sub Form_Open()
   
   $PhotoSelectionService = New PhotoSelectionService As "SelectionService"
   
+  LoadEnvironment()
   SelectGallery($Configuration.WhichGallery)
   
   $StatusDefaultText = LabelStatusBar.Text
@@ -42,6 +51,7 @@ Public Sub Form_Open()
   
   AddAlbumExpander()
   UpdateSelectionActions()
+  UpdateTrashCount()
   
 End
 
@@ -74,35 +84,13 @@ End
 
 Public Sub ButtonZoomIn_Click()
   
-  Dim oPanel As FPhoto
-  
-  Print "zoom in " & CStr($Amplifier)
-  If $Amplifier < 8 Then
-    $Amplifier += 1
-    
-    For Each oPanel In PanelGalleryContent.Children
-      
-      oPanel.ResizeScaledForm(1)
-      
-    Next
-  Endif
+  ZoomIn()
   
 End
 
 Public Sub ButtonZoomOut_Click()
   
-  Dim oPanel As FPhoto
-  
-  Print "zoom out " & CStr($Amplifier)
-  If $Amplifier > 1 Then
-    $Amplifier -= 1
-    
-    For Each oPanel In PanelGalleryContent.Children
-      
-      oPanel.ResizeScaledForm(-1)
-      
-    Next
-  Endif
+  ZoomOut()
   
 End
 
@@ -122,7 +110,13 @@ Public Sub PanelGalleryContent_Scroll()
   
   ' If it reached 80% and not loading, load more
   If fScrollPos >= fThreshold Then
-    aNewPhotos = $PhotoService.LoadNextPage()
+    If $IsViewingTrash Then
+      $TrashPage += 1
+      aNewPhotos = $PhotoService.LoadTrashPage($TrashPage)
+    Else
+      aNewPhotos = $PhotoService.LoadNextPage()
+    Endif
+    
     If aNewPhotos.Count > 0 Then
       CreatePhotoPanels(aNewPhotos)
     End If
@@ -154,15 +148,21 @@ Public Sub ViewGallery_PrivateCollection_Click()
   
 End
 
-Public Sub CollectionToolMenu_Private_Click()
+Public Sub GalleryMenu_PrivateGallery_Click()
   
   SelectGallery(Enumeration.GalleryType_Private)
   
 End
 
-Public Sub CollectionToolMenu_Share_Click()
+Public Sub GalleryMenu_ShareGallery_Click()
   
   SelectGallery(Enumeration.GalleryType_Shared)
+  
+End
+
+Public Sub ViewGallery_ViewGallery_Click()
+  
+  SelectGallery($SelectedGallery)
   
 End
 
@@ -202,7 +202,7 @@ End
 
 Public Sub ToolButtonViewTrash_Enter()
   
-  ShowStatus(("View deleted images"), 0)
+  ShowStatus(ToolButtonViewTrash.Tooltip, 0)
   
 End
 
@@ -230,7 +230,23 @@ End
 
 Public Sub ToolButtonViewTrash_Click()
   
-  ShowStatus(("Open deleted images folder"), 0)
+  ' $IsViewingTrash = Not $IsViewingTrash
+  
+  ' If $IsViewingTrash Then
+  '   ShowStatus(("Viewing deleted images"), 0)
+  '   ToolButtonViewTrash.Tooltip = ("Return to gallery")
+  '   ReloadTrash()
+  ' Else
+  '   ShowStatus(("Viewing main gallery"), 0)
+  '   ToolButtonViewTrash.Tooltip = ("Open deleted images folder")
+  '   ReloadGallery()
+  ' Endif
+  
+End
+
+Public Sub EditMenu_TrashOut_Click()
+  
+  RestoreSelectedImagesFromTrash()
   
 End
 
@@ -286,7 +302,7 @@ End
 
 Public Sub ToolButtonTrash_Click()
   
-  Print $PhotoSelectionService.GetSelectedIds()
+  MoveSelectedImagesToTrashDirectory()
   
 End
 
@@ -354,15 +370,11 @@ End
 
 Public Sub ButtonBoxPhotoFilter_Filter()
   
-  Print "ButtonBox1_Filter()" & ButtonBoxPhotoFilter.Text
-  
   FindPhotoFilterActive()
   
 End
 
 Public Sub ButtonBoxPhotoFilter_Click()
-  
-  Print "ButtonBox1_Click()" & ButtonBoxPhotoFilter.Text
   
 End
 
@@ -402,11 +414,122 @@ Public Sub SearchByMenu_UnFiltered_Click()
   
 End
 
-' ==================================================
+Public Sub EditMenu_Trash_Click()
+  
+  MoveSelectedImagesToTrashDirectory()
+  
+End
+
+Public Sub ViewGallery_TrashCollection_Click()
+  
+  SelectGallery(Enumeration.GalleryType_Trash)
+  
+End
+
+Public Sub ViewMenu_Show_Menu_Click()
+  
+  $ShowMenuBar = Not $ShowMenuBar
+  
+End
+
+Public Sub ViewMenu_Show_Toolbar_Click()
+  
+  $ShowToolbar = Not $ShowToolbar
+  
+  HBoxToolBar.Visible = $ShowToolbar
+  $Configuration.ShowMainToolbar = $ShowToolbar
+  
+End
+
+Public Sub OptionsMenu_Albums_Click()
+  
+  ShowAlbumManager()
+  
+End
+
+Public Sub OptionsMenu_Tags_Click()
+  
+  ShowTagManager()
+  
+End
+
+Public Sub ViewMenu_ZoomIn_Click()
+  
+  ZoomIn()
+  
+End
+
+Public Sub ViewMenu_ZoomOut_Click()
+  
+  ZoomOut()
+  
+End
+
+Public Sub ViewMenu_Show_Statusbar_Click()
+  
+  $ShowStatusbar = Not $ShowStatusbar
+  $Configuration.ShowMainStatusBar = $ShowStatusbar
+  HBoxStatusBar.Visible = $ShowStatusbar
+  
+End
+
+' =============================================================================
 '
 '          Private methods
 '
-' ==================================================
+' =============================================================================
+
+Private Sub UpdateTrashCount()
+  
+  Dim iCount As Integer = $PhotoService.GetTrashCount()
+  
+  ToolButtonViewTrash.Tooltip = ("Total deleted images in folder") & " (" & iCount & ")"
+  
+End
+
+Private Sub ReloadTrash()
+  
+  $IsViewingTrash = True
+  $TrashPage = 0
+  
+  If $PhotoSelectionService <> Null Then
+    $PhotoSelectionService.Clear()
+  Endif
+  
+  ClearPhotoGallery()
+  CreatePhotoPanels($PhotoService.LoadTrashPage($TrashPage))
+  
+End
+
+Private Sub RestoreSelectedImagesFromTrash() '' Method to restore images from trash
+  
+  Dim oSelected As PhotoEntity[]
+  Dim oSummary As Summary
+  Dim oProgress As FProgressBar
+  
+  $LogMessage = New LogMessage($Titulo, "RestoreSelectedImagesFromTrash", "Restoring selected images")
+  $Logger.Info($LogMessage)
+  
+  oSelected = $PhotoSelectionService.GetSelectedEntities()
+  If oSelected.Count = 0 Then
+    Message.Warning(("No images selected to restore"))
+    Return
+  Endif
+  
+  oProgress = New FProgressBar($PhotoService, ("Restoring images"))
+  oProgress.Show()
+  Wait 0.05
+  
+  oSummary = $PhotoService.RestoreFromTrash(oSelected)
+  
+  oProgress.Close()
+  
+  UpdateTrashCount()
+  ReloadTrash() ' Refresh trash view
+  
+  ShowStatus(("Restore finished. OK: ") & oSummary.OkCount & (" and NOK: ") & oSummary.FailCount, 5000)
+  
+End
 
 Private Sub CreatePhotoPanels(photos As PhotoEntity[])
   
@@ -435,21 +558,36 @@ Private Sub ClearPhotoGallery()
   
 End
 
-Private Sub ImportProcess(Optional listFiles As String[])
+Private Sub ImportProcess(Optional listFiles As String[]) '' Import images process
   
-  Dim vResp As Variant
-  Dim cSelector As FImportDialog
-  Dim oImportSummary As FImportSummary
+  Dim iResp As Integer
+  Dim oSelector As FImport
+  Dim oImportSummary As FSummary
+  Dim oProgress As FProgressBar
+  Dim oImportSelection As New PhotoImportSelectionService
   
-  cSelector = New FImportDialog(Me, $PhotoService, $AlbumService, $Logger, listFiles)
-  vResp = cSelector.ShowModal()
+  If listFiles <> Null Then
+    oImportSelection.SetPaths(listFiles)
+  Endif
   
-  If vResp = Enumeration.DLG_OK Then
+  oSelector = New FImport(Me, $PhotoService, $AlbumService, $Logger, oImportSelection, $Configuration)
+  iResp = oSelector.ShowModal()
+  
+  If iResp = Enumeration.DLG_OK Then
+    
+    oProgress = New FProgressBar($PhotoService, ("Import images"))
+    oProgress.Show()
+    Wait 0.05
+    
+    $LastImportSummary = $PhotoService.ImportPhotos(oImportSelection.SelectedPaths, oImportSelection.SelectedAlbumId)
+    
+    oProgress.Close()
+    
     ReloadGallery()
     If $LastImportSummary <> Null Then
       ShowStatus(("Import finished. OK: ") & $LastImportSummary.OkCount & (" NOK: ") & $LastImportSummary.FailCount, 5000)
       If $Configuration.ImportShowSummary Then
-        oImportSummary = New FImportSummary($LastImportSummary, $Logger, $Configuration)
+        oImportSummary = New FSummary($LastImportSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_IMPORT)
         oImportSummary.ShowModal()
       Endif
     Endif
@@ -462,27 +600,37 @@ Private Sub SelectGallery(iGallery As Integer)
   
   Select Case iGallery
     Case Enumeration.GalleryType_Private
-      CollectionToolMenu_Private.Value = True
-      CollectionToolMenu_Share.Value = False
-      ViewGallery_PrivateCollection.Value = CollectionToolMenu_Private.Value
-      ViewGallery_ShareCollection.Value = CollectionToolMenu_Share.Value
       
-      MenuButtonCollection.Picture = CollectionToolMenu_Private.Picture
-      MenuButtonCollection.Text = CollectionToolMenu_Private.Text
+      GalleryMenu_PrivateGallery.Value = True
+      GalleryMenu_ShareGallery.Value = False
+      
+      MenuButtonCollection.Picture = GalleryMenu_PrivateGallery.Picture
+      MenuButtonCollection.Text = GalleryMenu_PrivateGallery.Text
+      
+      $IsViewingTrash = False
+      $SelectedGallery = iGallery
+      $PhotoService.ToggleGallery(iGallery)
+      ReloadGallery()
       
     Case Enumeration.GalleryType_Shared
-      CollectionToolMenu_Private.Value = False
-      CollectionToolMenu_Share.Value = True
-      ViewGallery_PrivateCollection.Value = CollectionToolMenu_Private.Value
-      ViewGallery_ShareCollection.Value = CollectionToolMenu_Share.Value
       
-      MenuButtonCollection.Picture = CollectionToolMenu_Share.Picture
-      MenuButtonCollection.Text = CollectionToolMenu_Share.Text
+      GalleryMenu_PrivateGallery.Value = False
+      GalleryMenu_ShareGallery.Value = True
+      
+      MenuButtonCollection.Picture = GalleryMenu_ShareGallery.Picture
+      MenuButtonCollection.Text = GalleryMenu_ShareGallery.Text
+      
+      $IsViewingTrash = False
+      $SelectedGallery = iGallery
+      $PhotoService.ToggleGallery(iGallery)
+      ReloadGallery()
+      
+    Case Enumeration.GalleryType_Trash
+      
+      $IsViewingTrash = True
+      ReloadTrash()
       
   End Select
-  
-  $PhotoService.ToggleGallery(iGallery)
-  ReloadGallery()
   
 End
 
@@ -494,6 +642,7 @@ Private Sub ReloadGallery()
   
   ClearPhotoGallery()
   CreatePhotoPanels($PhotoService.LoadFirstPage())
+  UpdateTrashCount()
   
 End
 
@@ -520,13 +669,13 @@ Private Sub StatusTimer_Timer()
   
 End
 
-Private Function LastImportSummary_Read() As ImportSummary
+Private Function LastImportSummary_Read() As Summary
   
   Return $LastImportSummary
   
 End
 
-Private Sub LastImportSummary_Write(Value As ImportSummary)
+Private Sub LastImportSummary_Write(Value As Summary)
   
   $LastImportSummary = Value
   
@@ -595,14 +744,20 @@ Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional bHa
       iCount = 0
       bHasSelection = False
     Else
-      iCount = $PhotoSelectionService.Count()
+      iCount = $PhotoSelectionService.SelectedCount
       bHasSelection = $PhotoSelectionService.HasSelection()
     Endif
   Endif
   
-  ToolButtonTrash.Enabled = bHasSelection
-  EditMenu_AddSelectedToAlbums.Enabled = bHasSelection
-  EditMenu_RemoveSelectedFromAlbums.Enabled = bHasSelection
+  If $IsViewingTrash Then
+    EditMenu_TrashOut.Enabled = bHasSelection
+  Else
+    EditMenu_Trash.Enabled = bHasSelection
+    EditMenu_AddSelectedToAlbums.Enabled = bHasSelection
+    EditMenu_RemoveSelectedFromAlbums.Enabled = bHasSelection
+    
+    ToolButtonTrash.Enabled = bHasSelection
+  Endif
   
 End
 
@@ -696,6 +851,117 @@ Private Sub FindPhotoFilterActive()
     
   Endif
   
-  'CreatePhotoPanels(photos As PhotoEntity[])
-  ' ReloadGallery()
+End
+
+Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash directory
+  
+  Dim oSelected As PhotoEntity[]
+  Dim oSummary As FSummary
+  Dim eSummary As Summary
+  Dim oProgress As FProgressBar
+  
+  $LogMessage = New LogMessage($Titulo, "MoveSelectedImagesToTrashDirectorio", "Move selected images to trash")
+  $Logger.Info($LogMessage)
+  
+  oSelected = $PhotoSelectionService.GetSelectedEntities()
+  If oSelected.Count = 0 Then
+    Message.Warning(("No images selected"))
+    Return
+  Endif
+  
+  oProgress = New FProgressBar($PhotoService, ("Moving images to trash"))
+  oProgress.Show()
+  Wait 0.05
+  
+  eSummary = $PhotoService.MoveToTrash(oSelected)
+  
+  oProgress.Close()
+  
+  ReloadGallery()
+  
+  ShowStatus(("Move to trash has finished. OK: ") & eSummary.OkCount & (" and NOK: ") & eSummary.FailCount, 5000)
+  If $Configuration.MoveToTrashSummary Then
+    oSummary = New FSummary(eSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_TRASH)
+    oSummary.ShowModal()
+  Endif
+  
+End
+
+Private Sub LoadEnvironment()
+  
+  HBoxToolBar.Visible = $Configuration.ShowMainToolbar
+  HBoxStatusBar.Visible = $Configuration.ShowMainStatusbar
+  SliderZoomer.MaxValue = $MaxAmplifier
+  SliderZoomer.MinValue = 1
+  SliderZoomer.Value = 1
+  
+End
+
+Private Sub ZoomIn()
+  
+  Dim oPanel As Control
+  
+  If $Amplifier < $MaxAmplifier Then
+    $Amplifier += 1
+    
+    If SliderZoomer.Value <> $Amplifier Then SliderZoomer.Value = $Amplifier
+    
+    For Each oPanel In PanelGalleryContent.Children
+      If oPanel Is FPhoto Then
+        (oPanel As FPhoto).ResizeScaledForm(1)
+      Endif
+    Next
+  Endif
+  
+End
+
+Private Sub ZoomOut()
+  
+  Dim oPanel As Control
+  
+  If $Amplifier > 1 Then
+    $Amplifier -= 1
+    
+    If SliderZoomer.Value <> $Amplifier Then SliderZoomer.Value = $Amplifier
+    
+    For Each oPanel In PanelGalleryContent.Children
+      If oPanel Is FPhoto Then
+        (oPanel As FPhoto).ResizeScaledForm(-1)
+      Endif
+    Next
+  Endif
+  
+End
+
+Public Sub SliderZoomer_Drag()
+  ApplyZoom()
+End
+
+Public Sub SliderZoomer_Change()
+  ApplyZoom()
+End
+
+Public Sub SliderZoomer_MouseDrag()
+  ApplyZoom()
+End
+
+Private Sub ApplyZoom()
+  
+  Dim iTarget As Integer = SliderZoomer.Value
+  
+  If $IsZooming Then Return
+  If $Amplifier = iTarget Then Return
+  
+  $IsZooming = True
+  
+  While $Amplifier < iTarget
+    ZoomIn()
+  Wend
+  
+  While $Amplifier > iTarget
+    ZoomOut()
+  Wend
+  
+  $IsZooming = False
+  
 End

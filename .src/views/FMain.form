@@ -18,7 +18,7 @@
     { Menu6 Menu
     }
     { MainMenu_ExportImages Menu
-      Text = ("Export Images")
+      Text = ("Export images")
     }
     { MainMenu_ImportImages Menu
       Text = ("Import images")
@@ -50,47 +50,83 @@
     }
     { EditMenu_AddSelectedToAlbums Menu
       Text = ("Add selected to albums")
+      Enabled = False
     }
     { EditMenu_RemoveSelectedFromAlbums Menu
       Text = ("Remove selected from albums")
+      Enabled = False
     }
     { Menu12 Menu
     }
     { EditMenu_Trash Menu
       Text = ("Move to trash")
+      Enabled = False
+    }
+    { EditMenu_TrashOut Menu
+      Text = ("Restore images")
+      Enabled = False
     }
   }
-  { ViewGalleryMenu Menu
+  { ViewMenu Menu
     Text = ("View")
-    { ViewGallery_PrivateCollection Menu
+    { ViewGallery_ViewGallery Menu
+      Text = ("View Gallery")
+      Picture = Picture["icon:/medium/directory"]
+    }
+    { ViewGallery_TrashCollection Menu
+      Text = ("View deleted files")
+      Picture = Picture["icon:/22/trash-full"]
+    }
+    { Menu5 Menu
+    }
+    { ViewMenu_show Menu
+      Text = ("Show")
+      { ViewMenu_Show_Menu Menu
+        Text = ("View Menu")
+        Checked = True
+      }
+      { ViewMenu_Show_Toolbar Menu
+        Text = ("View Toolbar")
+        Checked = True
+      }
+      { ViewMenu_Show_Statusbar Menu
+        Text = ("View Statusbar")
+        Checked = True
+      }
+    }
+    { Menu4 Menu
+    }
+    { ViewMenu_ZoomIn Menu
+      Text = ("Zoom in")
+      Picture = Picture["icon:/medium/zoom-in"]
+    }
+    { ViewMenu_ZoomOut Menu
+      Text = ("Zoom out")
+      Picture = Picture["icon:/medium/zoom-out"]
+    }
+  }
+  { GalleryMenu Menu
+    Text = ("Gallery")
+    { GalleryMenu_PrivateGallery Menu
       Text = ("Private gallery")
       Picture = Picture["icon:/medium/folder-home"]
       Radio = True
     }
-    { ViewGallery_ShareCollection Menu
+    { GalleryMenu_ShareGallery Menu
       Text = ("Shared gallery")
       Picture = Picture["icon:/medium/user-group"]
       Radio = True
     }
-    { Menu5 Menu
-    }
-    { Menu8 Menu
-      Text = ("View deleted files")
-      Picture = Picture["icon:/22/trash-full"]
-    }
   }
   { OptionsMenu Menu
     Text = ("Options")
-    { Menu9 Menu
+    { OptionsMenu_Albums Menu
       Text = ("Albums")
     }
-    { Menu10 Menu
+    { OptionsMenu_Tags Menu
       Text = ("Tags")
     }
     { Menu11 Menu
-    }
-    { ToolbarConfigurationMenu Menu
-      Text = ("Toolbar configuration")
     }
     { OptionsMenu_Configuration Menu
       Text = ("Gacela settings")
@@ -101,20 +137,6 @@
     Text = ("?")
     { HelpMenu_About Menu
       Text = ("About Gacela")
-    }
-  }
-  { CollectionToolMenu Menu
-    Text = ("Gallery")
-    Visible = False
-    { CollectionToolMenu_Private Menu
-      Text = ("Private gallery")
-      Picture = Picture["icon:/medium/folder-home"]
-      Radio = True
-    }
-    { CollectionToolMenu_Share Menu
-      Text = ("Shared gallery")
-      Picture = Picture["icon:/medium/user-group"]
-      Radio = True
     }
   }
   { SearchByMenu Menu
@@ -171,19 +193,22 @@
       Picture = Picture["icon:/32/trash"]
       Border = True
     }
+    { SpringToolBar Spring
+      MoveScaled(67,1,4,6)
+      Direction = Direction.LeftToRight
+    }
     { ToolButtonAlbum ToolButton
-      MoveScaled(26,0,8,8)
+      MoveScaled(101,0,8,8)
       Picture = Picture["icon:/32/exclusive"]
       Border = True
     }
     { ToolButtonTags ToolButton
-      MoveScaled(34,0,8,8)
+      MoveScaled(109,0,8,8)
       Picture = Picture["icon:/32/tag"]
       Border = True
     }
-    { SpringToolBar Spring
-      MoveScaled(73,1,4,6)
-      Direction = Direction.LeftToRight
+    { PanelSpring1 Panel
+      MoveScaled(117,0,2,8)
     }
     { ToolButtonConfiguration ToolButton
       MoveScaled(119,0,8,8)
@@ -221,9 +246,10 @@
           Text = ("Albums")
         }
         { ExpanderTags Expander
-          MoveScaled(2,12,24,18)
+          MoveScaled(2,12,24,4)
           Expand = True
           Arrangement = Arrange.Fill
+          Border = False
           Text = ("Tags")
         }
       }
@@ -237,11 +263,12 @@
         Arrangement = Arrange.Horizontal
         Padding = 8
         { SpringToolBar2 Spring
-          MoveScaled(3,1,4,6)
+          MoveScaled(1,0,4,6)
           Direction = Direction.LeftToRight
         }
         { ButtonBoxPhotoFilter ButtonBox
-          MoveScaled(22,1,67,5)
+          MoveScaled(8,1,67,5)
+          ToolTip = ("Images Filter ")
           Expand = True
           Placeholder = ("Unfilter")
           Button = False
@@ -250,40 +277,17 @@
           FilterMenu = "SearchByMenu"
           FilterPicture = Picture["icon:/22/filter"]
         }
-      }
-      { HBox2 Panel
-        MoveScaled(1,9,90,8)
-        Arrangement = Arrange.Horizontal
-        Border = Border.Sunken
-        { Panel1 Panel
-          MoveScaled(40,0,50,6)
-          { ButtonZoomIn Button
-            MoveScaled(40,1,4,4)
-            Picture = Picture["icon:/medium/zoom-in"]
-          }
-          { ButtonZoomOut Button
-            MoveScaled(44,1,4,4)
-            Picture = Picture["icon:/medium/zoom-out"]
-          }
-          { SpinBoxPaginas SpinBox
-            MoveScaled(22,1,9,4)
-          }
-          { Button1 Button
-            MoveScaled(14,1,4,4)
-            Picture = Picture["icon:/medium/start"]
-          }
-          { Button2 Button
-            MoveScaled(35,1,4,4)
-            Picture = Picture["icon:/medium/end"]
-          }
-          { Button3 Button
-            MoveScaled(31,1,4,4)
-            Picture = Picture["icon:/medium/forward"]
-          }
-          { Button4 Button
-            MoveScaled(18,1,4,4)
-            Picture = Picture["icon:/medium/rewind"]
-          }
+        { ButtonZoomIn Button
+          MoveScaled(75,1,5,5)
+          Visible = False
+          ToolTip = ("Zoom In")
+          Picture = Picture["icon:/medium/zoom-in"]
+        }
+        { ButtonZoomOut Button
+          MoveScaled(81,1,5,5)
+          Visible = False
+          ToolTip = ("Zoom Out")
+          Picture = Picture["icon:/medium/zoom-out"]
         }
       }
       { PanelGalleryContent ScrollView
@@ -307,7 +311,7 @@
       MoveScaled(0,0,25,5)
       Text = ("Shared gallery")
       Arrow = False
-      Menu = "CollectionToolMenu"
+      Menu = "GalleryMenu"
     }
     { LabelStatusBar Label
       MoveScaled(25,0,58,5)
@@ -318,10 +322,19 @@
       Text = ("Status bar")
       Trim = True
     }
+    { SliderZoomer Slider
+      MoveScaled(113,0,16,4)
+      Mouse = Cursor.ZoomIn
+      MinValue = 1
+      MaxValue = 10
+      PageStep = 1
+      Orientation = ScrollBar.Horizontal
+      Value = 1
+    }
     { ToolButtonViewTrash ToolButton
       MoveScaled(132,0,5,5)
       ToolTip = ("View deleted files")
-      Picture = Picture["icons/22x22/user-trash-full.png"]
+      Picture = Picture["icon:/22/trash"]
       Border = True
     }
   }

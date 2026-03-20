@@ -3,13 +3,15 @@
 Private $IsSelected As Boolean
 Private $PhotoId As Integer
 Private $SelectionService As PhotoSelectionService
+Private $PhotoEntity As PhotoEntity
 
 Property Read PhotoId As Integer
 Property Read IsSelected As Boolean
 
-Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntity)
+Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntity) '' Initializes the photo component with its entity and selection service.
   
   $SelectionService = oSelectionService
+  $PhotoEntity = cPhoto
   $PhotoId = cPhoto.Id
   
   Me.Width = 160
@@ -23,7 +25,11 @@ Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntit
   If cPhoto.HasThumbnail Then
     PictureBoxPhoto.Image = Image.FromString(cPhoto.Thumbnail)
   Else
-    PictureBoxPhoto.Image = Image.Load(cPhoto.ImagePath &/ cPhoto.FileName)
+    If IsDir(cPhoto.ImagePath) Then
+      PictureBoxPhoto.Image = Image.Load(cPhoto.ImagePath &/ cPhoto.FileName)
+    Else
+      PictureBoxPhoto.Image = Image.Load(cPhoto.ImagePath)
+    Endif
   Endif
   
   PictureBoxPhoto.Width = PanelPhoto.Width - 2
@@ -34,15 +40,15 @@ Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntit
   PictureBoxPhoto.y = 2
   PictureBoxPhoto.Padding = 8
   
-  If $SelectionService <> Null Then
-    SetSelected($SelectionService.IsSelected($PhotoId), False)
-  Else
-    SetSelected(False, False)
-  Endif
+  ' If $SelectionService <> Null Then
+  '   SetSelected($SelectionService.IsSelected($PhotoId), False)
+  ' Else
+  '   SetSelected(False, False)
+  ' Endif
   
 End
 
-Public Sub Form_Enter()
+Public Sub Form_Enter() '' Handles mouse hover entry.
   
   ButtonSeleccionar.Visible = True
   ButtonSeleccionar.Raise()
@@ -51,20 +57,20 @@ Public Sub Form_Enter()
   
 End
 
-Public Sub Form_Leave()
+Public Sub Form_Leave() '' Handles mouse hover exit.
   
   ButtonSeleccionar.Visible = False
   PictureBoxPhoto.Border = Border.None
   
 End
 
-Public Sub ButtonSeleccionar_Click()
+Public Sub ButtonSeleccionar_Click() '' Handles selection button click.
   
   SetSelected(Not $IsSelected)
   
 End
 
-Public Sub SetSelected(bValue As Boolean, Optional bNotify As Boolean = True)
+Public Sub SetSelected(bValue As Boolean, Optional bNotify As Boolean = True) '' Updates the selection state and visual feedback.
   
   If $IsSelected = bValue Then
     RefreshSelectionVisual()
@@ -78,27 +84,20 @@ Public Sub SetSelected(bValue As Boolean, Optional bNotify As Boolean = True)
   If $SelectionService = Null Then Return
   
   If $IsSelected Then
-    $SelectionService.Select($PhotoId)
+    $SelectionService.Select($PhotoEntity)
   Else
-    $SelectionService.Unselect($PhotoId)
+    $SelectionService.Unselect($PhotoEntity)
   Endif
   
 End
 
-Public Sub Form_Show()
-  
-  Me.Margin = True
-  Me.Padding = 2
-  
-End
-
-Public Sub PictureBoxPhoto_DblClick()
+Public Sub PictureBoxPhoto_DblClick() '' Handles double click on the photo.
   
   Message.Info("ejale")
   
 End
 
-Public Sub ResizeScaledForm(iSize As Integer)
+Public Sub ResizeScaledForm(iSize As Integer) '' Scales the photo component visually.
   
   If iSize > 0 Then
     Me.Width = Me.Width * 1.25
