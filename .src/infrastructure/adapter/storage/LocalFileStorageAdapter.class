@@ -34,6 +34,16 @@ Catch
 
 End
 
+Public Function MoveFile(sourcePath As String, targetPath As String) As Boolean '' Implements filesystem-level file moving.
+
+  Move sourcePath To targetPath
+  Return True
+
+Catch
+  Error.Propagate
+
+End
+
 Public Function Exists(path As String) As Boolean
 
   Return Exist(path)

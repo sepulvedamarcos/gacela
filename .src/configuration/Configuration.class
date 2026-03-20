@@ -9,12 +9,11 @@ Private $SettingPath As String                                                ''
 Private $IsFirstRun As Boolean = False                                        '' First run indicator
 Private $WhichGallery As Integer = Enumeration.GalleryType_Private            '' Active gallery type
 Private $AppPath As String                                                    '' Application files path
-Private $Logger As LoggerPort                                              '' Logger instance
+Private $Logger As LoggerPort                                                 '' Logger instance
 Private $OsTheme As Integer                                                   '' Current OS theme
 Private $AppTheme As Integer                                                  '' Application theme
 Private $IsSharedEnabled As Boolean                                           '' Shared gallery directory enabled
 Private $Titulo As String = "Configuration"
-
 Private $LogMessage As LogMessage
 Private $LogLevel As Integer
 Private $LogOutput As Integer
@@ -24,6 +23,9 @@ Private $LogFiles As Integer
 Private $DeletedMaxSizeMB As Integer
 Private $DeletedMaxCount As Integer
 Private $ImportShowSummary As Boolean
+Private $MoveToTrashSummary As Boolean
+Private $ShowMainToolbar As Boolean
+Private $ShowMainStatusbar As Boolean
 
 Property Read WhichGallery As Integer                                         '' Which gallery is active
 Property Read IsFirstRun As Boolean                                           '' First execution indicator
@@ -31,7 +33,7 @@ Property Read GalleryPath As String                                           ''
 Property Read IsSharedGalleryAvailable As Boolean                             '' Shared gallery is available
 Property Read DatabaseProvider As String
 Property Read StorageProvider As String
-Property DeleteOriginals As Boolean                                           '' Delete originals after import
+Property DeleteOriginals As Boolean                                           '' Delete originals images after import
 Property LogLevel As Integer
 Property LogOutput As Integer
 Property LogPath As String
@@ -40,6 +42,9 @@ Property LogFiles As Integer
 Property DeletedMaxSizeMB As Integer
 Property DeletedMaxCount As Integer
 Property ImportShowSummary As Boolean
+Property MoveToTrashSummary As Boolean                                      '' Indicate dialog summary is show it
+Property ShowMainToolbar As Boolean
+Property ShowMainStatusBar As Boolean
 
 '============================================
 '
@@ -92,33 +97,39 @@ Public Sub InitializeEnvironment()
   If $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED, Null] = Null Then
     If $Settings["Global/Shared", Null] <> Null Then
       $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED] = $Settings["Global/Shared"]
-      $Settings.Save()
     Endif
   Endif
   
   If $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, Null] = Null Then
     $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = 2048
-    $Settings.Save()
   Endif
   
   If $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, Null] = Null Then
     $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
-    $Settings.Save()
   Endif
   
   If $Settings[Constants.IMPORT_SHOW_SUMMARY, Null] = Null Then
     $Settings[Constants.IMPORT_SHOW_SUMMARY] = True
-    $Settings.Save()
+  Endif
+  
+  If $Settings[Constants.MOVETRASH_SHOW_SUMMARY, Null] = Null Then
+    $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = True
+  Endif
+  
+  If $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, Null] = Null Then
+    $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = True
+  Endif
+  
+  If $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, Null] = Null Then
+    $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = True
   Endif
   
   If $Settings[Constants.GLOBAL_DATABASE_PROVIDER, Null] = Null Then
     $Settings[Constants.GLOBAL_DATABASE_PROVIDER] = Constants.DATABASE_PROVIDER_SQLITE
-    $Settings.Save()
   Endif
   
   If $Settings[Constants.GLOBAL_STORAGE_PROVIDER, Null] = Null Then
     $Settings[Constants.GLOBAL_STORAGE_PROVIDER] = Constants.STORAGE_PROVIDER_LOCAL
-    $Settings.Save()
   Endif
   
   $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
@@ -126,17 +137,22 @@ Public Sub InitializeEnvironment()
   $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
   $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 10000]
   $ImportShowSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
+  $MoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
+  $ShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
+  $ShowMainStatusbar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
+  
+  $Settings.Save()
   
 End
 
 Private Function DatabaseProvider_Read() As String
-
+  
   Return LCase($Settings[Constants.GLOBAL_DATABASE_PROVIDER, Constants.DATABASE_PROVIDER_SQLITE])
   
 End
 
 Private Function StorageProvider_Read() As String
-
+  
   Return LCase($Settings[Constants.GLOBAL_STORAGE_PROVIDER, Constants.STORAGE_PROVIDER_LOCAL])
   
 End
@@ -193,6 +209,10 @@ Private Sub FirstInitializeSettings() '' Initial configuration setup
   $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = 2048
   $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
   $Settings[Constants.IMPORT_SHOW_SUMMARY] = True
+  $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = True
+  $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = True
+  $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = True
+  
   $Settings.Save()
   
 Catch
@@ -419,7 +439,6 @@ Private Sub LogSize_Write(Value As Integer)
   $Settings[Constants.LOGGER_MAXFILESIZE] = $Logger.GetMaxFileSize()
   $Settings.Save()
   
-  
 End
 
 Private Function LogFiles_Read() As Integer
@@ -493,6 +512,51 @@ Private Sub ImportShowSummary_Write(Value As Boolean)
   
   $ImportShowSummary = Value
   $Settings[Constants.IMPORT_SHOW_SUMMARY] = Value
+  $Settings.Save()
+  
+End
+
+Private Function MoveToTrashSummary_Read() As Boolean
+  
+  $MoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
+  Return $MoveToTrashSummary
+  
+End
+
+Private Sub MoveToTrashSummary_Write(Value As Boolean)
+  
+  $MoveToTrashSummary = Value
+  $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = Value
+  $Settings.Save()
+  
+End
+
+Private Function ShowMainToolbar_Read() As Boolean
+  
+  $ShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
+  Return $ShowMainToolbar
+  
+End
+
+Private Sub ShowMainToolbar_Write(Value As Boolean)
+  
+  $ShowMainToolbar = Value
+  $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = Value
+  $Settings.Save()
+  
+End
+
+Private Function ShowMainStatusBar_Read() As Boolean
+  
+  $ShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
+  Return $ShowMainToolbar
+  
+End
+
+Private Sub ShowMainStatusBar_Write(Value As Boolean)
+  
+  $ShowMainToolbar = Value
+  $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = Value
   $Settings.Save()
   
 End

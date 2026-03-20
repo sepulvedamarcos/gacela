@@ -46,7 +46,7 @@ Public Function SwitchGallery() As Boolean '' Switches active gallery storage an
   
 Catch
   Error.Propagate()
-
+  
 End
 
 Public Function IsNewDatabase() As Boolean '' Indicates whether the current gallery database was newly created.
@@ -74,7 +74,7 @@ Public Function GetPhotos(Optional id As Integer) As PhotoEntity[]
   
   If oPhotoResult.Available Then
     $LogMessage = New LogMessage($Titulo, "GetPhotos", "Extracted " & oPhotoResult.Count & " photos from response")
-  $Logger.Debug($LogMessage)
+    $Logger.Debug($LogMessage)
     
     Return MapResultToEntities(oPhotoResult)
     
@@ -322,7 +322,7 @@ End
 '  
 '  Dim oRes As Result
 '  
-  ' FIXME : cascade delete should remove related TAGS and Albums. The layer above should also check locking.
+' FIXME : cascade delete should remove related TAGS and Albums. The layer above should also check locking.
 '  
 '  Return MarkPhotoAsDeleted(id, User.Name, False)
 '  
@@ -432,7 +432,7 @@ Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As Photo
     
     iPhotoAlbumId = $DbContext.DBConnection.LastInsertId
     $LogMessage = New LogMessage($Titulo, "CreatePhoto", ("Photo-album code created") & " [" & iPhotoAlbumId & "]")
-  $Logger.Debug($LogMessage)
+    $Logger.Debug($LogMessage)
     
   End If
   
@@ -519,6 +519,96 @@ Catch
   
 End
 
+Public Function GetPhotosInTrash(limit As Integer, offset As Integer) As PhotoEntity[] '' Retrieves photos that are currently in the trash (soft-deleted).
+  
+  Dim oResult As Result
+  Dim sQuery As String
+  
+  $LogMessage = New LogMessage($Titulo, "GetPhotosInTrash", "Fetching soft-deleted photos")
+  $Logger.Debug($LogMessage)
+  
+  sQuery = "SELECT * FROM " & LocalRepositoryAdapter.TABLE_PHOTOS &
+    " WHERE soft_delete = 1" &
+    " ORDER BY soft_deleted_date DESC" &
+    " LIMIT " & limit &
+    " OFFSET " & offset
+  
+  oResult = $DbContext.DBConnection.Exec(sQuery)
+  
+  If oResult.Available Then
+    Return MapResultToEntities(oResult)
+  Endif
+  Return New PhotoEntity[]
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "GetPhotosInTrash", "Problem retrieving photos from trash: " & Error.Text)
+  $Logger.Error($LogMessage)
+  Return New PhotoEntity[]
+End
+
+Public Function CountPhotosInTrash() As Integer '' Returns the total number of photos in the trash.
+  
+  Dim oResult As Result
+  Dim sQuery As String
+  
+  sQuery = "SELECT COUNT(*) as iTotal FROM " & LocalRepositoryAdapter.TABLE_PHOTOS &
+    " WHERE soft_delete = 1"
+    
+  oResult = $DbContext.DBConnection.Exec(sQuery)
+  
+  If oResult.Available Then
+    Return oResult["iTotal"]
+  Endif
+  Return 0
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "CountPhotosInTrash", "Problem counting photos in trash: " & Error.Text)
+  $Logger.Error($LogMessage)
+  Return 0
+End
+
+Public Function UpdatePhoto(photoE As PhotoEntity) As Boolean '' Updates a photo's fields in the local database.
+  
+  Dim oResult As Result
+  
+  If photoE = Null Then Return False
+  If photoE.Id <= 0 Then Return False
+  
+  $DbContext.DBConnection.Begin()
+  
+  oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_PHOTOS, "photo_id = &1", photoE.Id)
+  oResult["file_name"] = photoE.FileName
+  oResult["width_pixels"] = photoE.WidthPixels
+  oResult["height_pixels"] = photoE.HeightPixels
+  oResult["description"] = photoE.Description
+  oResult["stars"] = photoE.Stars
+  oResult["image_path"] = photoE.ImagePath
+  oResult["original_path"] = photoE.OriginalPath
+  oResult["Hash256"] = photoE.Hash256
+  oResult["thumbnail"] = photoE.Thumbnail
+  oResult["last_sync_date"] = photoE.LastSyncDate
+  oResult["sync_status"] = photoE.SyncStatus
+  oResult["soft_delete"] = photoE.SoftDelete
+  oResult["soft_deleted_date"] = photoE.SoftDeleteDate
+  oResult["soft_deleted_by"] = photoE.SoftDeleteBy
+  oResult["soft_deleted_auto"] = photoE.SoftDeleteAuto
+  oResult["is_locked"] = photoE.IsLocked
+  oResult["locked_by"] = photoE.LockedBy
+  oResult["locked_date"] = photoE.LockedDate
+  oResult["lock_reason"] = photoE.LockedReason
+  oResult.Update()
+  
+  $DbContext.DBConnection.Commit
+  Return True
+  
+Catch
+  $DbContext.DBConnection.Rollback
+  $LogMessage = New LogMessage($Titulo, "UpdatePhoto", "Problems updating photo, rolling back")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
 Public Function RemovePhotoFromAlbum(photoId As Integer, albumId As Integer) As Boolean '' Removes a photo-album relation and soft-deletes empty albums.
   
   Dim oResult As Result
@@ -587,7 +677,7 @@ Public Function ValidateHash256Exist(sHash256 As String) As Boolean '' Checks wh
     iTotal = oResult["iTotal"]
     If iTotal >= 1 Then
       $LogMessage = New LogMessage($Titulo, "ValidateHash256Exist", ("Image already exists with that Hash256"))
-  $Logger.Debug($LogMessage)
+      $Logger.Debug($LogMessage)
       Return True
     End If
   End If
@@ -625,7 +715,7 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
   If text <> "" Then
     sQuery &= sCon & " LOWER(a.name) LIKE '%" & Lower(text) & "%'"
   Endif
-
+  
   sQuery &= " GROUP BY a.album_id, a.name, a.description, a.creation_date, a.creation_user, a.modification_date, a.modification_user, a.thumbnail, a.soft_delete"
   sQuery &= " ORDER BY LOWER(a.name)"
   
@@ -1153,7 +1243,6 @@ Private Function TableHasColumn(oDb As Connection, sTableName As String, sColumn
   
 End
 
-
 Private Function MapResultToEntities(oResult As Result) As PhotoEntity[]
   
   Dim cPhoto As PhotoEntity
@@ -1182,7 +1271,7 @@ Private Function MapResultToEntities(oResult As Result) As PhotoEntity[]
     cPhoto.SoftDeleteAuto = oResult["soft_deleted_auto"]
     cPhoto.IsLocked = oResult["is_locked"]
     cPhoto.LockedBy = oResult["locked_by"]
-    cPhoto.Lockreason = oResult["lock_reason"]
+    cPhoto.LockedReason = oResult["lock_reason"]
     
     oPhotos.Add(cPhoto)
   Next

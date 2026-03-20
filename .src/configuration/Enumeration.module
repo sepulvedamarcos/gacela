@@ -1,7 +1,7 @@
 ' Gambas module file
 
 '' Enum for gallery types
-Public Enum GalleryType_Private = 1, GalleryType_Shared
+Public Enum GalleryType_Private = 1, GalleryType_Shared, GalleryType_Trash
 
 '' Enum for the application theme to use
 Public Enum APP_THEME_OS = 1, APP_THEME_LIGHT, APP_THEME_DARK
@@ -22,3 +22,6 @@ Public Enum RESPONSE_OK, RESPONSE_FILEEXIST, RESPONSE_DBERROR, RESPONSE_ERROR
 '' Enums What is the case to use
 Public Enum ALBUM_ADD_ACTION, ALBUM_REMOVE_ACTION, ALBUM_MANAGE_ACTION
 Public Enum TAG_ADD_ACTION, TAG_REMOVE_ACTION, TAG_MANAGE_ACTION
+
+'' Enums define action in Summary Dialog
+Public Enum DIALOG_SUMMARY_IMPORT, DIALOG_SUMMARY_TRASH
