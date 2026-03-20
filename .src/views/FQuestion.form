@@ -1,5 +1,29 @@
 # Gambas Form File 3.0
 
-{ FQuestion Form
-  MoveScaled(0,0,64,64)
+{ Form Form
+  MoveScaled(0,0,98,23)
+  { PictureBoxAction PictureBox
+    MoveScaled(3,4,9,9)
+    Picture = Picture.Load("icon:/64/question")
+  }
+  { LabelQuestion Label
+    MoveScaled(17,6,80,3)
+  }
+  { ButtonOk Button
+    MoveScaled(64,17,16,5)
+    Text = ("Ok")
+    Default = True
+  }
+  { ButtonCancel Button
+    MoveScaled(81,17,16,5)
+    Text = ("Cancel")
+    Cancel = True
+  }
+  { SwitchButtonDontShowAgain SwitchButton
+    MoveScaled(4,18,6,3)
+  }
+  { Label2 Label
+    MoveScaled(12,18,18,3)
+    Text = ("Don't  show again")
+  }
 }
