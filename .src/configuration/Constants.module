@@ -16,6 +16,9 @@ Public Const GLOBAL_SHOWMAINSTATUSBAR As String = "Global/ShowMainStatusbar"    
 Public Const IMPORT_SHOW_SUMMARY As String = "Summary/ShowImport"               '' Flag to show the import summary dialog
 Public Const MOVETRASH_SHOW_SUMMARY As String = "Summary/MoveToTrash"           '' Flag to show the MoveTrash summary dialog
 
+Public Const DONTSHOWAGAIN_MOVETRASH As String = "Question/MoveToTrash"         '' Flag to define dont show again move to trash question
+Public Const DONTSHOWAGAIN_IMPORT As String = "Question/Import"                 '' Flag to define dont show again import images question
+
 ' Constants that define the Logger section
 Public Const LOGGER_PROVIDER As String = "Logger/Provider"                      '' Logger implementation provider key
 Public Const LOGGER_LEVEL As String = "Logger/Level"                            '' Logging verbosity level key

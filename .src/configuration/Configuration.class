@@ -26,6 +26,8 @@ Private $ImportShowSummary As Boolean
 Private $MoveToTrashSummary As Boolean
 Private $ShowMainToolbar As Boolean
 Private $ShowMainStatusbar As Boolean
+Private $DontShowAgainMoveTrash As Boolean
+Private $DontShowAgainImportImages As Boolean
 
 Property Read WhichGallery As Integer                                         '' Which gallery is active
 Property Read IsFirstRun As Boolean                                           '' First execution indicator
@@ -45,6 +47,8 @@ Property ImportShowSummary As Boolean
 Property MoveToTrashSummary As Boolean                                      '' Indicate dialog summary is show it
 Property ShowMainToolbar As Boolean
 Property ShowMainStatusBar As Boolean
+Property DontShowAgainMoveTrash As Boolean
+Property DontShowAgainImportImages As Boolean
 
 '============================================
 '
@@ -132,6 +136,14 @@ Public Sub InitializeEnvironment()
     $Settings[Constants.GLOBAL_STORAGE_PROVIDER] = Constants.STORAGE_PROVIDER_LOCAL
   Endif
   
+  If $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, Null] = Null Then
+    $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = True
+  Endif
+  
+  If $Settings[Constants.DONTSHOWAGAIN_IMPORT, Null] = Null Then
+    $Settings[Constants.DONTSHOWAGAIN_IMPORT] = True
+  Endif
+  
   $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
   $AppTheme = $Settings[Constants.GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_OS]
   $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
@@ -140,6 +152,8 @@ Public Sub InitializeEnvironment()
   $MoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
   $ShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
   $ShowMainStatusbar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
+  $DontShowAgainMoveTrash = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
+  $DontShowAgainImportImages = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
   
   $Settings.Save()
   
@@ -212,6 +226,8 @@ Private Sub FirstInitializeSettings() '' Initial configuration setup
   $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = True
   $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = True
   $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = True
+  $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = True
+  $Settings[Constants.DONTSHOWAGAIN_IMPORT] = True
   
   $Settings.Save()
   
@@ -557,6 +573,36 @@ Private Sub ShowMainStatusBar_Write(Value As Boolean)
   
   $ShowMainToolbar = Value
   $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = Value
+  $Settings.Save()
+  
+End
+
+Private Function DontShowAgainMoveTrash_Read() As Boolean
+  
+  $DontShowAgainMoveTrash = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
+  Return $DontShowAgainMoveTrash
+  
+End
+
+Private Sub DontShowAgainMoveTrash_Write(Value As Boolean)
+  
+  $DontShowAgainMoveTrash = Value
+  $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = Value
+  $Settings.Save()
+  
+End
+
+Private Function DontShowAgainImportImages_Read() As Boolean
+  
+  $DontShowAgainImportImages = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
+  Return $DontShowAgainImportImages
+  
+End
+
+Private Sub DontShowAgainImportImages_Write(Value As Boolean)
+  
+  $DontShowAgainImportImages = Value
+  $Settings[Constants.DONTSHOWAGAIN_IMPORT] = Value
   $Settings.Save()
   
 End

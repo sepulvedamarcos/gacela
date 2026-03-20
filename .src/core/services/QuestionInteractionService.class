@@ -1,0 +1,49 @@
+' Gambas class file
+
+' QuestionInteractionService.class
+' Servicio de mediación para lógica de preguntas interactivas (SOLID/DRY)
+' Esta clase NO maneja UI, solo lógica de reglas y persistencia.
+
+Private $Logger As LoggerPort
+Private $DontShowAgain As Boolean = False
+Private $Titulo As String = "QuestionInteractionService"
+Private $LogMessage As LogMessage
+
+Property DontShowAgain As Boolean
+
+Public Sub _new(cLogger As LoggerPort)
+  
+  $Logger = cLogger
+  
+End
+
+' Determina si el sistema debe realizar la pregunta al usuario (Regla de Negocio)
+Public Function ShouldAsk(cConfiguration As Configuration, sConfigKey As String) As Boolean
+  
+  Select Case sConfigKey
+    Case Constants.DONTSHOWAGAIN_MOVETRASH
+      Return Not cConfiguration.DontShowAgainMoveTrash
+    Case Constants.DONTSHOWAGAIN_IMPORT
+      Return Not cConfiguration.DontShowAgainImportImages
+    Case Else
+      Return True ' Por defecto preguntamos si no conocemos la clave
+  End Select
+  
+End
+
+' Centraliza la persistencia de la decisión del usuario (DRY)
+Public Sub SaveUserDecision(cConfiguration As Configuration, sConfigKey As String, bDontShowAgain As Boolean)
+  
+  If Not bDontShowAgain Then Return ' Si no marcó el flag, no hacemos nada
+  
+  $LogMessage = New LogMessage($Titulo, "SaveUserDecision", "User decided to not show again for: " & sConfigKey)
+  $Logger.Info($LogMessage)
+  
+  Select Case sConfigKey
+    Case Constants.DONTSHOWAGAIN_MOVETRASH
+      cConfiguration.DontShowAgainMoveTrash = True
+    Case Constants.DONTSHOWAGAIN_IMPORT
+      cConfiguration.DontShowAgainImportImages = True
+  End Select
+  
+End
