@@ -358,31 +358,6 @@ End
 '  
 'End
 
-Public Function PermanentlyDeletePhoto(id As Integer) As Boolean
-  
-  Dim sQuery As String
-  
-  $DbContext.DBConnection.Begin()
-  
-  sQuery = "DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1"
-  $DbContext.DBConnection.Exec(sQuery, id)
-  
-  sQuery = "DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1"
-  $DbContext.DBConnection.Exec(sQuery, id)
-  
-  sQuery = "DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS & " WHERE photo_id = &1"
-  $DbContext.DBConnection.Exec(sQuery, id)
-  
-  $DbContext.DBConnection.Commit
-  Return True
-  
-Catch
-  $DbContext.DBConnection.Rollback
-  $LogMessage = New LogMessage($Titulo, "PermanentlyDeletePhoto", "Problems permanently deleting image, rolling back")
-  $Logger.Error($LogMessage)
-  Error.Propagate
-  
-End
 
 Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean
   
@@ -604,6 +579,23 @@ Public Function UpdatePhoto(photoE As PhotoEntity) As Boolean '' Updates a photo
 Catch
   $DbContext.DBConnection.Rollback
   $LogMessage = New LogMessage($Titulo, "UpdatePhoto", "Problems updating photo, rolling back")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Function PermanentlyDeletePhoto(id As Integer) As Boolean '' Permanently deletes a photo record and its relations.
+  
+  $DbContext.DBConnection.Begin()
+  $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1", id)
+  $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1", id)
+  $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS & " WHERE photo_id = &1", id)
+  $DbContext.DBConnection.Commit
+  Return True
+  
+Catch
+  $DbContext.DBConnection.Rollback
+  $LogMessage = New LogMessage($Titulo, "PermanentlyDeletePhoto", ("Problems permanently deleting photo, rolling back"))
   $Logger.Error($LogMessage)
   Error.Propagate
   

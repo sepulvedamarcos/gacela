@@ -74,6 +74,10 @@ Public Function RemovePhotoFromTag(photoId As Integer, tagId As Integer) As Bool
   Error.Raise("PhotoRepositoryPort.RemovePhotoFromTag not implemented")
 End
 
+Public Function PermanentlyDeletePhoto(id As Integer) As Boolean '' Permanently deletes a photo record and its relations.
+  Error.Raise("PhotoRepositoryPort.PermanentlyDeletePhoto not implemented")
+End
+
 Public Function ValidateHash256Exist(sHash256 As String) As Boolean '' Checks if a photo with the given hash already exists.
   Error.Raise("PhotoRepositoryPort.ValidateHash256Exist not implemented")
 End
