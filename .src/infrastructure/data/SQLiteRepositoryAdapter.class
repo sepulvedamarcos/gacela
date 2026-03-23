@@ -10,7 +10,7 @@ Inherits PhotoRepositoryPort
 Private $Logger As LoggerPort
 Private $DbContext As SQLiteContext
 Private $Configuration As Configuration
-Private $Titulo As String = "LocalRepositoryAdapter"
+Private $Titulo As String = "SQLiteRepositoryAdapter"
 
 Private $LogMessage As LogMessage
 Public Const TABLE_PHOTOS As String = "photos"
@@ -70,7 +70,7 @@ Public Function GetPhotos(Optional id As Integer) As PhotoEntity[]
     sQuery &= " AND photo_id = " & id
   End If
   
-  oPhotoResult = $DbContext.DBConnection.Find(LocalRepositoryAdapter.TABLE_PHOTOS, sQuery, False)
+  oPhotoResult = $DbContext.DBConnection.Find(SQLiteRepositoryAdapter.TABLE_PHOTOS, sQuery, False)
   
   If oPhotoResult.Available Then
     $LogMessage = New LogMessage($Titulo, "GetPhotos", "Extracted " & oPhotoResult.Count & " photos from response")
@@ -108,7 +108,7 @@ Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrd
   ' Execute query with LIMIT and OFFSET
   ' In Gambas, Find does not directly support LIMIT/OFFSET
   ' We must use Exec with SQL
-  sQuery = "SELECT * FROM " & LocalRepositoryAdapter.TABLE_PHOTOS &
+  sQuery = "SELECT * FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS &
     " WHERE " & whereClause &
     " ORDER BY " & sOrderBy &
     " LIMIT " & limit &
@@ -140,7 +140,7 @@ Public Function CountWithFilters(whereClause As String) As Integer '' Count reco
   $LogMessage = New LogMessage($Titulo, "CountWithFilters", "Counting photos in the current database")
   $Logger.Info($LogMessage)
   
-  sQuery = "SELECT COUNT(*) as iTotal FROM " & LocalRepositoryAdapter.TABLE_PHOTOS &
+  sQuery = "SELECT COUNT(*) as iTotal FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS &
     " WHERE " & whereClause
   oResult = $DbContext.DBConnection.Exec(sQuery)
   
@@ -164,7 +164,7 @@ Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer '' Persists a new 
   
   $DbContext.DBConnection.Begin()
   
-  oResult = $DbContext.DBConnection.Create(LocalRepositoryAdapter.TABLE_ALBUMS)
+  oResult = $DbContext.DBConnection.Create(SQLiteRepositoryAdapter.TABLE_ALBUMS)
   oResult["name"] = cAlbum.Name
   oResult["description"] = cAlbum.Description
   oResult["creation_date"] = Now
@@ -199,7 +199,7 @@ Public Function EditAlbum(cAlbum As AlbumEntity) As Boolean '' Updates editable 
   
   $DbContext.DBConnection.Begin()
   
-  oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_ALBUMS)
+  oResult = $DbContext.DBConnection.Edit(SQLiteRepositoryAdapter.TABLE_ALBUMS)
   oResult["album_id"] = cAlbum.Id
   oResult["name"] = cAlbum.Name
   oResult["description"] = cAlbum.Description
@@ -223,8 +223,8 @@ Public Function DeleteAlbum(id As Integer) As Integer '' Soft-deletes an album a
   Dim oResult As Result
   
   $DbContext.DBConnection.Begin()
-  $DbContext.DBConnection.Exec("DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE album_id = &1", id)
-  oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_ALBUMS)
+  $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE album_id = &1", id)
+  oResult = $DbContext.DBConnection.Edit(SQLiteRepositoryAdapter.TABLE_ALBUMS)
   oResult["album_id"] = id
   oResult["soft_delete"] = 1
   oResult.Update()
@@ -247,7 +247,7 @@ Public Function CreateTag(cTag As TagEntity) As Integer '' Persists a new tag an
   
   $DbContext.DBConnection.Begin()
   
-  oResult = $DbContext.DBConnection.Create(LocalRepositoryAdapter.TABLE_TAGS)
+  oResult = $DbContext.DBConnection.Create(SQLiteRepositoryAdapter.TABLE_TAGS)
   oResult["name"] = cTag.Name
   oResult["description"] = cTag.Description
   oResult["color"] = cTag.Color
@@ -281,7 +281,7 @@ Public Function EditTag(cTag As TagEntity) As Boolean '' Updates editable tag fi
   
   $DbContext.DBConnection.Begin()
   
-  oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_TAGS)
+  oResult = $DbContext.DBConnection.Edit(SQLiteRepositoryAdapter.TABLE_TAGS)
   oResult["tag_id"] = cTag.Id
   oResult["name"] = cTag.Name
   oResult["description"] = cTag.Description
@@ -304,8 +304,8 @@ End
 Public Function DeleteTag(id As Integer) As Integer '' Removes a tag and all its current photo relations.
   
   $DbContext.DBConnection.Begin()
-  $DbContext.DBConnection.Exec("DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE tag_id = &1", id)
-  $DbContext.DBConnection.Exec("DELETE FROM " & LocalRepositoryAdapter.TABLE_TAGS & " WHERE tag_id = &1", id)
+  $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE tag_id = &1", id)
+  $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_TAGS & " WHERE tag_id = &1", id)
   $DbContext.DBConnection.Commit
   
   Return id
@@ -339,7 +339,7 @@ End
 '  Dim oRes As Result
 '  
 '  $DbContext.DBConnection.Begin()
-'  oRes = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_PHOTOS)
+'  oRes = $DbContext.DBConnection.Edit(SQLiteRepositoryAdapter.TABLE_PHOTOS)
 '  oRes["photo_id"] = id
 '  oRes["soft_delete"] = 1
 '  oRes["soft_deleted_date"] = Now()
@@ -358,31 +358,31 @@ End
 '  
 'End
 
-'Public Function PermanentlyDeletePhoto(id As Integer) As Boolean
-'  
-'  Dim sQuery As String
-'  
-'  $DbContext.DBConnection.Begin()
-'  
-'  sQuery = "DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1"
-'  $DbContext.DBConnection.Exec(sQuery, id)
-'  
-'  sQuery = "DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1"
-'  $DbContext.DBConnection.Exec(sQuery, id)
-'  
-'  sQuery = "DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS & " WHERE photo_id = &1"
-'  $DbContext.DBConnection.Exec(sQuery, id)
-'  
-'  $DbContext.DBConnection.Commit
-'  Return True
-'  
-'Catch
-'  $DbContext.DBConnection.Rollback
-'  $LogMessage = New LogMessage($Titulo, "PermanentlyDeletePhoto", "Problems permanently deleting image, rolling back")
-'  $Logger.Error($LogMessage)
-'  Error.Propagate
-'  
-'End
+Public Function PermanentlyDeletePhoto(id As Integer) As Boolean
+  
+  Dim sQuery As String
+  
+  $DbContext.DBConnection.Begin()
+  
+  sQuery = "DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1"
+  $DbContext.DBConnection.Exec(sQuery, id)
+  
+  sQuery = "DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1"
+  $DbContext.DBConnection.Exec(sQuery, id)
+  
+  sQuery = "DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS & " WHERE photo_id = &1"
+  $DbContext.DBConnection.Exec(sQuery, id)
+  
+  $DbContext.DBConnection.Commit
+  Return True
+  
+Catch
+  $DbContext.DBConnection.Rollback
+  $LogMessage = New LogMessage($Titulo, "PermanentlyDeletePhoto", "Problems permanently deleting image, rolling back")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
 
 Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean
   
@@ -392,7 +392,7 @@ Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As Photo
   
   $DbContext.DBConnection.Begin()
   
-  oResult = $DbContext.DBConnection.Create(LocalRepositoryAdapter.TABLE_PHOTOS)
+  oResult = $DbContext.DBConnection.Create(SQLiteRepositoryAdapter.TABLE_PHOTOS)
   oResult["file_name"] = photoE.FileName
   oResult["width_pixels"] = photoE.WidthPixels
   oResult["height_pixels"] = photoE.HeightPixels
@@ -422,7 +422,7 @@ Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As Photo
   $Logger.Debug($LogMessage)
   
   If photoAlbumE <> Null Then
-    oResult = $DbContext.DBConnection.Create(LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS)
+    oResult = $DbContext.DBConnection.Create(SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS)
     oResult["photo_id"] = iPhotoId
     oResult["album_id"] = photoAlbumE.AlbumId
     oResult["order_in_album"] = photoAlbumE.OrderInAlbum
@@ -456,7 +456,7 @@ Public Function AddPhotoToAlbum(photoId As Integer, albumId As Integer, Optional
   If photoId <= 0 Or albumId <= 0 Then Return False
   If addedUser = "" Then addedUser = User.Name
   
-  oResult = $DbContext.DBConnection.Exec("SELECT COUNT(*) AS iTotal FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1 AND album_id = &2", photoId, albumId)
+  oResult = $DbContext.DBConnection.Exec("SELECT COUNT(*) AS iTotal FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1 AND album_id = &2", photoId, albumId)
   If oResult.Available Then
     iExists = oResult["iTotal"]
   Endif
@@ -466,7 +466,7 @@ Public Function AddPhotoToAlbum(photoId As Integer, albumId As Integer, Optional
   Endif
   
   $DbContext.DBConnection.Begin
-  oResult = $DbContext.DBConnection.Create(LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS)
+  oResult = $DbContext.DBConnection.Create(SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS)
   oResult["photo_id"] = photoId
   oResult["album_id"] = albumId
   oResult["order_in_album"] = orderInAlbum
@@ -493,7 +493,7 @@ Public Function AddPhotoToTag(photoId As Integer, tagId As Integer, Optional add
   If photoId <= 0 Or tagId <= 0 Then Return False
   If addedUser = "" Then addedUser = User.Name
   
-  oResult = $DbContext.DBConnection.Exec("SELECT COUNT(*) AS iTotal FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1 AND tag_id = &2", photoId, tagId)
+  oResult = $DbContext.DBConnection.Exec("SELECT COUNT(*) AS iTotal FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1 AND tag_id = &2", photoId, tagId)
   If oResult.Available Then
     iExists = oResult["iTotal"]
   Endif
@@ -501,7 +501,7 @@ Public Function AddPhotoToTag(photoId As Integer, tagId As Integer, Optional add
   If iExists > 0 Then Return True
   
   $DbContext.DBConnection.Begin
-  oResult = $DbContext.DBConnection.Create(LocalRepositoryAdapter.TABLE_PHOTOS_TAGS)
+  oResult = $DbContext.DBConnection.Create(SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS)
   oResult["photo_id"] = photoId
   oResult["tag_id"] = tagId
   oResult["added_date"] = Now
@@ -527,7 +527,7 @@ Public Function GetPhotosInTrash(limit As Integer, offset As Integer) As PhotoEn
   $LogMessage = New LogMessage($Titulo, "GetPhotosInTrash", "Fetching soft-deleted photos")
   $Logger.Debug($LogMessage)
   
-  sQuery = "SELECT * FROM " & LocalRepositoryAdapter.TABLE_PHOTOS &
+  sQuery = "SELECT * FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS &
     " WHERE soft_delete = 1" &
     " ORDER BY soft_deleted_date DESC" &
     " LIMIT " & limit &
@@ -551,7 +551,7 @@ Public Function CountPhotosInTrash() As Integer '' Returns the total number of p
   Dim oResult As Result
   Dim sQuery As String
   
-  sQuery = "SELECT COUNT(*) as iTotal FROM " & LocalRepositoryAdapter.TABLE_PHOTOS &
+  sQuery = "SELECT COUNT(*) as iTotal FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS &
     " WHERE soft_delete = 1"
     
   oResult = $DbContext.DBConnection.Exec(sQuery)
@@ -576,7 +576,7 @@ Public Function UpdatePhoto(photoE As PhotoEntity) As Boolean '' Updates a photo
   
   $DbContext.DBConnection.Begin()
   
-  oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_PHOTOS, "photo_id = &1", photoE.Id)
+  oResult = $DbContext.DBConnection.Edit(SQLiteRepositoryAdapter.TABLE_PHOTOS, "photo_id = &1", photoE.Id)
   oResult["file_name"] = photoE.FileName
   oResult["width_pixels"] = photoE.WidthPixels
   oResult["height_pixels"] = photoE.HeightPixels
@@ -588,7 +588,7 @@ Public Function UpdatePhoto(photoE As PhotoEntity) As Boolean '' Updates a photo
   oResult["thumbnail"] = photoE.Thumbnail
   oResult["last_sync_date"] = photoE.LastSyncDate
   oResult["sync_status"] = photoE.SyncStatus
-  oResult["soft_delete"] = photoE.SoftDelete
+  oResult["soft_delete"] = photoE.IsSoftDeleted
   oResult["soft_deleted_date"] = photoE.SoftDeleteDate
   oResult["soft_deleted_by"] = photoE.SoftDeleteBy
   oResult["soft_deleted_auto"] = photoE.SoftDeleteAuto
@@ -617,15 +617,15 @@ Public Function RemovePhotoFromAlbum(photoId As Integer, albumId As Integer) As 
   If photoId <= 0 Or albumId <= 0 Then Return False
   
   $DbContext.DBConnection.Begin
-  $DbContext.DBConnection.Exec("DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1 AND album_id = &2", photoId, albumId)
+  $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1 AND album_id = &2", photoId, albumId)
   
-  oResult = $DbContext.DBConnection.Exec("SELECT COUNT(*) AS iTotal FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE album_id = &1", albumId)
+  oResult = $DbContext.DBConnection.Exec("SELECT COUNT(*) AS iTotal FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE album_id = &1", albumId)
   If oResult.Available Then
     iPhotosInAlbum = oResult["iTotal"]
   Endif
   
   If iPhotosInAlbum = 0 Then
-    oResult = $DbContext.DBConnection.Edit(LocalRepositoryAdapter.TABLE_ALBUMS)
+    oResult = $DbContext.DBConnection.Edit(SQLiteRepositoryAdapter.TABLE_ALBUMS)
     oResult["album_id"] = albumId
     oResult["soft_delete"] = True
     oResult.Update()
@@ -648,7 +648,7 @@ Public Function RemovePhotoFromTag(photoId As Integer, tagId As Integer) As Bool
   If photoId <= 0 Or tagId <= 0 Then Return False
   
   $DbContext.DBConnection.Begin
-  $DbContext.DBConnection.Exec("DELETE FROM " & LocalRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1 AND tag_id = &2", photoId, tagId)
+  $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " WHERE photo_id = &1 AND tag_id = &2", photoId, tagId)
   $DbContext.DBConnection.Commit
   
   Return True
@@ -669,7 +669,7 @@ Public Function ValidateHash256Exist(sHash256 As String) As Boolean '' Checks wh
   
   $LogMessage = New LogMessage($Titulo, "ValidateHash256Exist", ("Validating in table with Hash256") & " [" & sHash256 & "]")
   $Logger.Debug($LogMessage)
-  sQuery = "SELECT COUNT(*) as iTotal FROM " & LocalRepositoryAdapter.TABLE_PHOTOS &
+  sQuery = "SELECT COUNT(*) as iTotal FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS &
     " WHERE Hash256 = &1"
   oResult = $DbContext.DBConnection.Exec(sQuery, sHash256)
   
@@ -700,8 +700,8 @@ Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, 
   Dim sCon As String = " WHERE "
   
   sQuery = "SELECT a.*, COUNT(pa.photo_id) AS photo_count " &
-    "FROM " & LocalRepositoryAdapter.TABLE_ALBUMS & " AS a " &
-    "LEFT JOIN " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " AS pa ON pa.album_id = a.album_id"
+    "FROM " & SQLiteRepositoryAdapter.TABLE_ALBUMS & " AS a " &
+    "LEFT JOIN " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " AS pa ON pa.album_id = a.album_id"
   If useSoftDelete <> -1 Then
     sQuery &= " WHERE a.soft_delete = " & useSoftDelete
     sCon = " AND "
@@ -742,8 +742,8 @@ Public Function FindTags(Optional text As String, Optional id As Integer = 0) As
   Dim sCon As String = " WHERE "
   
   sQuery = "SELECT t.*, COUNT(pt.photo_id) AS photo_count " &
-    "FROM " & LocalRepositoryAdapter.TABLE_TAGS & " AS t " &
-    "LEFT JOIN " & LocalRepositoryAdapter.TABLE_PHOTOS_TAGS & " AS pt ON pt.tag_id = t.tag_id"
+    "FROM " & SQLiteRepositoryAdapter.TABLE_TAGS & " AS t " &
+    "LEFT JOIN " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " AS pt ON pt.tag_id = t.tag_id"
   
   If id <> 0 Then
     sQuery &= sCon & " t.tag_id = " & id
@@ -792,32 +792,32 @@ Private Sub EnsureSchema()
   $LogMessage = New LogMessage($Titulo, "EnsureSchema", ("Checking the existence of schema tables..."))
   $Logger.Debug($LogMessage)
   ' 1. Photos table (photos)
-  If Not oDb.Tables.Exist(LocalRepositoryAdapter.TABLE_PHOTOS) Then
-    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & LocalRepositoryAdapter.TABLE_PHOTOS & "]" & $TableNotExist)
+  If Not oDb.Tables.Exist(SQLiteRepositoryAdapter.TABLE_PHOTOS) Then
+    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & SQLiteRepositoryAdapter.TABLE_PHOTOS & "]" & $TableNotExist)
     $Logger.Info($LogMessage)
     CreatePhotosTable(oDb)
   Endif
   ' 2. Albums table (albums)
-  If Not oDb.Tables.Exist(LocalRepositoryAdapter.TABLE_ALBUMS) Then
-    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & LocalRepositoryAdapter.TABLE_ALBUMS & "]" & $TableNotExist)
+  If Not oDb.Tables.Exist(SQLiteRepositoryAdapter.TABLE_ALBUMS) Then
+    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & SQLiteRepositoryAdapter.TABLE_ALBUMS & "]" & $TableNotExist)
     $Logger.Info($LogMessage)
     CreateAlbumsTable(oDb)
   Endif
   ' 3. Tags table (tags)
-  If Not oDb.Tables.Exist(LocalRepositoryAdapter.TABLE_TAGS) Then
-    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & LocalRepositoryAdapter.TABLE_TAGS & "]" & $TableNotExist)
+  If Not oDb.Tables.Exist(SQLiteRepositoryAdapter.TABLE_TAGS) Then
+    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & SQLiteRepositoryAdapter.TABLE_TAGS & "]" & $TableNotExist)
     $Logger.Info($LogMessage)
     CreateTagsTable(oDb)
   Endif
   ' 4. Photos-Albums relationship table (photo_albums)
-  If Not oDb.Tables.Exist(LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS) Then
-    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & "]" & $TableNotExist)
+  If Not oDb.Tables.Exist(SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS) Then
+    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & "]" & $TableNotExist)
     $Logger.Info($LogMessage)
     CreatePhotosAlbumsTable(oDb)
   Endif
   ' 5. Photos-Tags relationship table (photos_tags)
-  If Not oDb.Tables.Exist(LocalRepositoryAdapter.TABLE_PHOTOS_TAGS) Then
-    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & LocalRepositoryAdapter.TABLE_PHOTOS_TAGS & "]" & $TableNotExist)
+  If Not oDb.Tables.Exist(SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS) Then
+    $LogMessage = New LogMessage($Titulo, "EnsureSchema", "[" & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & "]" & $TableNotExist)
     $Logger.Info($LogMessage)
     CreatePhotosTagsTable(oDb)
   Endif
@@ -847,9 +847,9 @@ Private Sub CreatePhotosTable(oDb As Connection)
     $LogMessage = New LogMessage($Titulo, "CreatePhotosTable", "Tables collection is not available")
     Error.Raise($LogMessage.ToText())
   Endif
-  oTable = oDb.Tables.Add(LocalRepositoryAdapter.TABLE_PHOTOS)
+  oTable = oDb.Tables.Add(SQLiteRepositoryAdapter.TABLE_PHOTOS)
   If oTable = Null Then
-    $LogMessage = New LogMessage($Titulo, "CreatePhotosTable", "Cannot create table " & LocalRepositoryAdapter.TABLE_PHOTOS)
+    $LogMessage = New LogMessage($Titulo, "CreatePhotosTable", "Cannot create table " & SQLiteRepositoryAdapter.TABLE_PHOTOS)
     Error.Raise($LogMessage.ToText())
   Endif
   With oTable
@@ -880,7 +880,7 @@ Private Sub CreatePhotosTable(oDb As Connection)
     .Update()
   End With
   
-  $LogMessage = New LogMessage($Titulo, "CreatePhotosTable", "[" & LocalRepositoryAdapter.TABLE_PHOTOS & "]" & $TableCreate)
+  $LogMessage = New LogMessage($Titulo, "CreatePhotosTable", "[" & SQLiteRepositoryAdapter.TABLE_PHOTOS & "]" & $TableCreate)
   $Logger.Debug($LogMessage)
   
 End
@@ -889,34 +889,34 @@ Private Sub EnsurePhotosTableColumns(oDb As Connection)
   
   Dim oTable As Table
   Dim oResult As Result
-  Dim bHasOriginalPath As Boolean
+  Dim hasOriginalPath As Boolean
   
-  If Not oDb.Tables.Exist(LocalRepositoryAdapter.TABLE_PHOTOS) Then Return
+  If Not oDb.Tables.Exist(SQLiteRepositoryAdapter.TABLE_PHOTOS) Then Return
   
-  oTable = oDb.Tables[LocalRepositoryAdapter.TABLE_PHOTOS]
+  oTable = oDb.Tables[SQLiteRepositoryAdapter.TABLE_PHOTOS]
   If oTable = Null Then
-    $LogMessage = New LogMessage($Titulo, "EnsurePhotosTableColumns", "Cannot open table " & LocalRepositoryAdapter.TABLE_PHOTOS)
+    $LogMessage = New LogMessage($Titulo, "EnsurePhotosTableColumns", "Cannot open table " & SQLiteRepositoryAdapter.TABLE_PHOTOS)
     Error.Raise($LogMessage.ToText())
   Endif
   If Not oTable.Fields.Exist("original_path") Then
-    Try oDb.Exec("ALTER TABLE " & LocalRepositoryAdapter.TABLE_PHOTOS & " ADD COLUMN original_path TEXT")
+    Try oDb.Exec("ALTER TABLE " & SQLiteRepositoryAdapter.TABLE_PHOTOS & " ADD COLUMN original_path TEXT")
     If Error Then
       $LogMessage = New LogMessage($Titulo, "EnsurePhotosTableColumns", ("Error adding original_path column") & " " & Error.Text)
       $Logger.Error($LogMessage)
     Endif
   Endif
   
-  bHasOriginalPath = False
-  oResult = oDb.Exec("PRAGMA table_info(" & LocalRepositoryAdapter.TABLE_PHOTOS & ")")
+  hasOriginalPath = False
+  oResult = oDb.Exec("PRAGMA table_info(" & SQLiteRepositoryAdapter.TABLE_PHOTOS & ")")
   While oResult.Available
     If oResult["name"] = "original_path" Then
-      bHasOriginalPath = True
+      hasOriginalPath = True
       Exit
     Endif
     oResult.MoveNext()
   Wend
   
-  If Not bHasOriginalPath Then
+  If Not hasOriginalPath Then
     $LogMessage = New LogMessage($Titulo, "EnsurePhotosTableColumns", ("Column original_path was not created"))
     $Logger.Warning($LogMessage)
   Endif
@@ -931,9 +931,9 @@ Private Sub CreateAlbumsTable(oDb As Connection)
     $LogMessage = New LogMessage($Titulo, "CreateAlbumsTable", "Tables collection is not available")
     Error.Raise($LogMessage.ToText())
   Endif
-  oTable = oDb.Tables.Add(LocalRepositoryAdapter.TABLE_ALBUMS)
+  oTable = oDb.Tables.Add(SQLiteRepositoryAdapter.TABLE_ALBUMS)
   If oTable = Null Then
-    $LogMessage = New LogMessage($Titulo, "CreateAlbumsTable", "Cannot create table " & LocalRepositoryAdapter.TABLE_ALBUMS)
+    $LogMessage = New LogMessage($Titulo, "CreateAlbumsTable", "Cannot create table " & SQLiteRepositoryAdapter.TABLE_ALBUMS)
     Error.Raise($LogMessage.ToText())
   Endif
   With oTable
@@ -950,7 +950,7 @@ Private Sub CreateAlbumsTable(oDb As Connection)
     .Update()
   End With
   
-  $LogMessage = New LogMessage($Titulo, "CreateAlbumsTable", "[" & LocalRepositoryAdapter.TABLE_ALBUMS & "]" & $TableCreate)
+  $LogMessage = New LogMessage($Titulo, "CreateAlbumsTable", "[" & SQLiteRepositoryAdapter.TABLE_ALBUMS & "]" & $TableCreate)
   $Logger.Debug($LogMessage)
   
 End
@@ -963,9 +963,9 @@ Private Sub CreatePhotosAlbumsTable(oDb As Connection)
     $LogMessage = New LogMessage($Titulo, "CreatePhotosAlbumsTable", "Tables collection is not available")
     Error.Raise($LogMessage.ToText())
   Endif
-  oTable = oDb.Tables.Add(LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS)
+  oTable = oDb.Tables.Add(SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS)
   If oTable = Null Then
-    $LogMessage = New LogMessage($Titulo, "CreatePhotosAlbumsTable", "Cannot create table " & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS)
+    $LogMessage = New LogMessage($Titulo, "CreatePhotosAlbumsTable", "Cannot create table " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS)
     Error.Raise($LogMessage.ToText())
   Endif
   With oTable
@@ -979,7 +979,7 @@ Private Sub CreatePhotosAlbumsTable(oDb As Connection)
     .Update()
   End With
   
-  $LogMessage = New LogMessage($Titulo, "CreatePhotosAlbumsTable", "[" & LocalRepositoryAdapter.TABLE_PHOTOS_ALBUMS & "]" & $TableCreate)
+  $LogMessage = New LogMessage($Titulo, "CreatePhotosAlbumsTable", "[" & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & "]" & $TableCreate)
   $Logger.Debug($LogMessage)
   
 End
@@ -992,9 +992,9 @@ Private Sub CreateTagsTable(oDb As Connection)
     $LogMessage = New LogMessage($Titulo, "CreateTagsTable", "Tables collection is not available")
     Error.Raise($LogMessage.ToText())
   Endif
-  oTable = oDb.Tables.Add(LocalRepositoryAdapter.TABLE_TAGS)
+  oTable = oDb.Tables.Add(SQLiteRepositoryAdapter.TABLE_TAGS)
   If oTable = Null Then
-    $LogMessage = New LogMessage($Titulo, "CreateTagsTable", "Cannot create table " & LocalRepositoryAdapter.TABLE_TAGS)
+    $LogMessage = New LogMessage($Titulo, "CreateTagsTable", "Cannot create table " & SQLiteRepositoryAdapter.TABLE_TAGS)
     Error.Raise($LogMessage.ToText())
   Endif
   With oTable
@@ -1010,7 +1010,7 @@ Private Sub CreateTagsTable(oDb As Connection)
     .Update()
   End With
   
-  $LogMessage = New LogMessage($Titulo, "CreateTagsTable", "[" & LocalRepositoryAdapter.TABLE_TAGS & "]" & $TableCreate)
+  $LogMessage = New LogMessage($Titulo, "CreateTagsTable", "[" & SQLiteRepositoryAdapter.TABLE_TAGS & "]" & $TableCreate)
   $Logger.Debug($LogMessage)
   
 End
@@ -1023,9 +1023,9 @@ Private Sub CreatePhotosTagsTable(oDb As Connection)
     $LogMessage = New LogMessage($Titulo, "CreatePhotosTagsTable", "Tables collection is not available")
     Error.Raise($LogMessage.ToText())
   Endif
-  oTable = oDb.Tables.Add(LocalRepositoryAdapter.TABLE_PHOTOS_TAGS)
+  oTable = oDb.Tables.Add(SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS)
   If oTable = Null Then
-    $LogMessage = New LogMessage($Titulo, "CreatePhotosTagsTable", "Cannot create table " & LocalRepositoryAdapter.TABLE_PHOTOS_TAGS)
+    $LogMessage = New LogMessage($Titulo, "CreatePhotosTagsTable", "Cannot create table " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS)
     Error.Raise($LogMessage.ToText())
   Endif
   With oTable
@@ -1038,7 +1038,7 @@ Private Sub CreatePhotosTagsTable(oDb As Connection)
     .Update()
   End With
   
-  $LogMessage = New LogMessage($Titulo, "CreatePhotosTagsTable", "[" & LocalRepositoryAdapter.TABLE_PHOTOS_TAGS & "]" & $TableCreate)
+  $LogMessage = New LogMessage($Titulo, "CreatePhotosTagsTable", "[" & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & "]" & $TableCreate)
   $Logger.Debug($LogMessage)
   
 End
@@ -1130,8 +1130,8 @@ End
 
 Private Sub Migrate_1_1_to_1_2(oDb As Connection)
   
-  If Not TableHasColumn(oDb, LocalRepositoryAdapter.TABLE_ALBUMS, "modification_date") Then
-    Try oDb.Exec("ALTER TABLE " & LocalRepositoryAdapter.TABLE_ALBUMS & " ADD COLUMN modification_date DATE")
+  If Not TableHasColumn(oDb, SQLiteRepositoryAdapter.TABLE_ALBUMS, "modification_date") Then
+    Try oDb.Exec("ALTER TABLE " & SQLiteRepositoryAdapter.TABLE_ALBUMS & " ADD COLUMN modification_date DATE")
     If Error Then
       $LogMessage = New LogMessage($Titulo, "Migrate_1_1_to_1_2", "Error adding modification_date column: " & Error.Text)
       $Logger.Error($LogMessage)
@@ -1139,8 +1139,8 @@ Private Sub Migrate_1_1_to_1_2(oDb As Connection)
     Endif
   Endif
   
-  If Not TableHasColumn(oDb, LocalRepositoryAdapter.TABLE_ALBUMS, "modification_user") Then
-    Try oDb.Exec("ALTER TABLE " & LocalRepositoryAdapter.TABLE_ALBUMS & " ADD COLUMN modification_user TEXT(50)")
+  If Not TableHasColumn(oDb, SQLiteRepositoryAdapter.TABLE_ALBUMS, "modification_user") Then
+    Try oDb.Exec("ALTER TABLE " & SQLiteRepositoryAdapter.TABLE_ALBUMS & " ADD COLUMN modification_user TEXT(50)")
     If Error Then
       $LogMessage = New LogMessage($Titulo, "Migrate_1_1_to_1_2", "Error adding modification_user column: " & Error.Text)
       $Logger.Error($LogMessage)
@@ -1154,8 +1154,8 @@ End
 
 Private Sub Migrate_1_2_to_1_3(oDb As Connection)
   
-  If Not TableHasColumn(oDb, LocalRepositoryAdapter.TABLE_TAGS, "modification_date") Then
-    Try oDb.Exec("ALTER TABLE " & LocalRepositoryAdapter.TABLE_TAGS & " ADD COLUMN modification_date DATE")
+  If Not TableHasColumn(oDb, SQLiteRepositoryAdapter.TABLE_TAGS, "modification_date") Then
+    Try oDb.Exec("ALTER TABLE " & SQLiteRepositoryAdapter.TABLE_TAGS & " ADD COLUMN modification_date DATE")
     If Error Then
       $LogMessage = New LogMessage($Titulo, "Migrate_1_2_to_1_3", "Error adding tag modification_date column: " & Error.Text)
       $Logger.Error($LogMessage)
@@ -1163,8 +1163,8 @@ Private Sub Migrate_1_2_to_1_3(oDb As Connection)
     Endif
   Endif
   
-  If Not TableHasColumn(oDb, LocalRepositoryAdapter.TABLE_TAGS, "modification_user") Then
-    Try oDb.Exec("ALTER TABLE " & LocalRepositoryAdapter.TABLE_TAGS & " ADD COLUMN modification_user TEXT(50)")
+  If Not TableHasColumn(oDb, SQLiteRepositoryAdapter.TABLE_TAGS, "modification_user") Then
+    Try oDb.Exec("ALTER TABLE " & SQLiteRepositoryAdapter.TABLE_TAGS & " ADD COLUMN modification_user TEXT(50)")
     If Error Then
       $LogMessage = New LogMessage($Titulo, "Migrate_1_2_to_1_3", "Error adding tag modification_user column: " & Error.Text)
       $Logger.Error($LogMessage)
@@ -1180,7 +1180,7 @@ Private Sub Migrate_1_3_to_1_4(oDb As Connection)
   
   oDb.Begin()
   
-  Try oDb.Exec("ALTER TABLE " & LocalRepositoryAdapter.TABLE_TAGS & " RENAME TO tags_old")
+  Try oDb.Exec("ALTER TABLE " & SQLiteRepositoryAdapter.TABLE_TAGS & " RENAME TO tags_old")
   If Error Then
     oDb.Rollback
     $LogMessage = New LogMessage($Titulo, "Migrate_1_3_to_1_4", "Error renaming tags table: " & Error.Text)
@@ -1188,7 +1188,7 @@ Private Sub Migrate_1_3_to_1_4(oDb As Connection)
     Error.Propagate
   Endif
   
-  Try oDb.Exec("CREATE TABLE " & LocalRepositoryAdapter.TABLE_TAGS & " (" &
+  Try oDb.Exec("CREATE TABLE " & SQLiteRepositoryAdapter.TABLE_TAGS & " (" &
     "tag_id INTEGER PRIMARY KEY, " &
     "name VARCHAR(100), " &
     "description TEXT, " &
@@ -1204,7 +1204,7 @@ Private Sub Migrate_1_3_to_1_4(oDb As Connection)
     Error.Propagate
   Endif
   
-  Try oDb.Exec("INSERT INTO " & LocalRepositoryAdapter.TABLE_TAGS &
+  Try oDb.Exec("INSERT INTO " & SQLiteRepositoryAdapter.TABLE_TAGS &
     " (tag_id, name, description, color, creation_date, creation_user, modification_date, modification_user) " &
     "SELECT tag_id, name, description, color, creation_date, creation_user, modification_date, modification_user FROM tags_old")
   If Error Then
@@ -1265,7 +1265,7 @@ Private Function MapResultToEntities(oResult As Result) As PhotoEntity[]
     cPhoto.Thumbnail = oResult["thumbnail"]
     cPhoto.LastSyncDate = oResult["last_sync_date"]
     cPhoto.SyncStatus = oResult["sync_status"]
-    cPhoto.SoftDelete = oResult["soft_delete"]
+    cPhoto.IsSoftDeleted = oResult["soft_delete"]
     cPhoto.SoftDeleteDate = oResult["soft_deleted_date"]
     cPhoto.SoftDeleteBy = oResult["soft_deleted_by"]
     cPhoto.SoftDeleteAuto = oResult["soft_deleted_auto"]
@@ -1302,7 +1302,7 @@ Private Sub MapAlbumEntitys(oResult As Result) As AlbumEntity[] '' Map albums
     cAlbum.ModificationDate = oResult["modification_date"]
     cAlbum.ModificationUser = oResult["modification_user"]
     cAlbum.Thumbnail = oResult["thumbnail"]
-    cAlbum.SoftDelete = oResult["soft_delete"]
+    cAlbum.IsSoftDeleted = oResult["soft_delete"]
     cAlbum.PhotoCount = oResult["photo_count"]
     oAlbums.Add(cAlbum)
     

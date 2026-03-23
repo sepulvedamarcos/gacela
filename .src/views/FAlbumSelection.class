@@ -6,9 +6,9 @@ Private $Logger As LoggerPort
 Private $Titulo As String = "FAlbumSelection"
 Private $LogMessage As LogMessage
 Private $Action As Integer
-Private $Edit As Boolean
-Private $EditCode As AlbumEntity
-Private $AllowMultiple As Boolean
+Private $IsEditMode As Boolean
+Private $AlbumBeingEdited As AlbumEntity
+Private $ShouldAllowMultiple As Boolean
 
 ' =============================================================================
 '
@@ -16,13 +16,13 @@ Private $AllowMultiple As Boolean
 '
 ' =============================================================================
 
-Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, oSelectionService As AlbumSelectionService, iAction As Integer, Optional bAllowMultiple As Boolean = True)
+Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, oSelectionService As AlbumSelectionService, iAction As Integer, Optional shouldAllowMultiple As Boolean = True)
   
   $AlbumService = oAlbumService
   $SelectionService = oSelectionService
   $Logger = oLogger
   $Action = iAction
-  $AllowMultiple = bAllowMultiple
+  $ShouldAllowMultiple = shouldAllowMultiple
   If $SelectionService <> Null Then $SelectionService.Clear()
   
   VBoxListAlbums.Visible = True
@@ -81,19 +81,19 @@ Public Sub ButtonAddNew_Click()
     Return
   Endif
   
-  If $EditCode <> Null Then
+  If $AlbumBeingEdited <> Null Then
     oAlbumE = FindAlbumByName(TextBoxAlbum.Text)
     If oAlbumE = Null Then
-      $EditCode.Name = TextBoxAlbum.Text
-      $EditCode.Description = TextAreaAlbumDescription.Text
-      If $AlbumService.EditAlbum($EditCode) Then
+      $AlbumBeingEdited.Name = TextBoxAlbum.Text
+      $AlbumBeingEdited.Description = TextAreaAlbumDescription.Text
+      If $AlbumService.EditAlbum($AlbumBeingEdited) Then
         
         $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("Album editing successfully, loading it into the list"))
         $Logger.Debug($LogMessage)
         FindAlbums()
         
         ChangePanels(False)
-        $EditCode = Null
+        $AlbumBeingEdited = Null
       Else
         
         $LogMessage = New LogMessage($Titulo, "ButtonAddNew_Click", ("Failed to edit album"))
@@ -158,10 +158,10 @@ Public Sub ButtonEdit_Click()
   
   ChangePanels(True)
   
-  $EditCode = FindAlbumByRow(TableViewAlbums.Rows.Selection[0])
+  $AlbumBeingEdited = FindAlbumByRow(TableViewAlbums.Rows.Selection[0])
   
-  TextBoxAlbum.Text = $EditCode.Name
-  TextAreaAlbumDescription.Text = $EditCode.Description
+  TextBoxAlbum.Text = $AlbumBeingEdited.Name
+  TextAreaAlbumDescription.Text = $AlbumBeingEdited.Description
   TextBoxAlbum.SetFocus
   
 End
@@ -206,7 +206,7 @@ Private Sub InitializeGrid()
     .Columns.Count = 3
     .Rows.Count = 0
     .Header = GridView.Horizontal
-    .Mode = IIf($AllowMultiple, Select.Multiple, Select.Single)
+    .Mode = IIf($ShouldAllowMultiple, Select.Multiple, Select.Single)
     
     .Columns[0].Text = ("Albums")
     .Columns[0].Alignment = Align.Left
@@ -277,9 +277,9 @@ Private Sub FindAlbums()
   
 End
 
-Private Sub ChangePanels(bPanel As Boolean)
+Private Sub ChangePanels(shouldShowManagePanel As Boolean)
   
-  If bPanel Then
+  If shouldShowManagePanel Then
     VBoxListAlbums.Visible = False
     VBoxManageAlbum.Visible = True
     TextBoxAlbum.SetFocus()

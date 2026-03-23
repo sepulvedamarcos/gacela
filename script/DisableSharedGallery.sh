@@ -22,9 +22,9 @@ check_root() {
 # Verify that the shared directory is empty
 #
 check_directory_empty() {
-  if [ -d "/var/lib/gacela" ]; then
-    if [ -n "$(ls -A /var/lib/gacela)" ]; then
-      echo "The directory '/var/lib/gacela' is not empty. Aborting."
+  if [ -d "/home/.gacela-shared" ]; then
+    if [ -n "$(ls -A /home/.gacela-shared)" ]; then
+      echo "The directory '/home/.gacela-shared' is not empty. Aborting."
       exit 1
     fi
   fi
@@ -34,16 +34,16 @@ check_directory_empty() {
 # Remove the shared directory
 #
 remove_directory() {
-  if [ -d "/var/lib/gacela" ]; then
-    echo "Removing directory '/var/lib/gacela'..."
-    if rm -r /var/lib/gacela; then
-      echo "Directory '/var/lib/gacela' removed successfully."
+  if [ -d "/home/.gacela-shared" ]; then
+    echo "Removing directory '/home/.gacela-shared'..."
+    if rm -r /home/.gacela-shared; then
+      echo "Directory '/home/.gacela-shared' removed successfully."
     else
       echo "An error occurred: Could not remove the directory."
       exit 1
     fi
   else
-    echo "Directory '/var/lib/gacela' does not exist. Skipping removal."
+    echo "Directory '/home/.gacela-shared' does not exist. Skipping removal."
   fi
 }
 

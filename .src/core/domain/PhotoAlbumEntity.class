@@ -13,7 +13,7 @@ Private $iAlbumId As Integer
 Private $iOrderInAlbum As Integer = 0
 Private $dAddedDate As Date
 Private $sAddedUser As String
-Private $bSoftDelete As Boolean
+Private $IsSoftDeleted As Boolean
 
 ' =============================================
 '
@@ -26,7 +26,7 @@ Property AlbumId As Integer                '' Album identifier
 Property OrderInAlbum As Integer           '' Position within the album
 Property AddedDate As Date                 '' Date added to the album
 Property AddedUser As String               '' User who added the photo to the album
-Property SoftDelete As Boolean             '' Indicates if it was deleted
+Property IsSoftDeleted As Boolean             '' Indicates if it was deleted
 
 Private Function Id_Read() As Integer
 
@@ -99,14 +99,14 @@ Private Sub AddedUser_Write(Value As String)
 
 End
 
-Private Function SoftDelete_Read() As Boolean
+Private Function IsSoftDeleted_Read() As Boolean
 
-  Return $bSoftDelete
+  Return $IsSoftDeleted
 
 End
 
-Private Sub SoftDelete_Write(Value As Boolean)
+Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
 
-  $bSoftDelete = value
+  $IsSoftDeleted = isSoftDeleted
 
 End

@@ -82,6 +82,10 @@ graph TD
 
 ## 4. Convenciones de Desarrollo
 *   **Nomenclatura**: Uso de prefijos semánticos en variables internas (`$Configuration`, `$Logger`) y parámetros (`cPhotoService`).
+*   **Variables booleanas**: Toda variable, propiedad o parámetro booleano debe leerse como una pregunta de sí/no en inglés y comenzar con `Is`, `Has` o `Should`.
+    *   Correcto: `hasErrors`, `isDataValid`, `shouldSendEmail`.
+    *   Incorrecto: `have_errors`, `data_valid`, `send_email`, `ShowMainToolbar`, `DontShowAgainMoveTrash`.
+    *   Regla práctica: si el valor solo puede ser `True` o `False`, su nombre debe responder mentalmente a “¿sí o no?”.
 *   **Documentación IntelliSense**: Uso de `''` al final de métodos y constantes para soporte de ayuda en el IDE de Gambas3.
 *   **Clean Code**: Métodos cortos, nombres descriptivos y evitación de lógica "mágica" o hardcodeada (uso extensivo de `Constants.module`).
 

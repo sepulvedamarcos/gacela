@@ -70,17 +70,17 @@ Public Sub ButtonSeleccionar_Click() '' Handles selection button click.
   
 End
 
-Public Sub SetSelected(bValue As Boolean, Optional bNotify As Boolean = True) '' Updates the selection state and visual feedback.
+Public Sub SetSelected(isSelected As Boolean, Optional shouldNotify As Boolean = True) '' Updates the selection state and visual feedback.
   
-  If $IsSelected = bValue Then
+  If $IsSelected = isSelected Then
     RefreshSelectionVisual()
     Return
   Endif
   
-  $IsSelected = bValue
+  $IsSelected = isSelected
   RefreshSelectionVisual()
   
-  If Not bNotify Then Return
+  If Not shouldNotify Then Return
   If $SelectionService = Null Then Return
   
   If $IsSelected Then

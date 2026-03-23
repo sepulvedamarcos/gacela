@@ -12,10 +12,10 @@ Private $iCurrentPage As Integer = 0
 Private $aCachedPhotos As PhotoEntity[]
 Private $iTotalCount As Integer = 0
 Private $Logger As LoggerPort
-Private $bHasMorePages As Boolean = True
+Private $HasMorePages As Boolean = True
 ' Filters
-Private $bFilterGarbage As Boolean = False
-Private $bFilterFavorites As Boolean = False
+Private $ShouldFilterGarbage As Boolean = False
+Private $ShouldFilterFavorites As Boolean = False
 Private $sFilterFormat As String = ""
 Private $dFilterDateFrom As Date
 Private $dFilterDateTo As Date
@@ -59,7 +59,7 @@ End
 '    Return True
 '  Endif
 '
-'  Return $bHasMorePages
+'  Return $HasMorePages
 '
 'End
 
@@ -83,7 +83,7 @@ Public Function LoadNextBatch() As PhotoEntity[] '' Load next batch for infinite
   Dim oNewPhotos As New PhotoEntity[]
 
   ' If there are no more pages
-  If Not $bHasMorePages Then
+  If Not $HasMorePages Then
     $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "No more pages to load")
   $Logger.Debug($LogMessage)
     Return oNewPhotos
@@ -104,7 +104,7 @@ Public Function LoadNextBatch() As PhotoEntity[] '' Load next batch for infinite
 
   ' If fewer than expected were loaded, there are no more pages
   If oNewPhotos.Count < $iPageSize Then
-    $bHasMorePages = False
+    $HasMorePages = False
     $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Last page reached")
   $Logger.Debug($LogMessage)
   Endif
@@ -125,7 +125,7 @@ Public Sub Reset() '' Reset iterator
   $iCurrentIndex = 0
   $iCurrentPage = 0
   $aCachedPhotos.Clear()
-  $bHasMorePages = True
+  $HasMorePages = True
   UpdateTotalCount()
 
   $LogMessage = New LogMessage($Titulo, "Reset", "Iterator reset")
@@ -135,9 +135,9 @@ End
 
 'Public Sub SetFilterFavorites(onlyFavorites As Boolean)
 '
-'  If $bFilterFavorites = onlyFavorites Then Return
+'  If $ShouldFilterFavorites = onlyFavorites Then Return
 '
-'  $bFilterFavorites = onlyFavorites
+'  $ShouldFilterFavorites = onlyFavorites
 '  Reset()
 '
 'End
@@ -186,8 +186,8 @@ End
 
 'Public Sub ClearFilters()
 '
-'  $bFilterGarbage = False
-'  $bFilterFavorites = False
+'  $ShouldFilterGarbage = False
+'  $ShouldFilterFavorites = False
 '  $sFilterFormat = ""
 '  $dFilterDateFrom = Null
 '  $dFilterDateTo = Null
@@ -293,10 +293,10 @@ Private Function BuildFilterQuery() As String
 
   Dim aConditions As String[] = New String[]
 
-  aConditions.Add("soft_delete = " & If($bFilterGarbage, "true", "false"))
+  aConditions.Add("soft_delete = " & If($ShouldFilterGarbage, "true", "false"))
 
   ' Filter: favorites only
-  If $bFilterFavorites Then
+  If $ShouldFilterFavorites Then
     aConditions.Add("is_favorite = &2")
   Endif
 
@@ -342,7 +342,7 @@ End
 '  oParams.Add(False)
 '
   ' Parameter 2: is_favorite
-'  If $bFilterFavorites Then
+'  If $ShouldFilterFavorites Then
 '    oParams.Add(True)
 '  Endif
 '
@@ -380,6 +380,6 @@ Property Read IsFiltered As Boolean
 
 Function IsFiltered_Read() As Boolean
 
-  Return $bFilterFavorites Or $sFilterFormat <> "" Or $dFilterDateFrom <> Null Or $dFilterDateTo <> Null Or $sFilterUser <> "" Or $sSearchText <> "" Or $iFilterAlbumId > 0
+  Return $ShouldFilterFavorites Or $sFilterFormat <> "" Or $dFilterDateFrom <> Null Or $dFilterDateTo <> Null Or $sFilterUser <> "" Or $sSearchText <> "" Or $iFilterAlbumId > 0
 
 End

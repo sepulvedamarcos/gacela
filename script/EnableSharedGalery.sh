@@ -23,7 +23,7 @@ check_root() {
 # Show information about the directory to be created
 #
 display_info() {
-  echo "The directory '/var/lib/gacela' will be created for the shared gallery."
+  echo "The directory '/home/.gacela-shared' will be created for the shared gallery."
   echo "Then a group named 'gacela-shared' will be created to manage gallery access."
   echo "If everything finishes correctly, you must log out so your session picks up the new group permissions."
 }
@@ -74,10 +74,10 @@ create_group_and_add_users() {
 # Create the directory and set permissions
 #
 create_directory_and_set_permissions() {
-  if [ ! -d "/var/lib/gacela" ]; then
-    echo "Creating directory '/var/lib/gacela'"
-    if mkdir -p /var/lib/gacela; then
-      echo "Directory '/var/lib/gacela' created successfully."
+  if [ ! -d "/home/.gacela-shared" ]; then
+    echo "Creating directory '/home/.gacela-shared'"
+    if mkdir -p /home/.gacela-shared; then
+      echo "Directory '/home/.gacela-shared' created successfully."
     else
       echo "An error occurred: Could not create the directory."
       exit 1
@@ -85,9 +85,9 @@ create_directory_and_set_permissions() {
   fi
   
   echo "Setting owner and permissions..."
-  if chown -R root:gacela-shared /var/lib/gacela && \
-     chmod -R 2775 /var/lib/gacela; then
-    echo "Permissions set for directory '/var/lib/gacela'."
+  if chown -R root:gacela-shared /home/.gacela-shared && \
+     chmod -R 2775 /home/.gacela-shared; then
+    echo "Permissions set for directory '/home/.gacela-shared'."
   else
     echo "An error occurred: Could not set permissions."
     exit 1
@@ -99,7 +99,7 @@ create_directory_and_set_permissions() {
 #
 test_permissions() {
     echo "Running permissions test..."
-    local test_file="/var/lib/gacela/test.txt"
+    local test_file="/home/.gacela-shared/test.txt"
     
     if touch "$test_file"; then
         echo "Test file created successfully."

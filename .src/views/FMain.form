@@ -66,6 +66,16 @@
       Text = ("Restore images")
       Enabled = False
     }
+    { Menu13 Menu
+    }
+    { EditMenu_Share Menu
+      Text = ("Share selected images")
+      Enabled = False
+    }
+    { EditMenu_Unshare Menu
+      Text = ("Unshare selected images")
+      Enabled = False
+    }
   }
   { ViewMenu Menu
     Text = ("View")

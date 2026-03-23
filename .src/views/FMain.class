@@ -18,9 +18,9 @@ Private $AlbumPanel As Panel
 Private $IsViewingTrash As Boolean = False
 Private $TrashPage As Integer = 0
 Private $SelectedGallery As Integer = 0
-Private $ShowToolbar As Boolean = True
-Private $ShowMenuBar As Boolean = True
-Private $ShowStatusbar As Boolean = True
+Private $ShouldShowToolbar As Boolean = True
+Private $ShouldShowMenuBar As Boolean = True
+Private $ShouldShowStatusBar As Boolean = True
 Private $IsZooming As Boolean = False
 
 Property LastImportSummary As Summary
@@ -266,9 +266,9 @@ Public Sub AlbumRadio_Click()
   
 End
 
-Public Sub SelectionService_SelectionChanged(iCount As Integer, bHasSelection As Boolean)
+Public Sub SelectionService_SelectionChanged(iCount As Integer, hasSelection As Boolean)
   
-  UpdateSelectionActions(iCount, bHasSelection)
+  UpdateSelectionActions(iCount, hasSelection)
   
 End
 
@@ -428,16 +428,16 @@ End
 
 Public Sub ViewMenu_Show_Menu_Click()
   
-  $ShowMenuBar = Not $ShowMenuBar
+  $ShouldShowMenuBar = Not $ShouldShowMenuBar
   
 End
 
 Public Sub ViewMenu_Show_Toolbar_Click()
   
-  $ShowToolbar = Not $ShowToolbar
+  $ShouldShowToolbar = Not $ShouldShowToolbar
   
-  HBoxToolBar.Visible = $ShowToolbar
-  $Configuration.ShowMainToolbar = $ShowToolbar
+  HBoxToolBar.Visible = $ShouldShowToolbar
+  $Configuration.ShouldShowMainToolbar = $ShouldShowToolbar
   
 End
 
@@ -467,9 +467,9 @@ End
 
 Public Sub ViewMenu_Show_Statusbar_Click()
   
-  $ShowStatusbar = Not $ShowStatusbar
-  $Configuration.ShowMainStatusBar = $ShowStatusbar
-  HBoxStatusBar.Visible = $ShowStatusbar
+  $ShouldShowStatusBar = Not $ShouldShowStatusBar
+  $Configuration.ShouldShowMainStatusBar = $ShouldShowStatusBar
+  HBoxStatusBar.Visible = $ShouldShowStatusBar
   
 End
 
@@ -586,7 +586,7 @@ Private Sub ImportProcess(Optional listFiles As String[]) '' Import images proce
     ReloadGallery()
     If $LastImportSummary <> Null Then
       ShowStatus(("Import finished. OK: ") & $LastImportSummary.OkCount & (" NOK: ") & $LastImportSummary.FailCount, 5000)
-      If $Configuration.ImportShowSummary Then
+      If $Configuration.ShouldShowImportSummary Then
         oImportSummary = New FSummary($LastImportSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_IMPORT)
         oImportSummary.ShowModal()
       Endif
@@ -737,31 +737,33 @@ Private Sub ClearAlbumExpander()
   
 End
 
-Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional bHasSelection As Boolean = False)
+Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional hasSelection As Boolean = False)
   
   If iCount < 0 Then
     If $PhotoSelectionService = Null Then
       iCount = 0
-      bHasSelection = False
+      hasSelection = False
     Else
       iCount = $PhotoSelectionService.SelectedCount
-      bHasSelection = $PhotoSelectionService.HasSelection()
+      hasSelection = $PhotoSelectionService.HasSelection()
     Endif
   Endif
   
   If $IsViewingTrash Then
-    EditMenu_TrashOut.Enabled = bHasSelection
+    EditMenu_TrashOut.Enabled = hasSelection
   Else
-    EditMenu_Trash.Enabled = bHasSelection
-    EditMenu_AddSelectedToAlbums.Enabled = bHasSelection
-    EditMenu_RemoveSelectedFromAlbums.Enabled = bHasSelection
+    EditMenu_Trash.Enabled = hasSelection
+    EditMenu_AddSelectedToAlbums.Enabled = hasSelection
+    EditMenu_RemoveSelectedFromAlbums.Enabled = hasSelection
+    EditMenu_Share.Enabled = hasSelection And $Configuration.WhichGallery = Enumeration.GalleryType_Private
+    EditMenu_Unshare.Enabled = hasSelection And $Configuration.WhichGallery = Enumeration.GalleryType_Shared
     
-    ToolButtonTrash.Enabled = bHasSelection
+    ToolButtonTrash.Enabled = hasSelection
   Endif
   
 End
 
-Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
+Private Sub AssignSelectedPhotosToAlbums(isAddOperation As Boolean)
   
   Dim oDialog As FAlbumSelection
   Dim oSelectionAlbum As AlbumSelectionService
@@ -777,7 +779,7 @@ Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   
   oSelectionAlbum = New AlbumSelectionService
   
-  If bIsAddOperation Then
+  If isAddOperation Then
     oDialog = New FAlbumSelection($AlbumService, $Logger, oSelectionAlbum, Enumeration.ALBUM_ADD_ACTION)
   Else
     oDialog = New FAlbumSelection($AlbumService, $Logger, oSelectionAlbum, Enumeration.ALBUM_REMOVE_ACTION)
@@ -793,7 +795,7 @@ Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
     aAlbumIds.Add(oAlbum.Id)
   Next
   
-  If bIsAddOperation Then
+  If isAddOperation Then
     iAffected = $AlbumService.AddPhotosToAlbums(aPhotoIds, aAlbumIds)
     ShowStatus(("Relations created: ") & iAffected, 3500)
   Else
@@ -861,7 +863,7 @@ Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash 
   Dim oProgress As FProgressBar
   Dim oFQuestion As FQuestion
   Dim sTitle, sText As String
-  Dim bConfirmed As Boolean = True
+  Dim isConfirmed As Boolean = True
   Dim oQuestionService As QuestionInteractionService
   
   $LogMessage = New LogMessage($Titulo, "MoveSelectedImagesToTrashDirectory", "Move selected images to trash")
@@ -880,16 +882,16 @@ Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash 
     If oFQuestion.ShowModal() = Enumeration.DLG_OK Then
       
       ' 3. El SERVICIO guarda la decisión capturada por la UI (DRY/Persistencia)
-      oQuestionService.SaveUserDecision($Configuration, Constants.DONTSHOWAGAIN_MOVETRASH, oQuestionService.DontShowAgain)
-      bConfirmed = True
+      oQuestionService.SaveUserDecision($Configuration, Constants.DONTSHOWAGAIN_MOVETRASH, oQuestionService.ShouldNotShowAgain)
+      isConfirmed = True
     Else
-      bConfirmed = False
+      isConfirmed = False
     Endif
     
   Endif
   
   ' 4. Continuamos si hay confirmación (ya sea por el usuario o por decisión automática del servicio)
-  If bConfirmed Then
+  If isConfirmed Then
     oSelected = $PhotoSelectionService.GetSelectedEntities()
     If oSelected.Count = 0 Then
       Message.Warning(("No images selected"))
@@ -907,7 +909,7 @@ Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash 
     ReloadGallery()
     
     ShowStatus(("Move to trash has finished. OK: ") & eSummary.OkCount & (" and NOK: ") & eSummary.FailCount, 5000)
-    If $Configuration.MoveToTrashSummary Then
+    If $Configuration.ShouldShowMoveToTrashSummary Then
       oSummary = New FSummary(eSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_TRASH)
       oSummary.ShowModal()
     Endif
@@ -918,8 +920,8 @@ End
 
 Private Sub LoadEnvironment()
   
-  HBoxToolBar.Visible = $Configuration.ShowMainToolbar
-  HBoxStatusBar.Visible = $Configuration.ShowMainStatusbar
+  HBoxToolBar.Visible = $Configuration.ShouldShowMainToolbar
+  HBoxStatusBar.Visible = $Configuration.ShouldShowMainStatusBar
   SliderZoomer.MaxValue = $MaxAmplifier
   SliderZoomer.MinValue = 1
   SliderZoomer.Value = 1
@@ -999,4 +1001,36 @@ Private Sub ApplyZoom()
   
   $IsZooming = False
   
+End
+
+Public Sub EditMenu_Share_Click()
+  ExecuteSharing(True)
+End
+
+Public Sub EditMenu_Unshare_Click()
+  ExecuteSharing(False)
+End
+
+Private Sub ExecuteSharing(bToShared As Boolean)
+  Dim oSharingService As PhotoSharingService
+  Dim oProgress As FProgressBar
+  Dim oSummary As Summary
+  Dim sTitle As String = If(bToShared, ("Sharing selected images"), ("Unsharing selected images"))
+  
+  If Message.Question(If(bToShared, ("Are you sure you want to SHARE the selected images? They will be moved to the shared gallery."), ("Are you sure you want to UNSHARE the selected images? They will be moved back to your private gallery.")), ("Yes"), ("No")) <> 1 Then Return
+  
+  oSharingService = New PhotoSharingService($PhotoService, $Configuration, $Logger)
+  oProgress = New FProgressBar(oSharingService, sTitle)
+  
+  oSummary = oSharingService.Execute($PhotoSelectionService.GetSelectedEntities(), bToShared)
+  
+  oProgress.Close()
+  
+  If oSummary <> Null Then
+       Dim oSummaryDialog As New FSummary(oSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_SHARE)
+     oSummaryDialog.ShowModal()
+  Endif
+  
+  $PhotoSelectionService.Clear()
+  ReloadGallery()
 End

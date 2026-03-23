@@ -12,6 +12,14 @@ Property Status As Integer                                                 '' Su
 Property Reason As String                                                  '' Short reason for failure
 Property Message As String                                                 '' Detailed description of the result
 
+Public Sub _new(Optional sFileName As String = "", Optional iStatus As Integer = 0, Optional sMessage As String = "")
+  
+  $FileName = sFileName
+  $Status = iStatus
+  $Message = sMessage
+  
+End
+
 Private Function FilePath_Read() As String
   
   Return $FilePath

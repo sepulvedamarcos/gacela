@@ -1,15 +1,13 @@
 ' Gambas class file
 
 ' QuestionInteractionService.class
-' Servicio de mediación para lógica de preguntas interactivas (SOLID/DRY)
-' Esta clase NO maneja UI, solo lógica de reglas y persistencia.
 
 Private $Logger As LoggerPort
-Private $DontShowAgain As Boolean = False
+Private $ShouldNotShowAgain As Boolean = False
 Private $Titulo As String = "QuestionInteractionService"
 Private $LogMessage As LogMessage
 
-Property DontShowAgain As Boolean
+' Property ShouldNotShowAgain As Boolean
 
 Public Sub _new(cLogger As LoggerPort)
   
@@ -22,9 +20,9 @@ Public Function ShouldAsk(cConfiguration As Configuration, sConfigKey As String)
   
   Select Case sConfigKey
     Case Constants.DONTSHOWAGAIN_MOVETRASH
-      Return Not cConfiguration.DontShowAgainMoveTrash
+      Return Not cConfiguration.ShouldSkipMoveTrashConfirmation
     Case Constants.DONTSHOWAGAIN_IMPORT
-      Return Not cConfiguration.DontShowAgainImportImages
+      Return Not cConfiguration.ShouldSkipImportConfirmation
     Case Else
       Return True ' Por defecto preguntamos si no conocemos la clave
   End Select
@@ -32,18 +30,18 @@ Public Function ShouldAsk(cConfiguration As Configuration, sConfigKey As String)
 End
 
 ' Centraliza la persistencia de la decisión del usuario (DRY)
-Public Sub SaveUserDecision(cConfiguration As Configuration, sConfigKey As String, bDontShowAgain As Boolean)
+Public Sub SaveUserDecision(cConfiguration As Configuration, sConfigKey As String, shouldNotShowAgain As Boolean)
   
-  If Not bDontShowAgain Then Return ' Si no marcó el flag, no hacemos nada
+  If Not shouldNotShowAgain Then Return ' Si no marcó el flag, no hacemos nada
   
   $LogMessage = New LogMessage($Titulo, "SaveUserDecision", "User decided to not show again for: " & sConfigKey)
   $Logger.Info($LogMessage)
   
   Select Case sConfigKey
     Case Constants.DONTSHOWAGAIN_MOVETRASH
-      cConfiguration.DontShowAgainMoveTrash = True
+      cConfiguration.ShouldSkipMoveTrashConfirmation = True
     Case Constants.DONTSHOWAGAIN_IMPORT
-      cConfiguration.DontShowAgainImportImages = True
+      cConfiguration.ShouldSkipImportConfirmation = True
   End Select
   
 End

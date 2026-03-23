@@ -11,7 +11,7 @@ Private $Configuration As Configuration
 Private $DbGalleryDirectory As String
 Private $Titulo As String = "SQLiteContext"
 Private $LogMessage As LogMessage
-Private $IsNewBD As Boolean = False
+Private $IsNewDatabaseCreated As Boolean = False
 
 Property Read DBConnection As Connection            '' Object connection to database
 Property Read IsNewDatabase As Boolean
@@ -31,7 +31,7 @@ Public Sub SwitchGallery()
 
   Dim sNewGalleryPath As String
 
-  $IsNewBD = False
+  $IsNewDatabaseCreated = False
   If $Configuration.WhichGallery = Enumeration.GalleryType_Private Then
     sNewGalleryPath = User.Home &/ Constants.GACELA_GALLERY_DIRECTORY
   Else
@@ -91,7 +91,7 @@ Private Sub InitializeDatabase()
   If Not Exist($DbGalleryDirectory &/ Constants.DATABASE_NAME) Then
     $LogMessage = New LogMessage($Titulo, "InitializeDatabase", ("Database file does not exist. Starting creation:") & " " & $DbGalleryDirectory &/ Constants.DATABASE_NAME)
   $Logger.Debug($LogMessage)
-    $IsNewBD = True
+    $IsNewDatabaseCreated = True
 
     CreateDatabase()
   Endif
@@ -156,6 +156,6 @@ End
 
 Private Function IsNewDatabase_Read() As Boolean
 
-  Return $IsNewBD
+  Return $IsNewDatabaseCreated
 
 End

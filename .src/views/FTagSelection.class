@@ -257,9 +257,9 @@ Private Sub FindTags() '' Loads current tags into the list.
 
 End
 
-Private Sub ChangePanels(bPanel As Boolean) '' Switches between list mode and manage mode.
+Private Sub ChangePanels(shouldShowManagePanel As Boolean) '' Switches between list mode and manage mode.
 
-  If bPanel Then
+  If shouldShowManagePanel Then
     VBoxListTags.Visible = False
     VBoxManageTag.Visible = True
     TextBoxTag.SetFocus()

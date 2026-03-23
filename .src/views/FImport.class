@@ -70,7 +70,6 @@ Public Sub CheckBoxEnableAlbum_Click()
   Dim oAlbumSelection As AlbumSelectionService
   Dim oLabel As Label
   Dim iResponse As Integer
-  Dim bBol As Boolean = False
   
   $LogMessage = New LogMessage($Titulo, "CheckBoxEnableAlbum_Click", ("Checkbox click to associate album ") & "[" & Str(CheckBoxEnableAlbum.Value) & "]")
   $Logger.Debug($LogMessage)
@@ -144,7 +143,7 @@ End
 
 Public Sub Form_Show()
 
-  If $Configuration.DeleteOriginals Then
+  If $Configuration.ShouldDeleteOriginals Then
     LabelMessageDeleteOriginals.Text = ("Warning!, All images are delete from original position")
   End If
 End

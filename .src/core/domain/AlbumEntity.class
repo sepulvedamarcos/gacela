@@ -15,7 +15,7 @@ Private $sCreationUser As String
 Private $dModificationDate As Date
 Private $sModificationUser As String
 Private $sThumbnail As String
-Private $bSoftDelete As Boolean
+Private $IsSoftDeleted As Boolean
 Private $iPhotoCount As Integer
 
 ' =============================================
@@ -31,7 +31,7 @@ Property CreationUser As String             '' User who created the album
 Property ModificationDate As Date           '' Album last modification date
 Property ModificationUser As String         '' User who last modified the album
 Property Thumbnail As String                '' Album thumbnail image
-Property SoftDelete As Boolean              '' Indicates if it was deleted
+Property IsSoftDeleted As Boolean              '' Indicates if it was deleted
 Property PhotoCount As Integer              '' Number of associated photos
 
 Private Function Id_Read() As Integer
@@ -130,15 +130,15 @@ Private Sub Thumbnail_Write(Value As String)
 
 End
 
-Private Function SoftDelete_Read() As Boolean
+Private Function IsSoftDeleted_Read() As Boolean
 
-  Return $bSoftDelete
+  Return $IsSoftDeleted
 
 End
 
-Private Sub SoftDelete_Write(Value As Boolean)
+Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
 
-  $bSoftDelete = value
+  $IsSoftDeleted = isSoftDeleted
 
 End
 

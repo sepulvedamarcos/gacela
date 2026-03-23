@@ -22,20 +22,20 @@ Private $LogSize As Integer
 Private $LogFiles As Integer
 Private $DeletedMaxSizeMB As Integer
 Private $DeletedMaxCount As Integer
-Private $ImportShowSummary As Boolean
-Private $MoveToTrashSummary As Boolean
-Private $ShowMainToolbar As Boolean
-Private $ShowMainStatusbar As Boolean
-Private $DontShowAgainMoveTrash As Boolean
-Private $DontShowAgainImportImages As Boolean
+Private $ShouldShowImportSummary As Boolean
+Private $ShouldShowMoveToTrashSummary As Boolean
+Private $ShouldShowMainToolbar As Boolean
+Private $ShouldShowMainStatusBar As Boolean
+Private $ShouldSkipMoveTrashConfirmation As Boolean
+Private $ShouldSkipImportConfirmation As Boolean
 
-Property Read WhichGallery As Integer                                         '' Which gallery is active
+Property WhichGallery As Integer                                         '' Which gallery is active
 Property Read IsFirstRun As Boolean                                           '' First execution indicator
 Property Read GalleryPath As String                                           '' Gallery path
 Property Read IsSharedGalleryAvailable As Boolean                             '' Shared gallery is available
 Property Read DatabaseProvider As String
 Property Read StorageProvider As String
-Property DeleteOriginals As Boolean                                           '' Delete originals images after import
+Property ShouldDeleteOriginals As Boolean                                           '' Delete originals images after import
 Property LogLevel As Integer
 Property LogOutput As Integer
 Property LogPath As String
@@ -43,12 +43,12 @@ Property LogSize As Integer
 Property LogFiles As Integer
 Property DeletedMaxSizeMB As Integer
 Property DeletedMaxCount As Integer
-Property ImportShowSummary As Boolean
-Property MoveToTrashSummary As Boolean                                      '' Indicate dialog summary is show it
-Property ShowMainToolbar As Boolean
-Property ShowMainStatusBar As Boolean
-Property DontShowAgainMoveTrash As Boolean
-Property DontShowAgainImportImages As Boolean
+Property ShouldShowImportSummary As Boolean
+Property ShouldShowMoveToTrashSummary As Boolean                                      '' Indicate dialog summary is show it
+Property ShouldShowMainToolbar As Boolean
+Property ShouldShowMainStatusBar As Boolean
+Property ShouldSkipMoveTrashConfirmation As Boolean
+Property ShouldSkipImportConfirmation As Boolean
 
 '============================================
 '
@@ -148,12 +148,12 @@ Public Sub InitializeEnvironment()
   $AppTheme = $Settings[Constants.GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_OS]
   $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
   $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 10000]
-  $ImportShowSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
-  $MoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
-  $ShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
-  $ShowMainStatusbar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
-  $DontShowAgainMoveTrash = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
-  $DontShowAgainImportImages = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
+  $ShouldShowImportSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
+  $ShouldShowMoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
+  $ShouldShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
+  $ShouldShowMainStatusBar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
+  $ShouldSkipMoveTrashConfirmation = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
+  $ShouldSkipImportConfirmation = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
   
   $Settings.Save()
   
@@ -258,16 +258,16 @@ End
 
 Private Sub MigrateLoggerSettings()
   
-  Dim bChanged As Boolean
+  Dim hasChanged As Boolean
   
-  bChanged = MigrateSetting(Constants.LOGGER_PROVIDER, "Log4Gambas/Provider", "log4gambas") Or bChanged
-  bChanged = MigrateSetting(Constants.LOGGER_LEVEL, "Log4Gambas/Level", $Logger.GetDefaultLevelDebug()) Or bChanged
-  bChanged = MigrateSetting(Constants.LOGGER_OUTPUT, "Log4Gambas/Output", $Logger.GetDefaultOutputBoth()) Or bChanged
-  bChanged = MigrateSetting(Constants.LOGGER_LOGFILE, "Log4Gambas/LogFile", $LogPath) Or bChanged
-  bChanged = MigrateSetting(Constants.LOGGER_MAXFILESIZE, "Log4Gambas/MaxFilesSize", $Logger.GetMaxFileSize()) Or bChanged
-  bChanged = MigrateSetting(Constants.LOGGER_MAXFILES, "Log4Gambas/MaxFiles", $Logger.GetMaxFiles()) Or bChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_PROVIDER, "Log4Gambas/Provider", "log4gambas") Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_LEVEL, "Log4Gambas/Level", $Logger.GetDefaultLevelDebug()) Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_OUTPUT, "Log4Gambas/Output", $Logger.GetDefaultOutputBoth()) Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_LOGFILE, "Log4Gambas/LogFile", $LogPath) Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_MAXFILESIZE, "Log4Gambas/MaxFilesSize", $Logger.GetMaxFileSize()) Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_MAXFILES, "Log4Gambas/MaxFiles", $Logger.GetMaxFiles()) Or hasChanged
   
-  If bChanged Then
+  If hasChanged Then
     $Settings.Save()
   Endif
   
@@ -319,7 +319,7 @@ Private Function DetectShareEnabled() As Boolean
   Dim sGroupAvailable As String
   Dim aGroup As Array
   Dim aUsers As Array
-  Dim bEncontrado As Boolean
+  Dim isFound As Boolean
   Dim cell As String
   
   ' Verify the group exists
@@ -335,10 +335,10 @@ Private Function DetectShareEnabled() As Boolean
   aUsers = Split(aGroup[aGroup.Count - 1], ",")
   For Each cell In aUsers
     If Replace(cell, "\n", "") = User.name Then
-      bEncontrado = True
+      isFound = True
     Endif
   Next
-  If Not bEncontrado Then
+  If Not isFound Then
     Return False
   Endif
   
@@ -399,15 +399,15 @@ Function IsSharedGalleryAvailable_Read() As Boolean
   
 End
 
-Function DeleteOriginals_Read() As Boolean
+Function ShouldDeleteOriginals_Read() As Boolean
   
   Return $Settings[Constants.IMPORT_DELETE_ORIGINALS, False]
   
 End
 
-Sub DeleteOriginals_Write(value As Boolean)
+Sub ShouldDeleteOriginals_Write(shouldDeleteOriginals As Boolean)
   
-  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = Value
+  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = shouldDeleteOriginals
   $Settings.Save()
   
 End
@@ -517,92 +517,96 @@ Private Sub DeletedMaxCount_Write(Value As Integer)
   
 End
 
-Private Function ImportShowSummary_Read() As Boolean
+Private Function ShouldShowImportSummary_Read() As Boolean
   
-  $ImportShowSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
-  Return $ImportShowSummary
+  $ShouldShowImportSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
+  Return $ShouldShowImportSummary
   
 End
 
-Private Sub ImportShowSummary_Write(Value As Boolean)
+Private Sub ShouldShowImportSummary_Write(shouldShowImportSummary As Boolean)
   
-  $ImportShowSummary = Value
-  $Settings[Constants.IMPORT_SHOW_SUMMARY] = Value
+  $ShouldShowImportSummary = shouldShowImportSummary
+  $Settings[Constants.IMPORT_SHOW_SUMMARY] = shouldShowImportSummary
   $Settings.Save()
   
 End
 
-Private Function MoveToTrashSummary_Read() As Boolean
+Private Function ShouldShowMoveToTrashSummary_Read() As Boolean
   
-  $MoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
-  Return $MoveToTrashSummary
+  $ShouldShowMoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
+  Return $ShouldShowMoveToTrashSummary
   
 End
 
-Private Sub MoveToTrashSummary_Write(Value As Boolean)
+Private Sub ShouldShowMoveToTrashSummary_Write(shouldShowMoveToTrashSummary As Boolean)
   
-  $MoveToTrashSummary = Value
-  $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = Value
+  $ShouldShowMoveToTrashSummary = shouldShowMoveToTrashSummary
+  $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = shouldShowMoveToTrashSummary
   $Settings.Save()
   
 End
 
-Private Function ShowMainToolbar_Read() As Boolean
+Private Function ShouldShowMainToolbar_Read() As Boolean
   
-  $ShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
-  Return $ShowMainToolbar
+  $ShouldShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
+  Return $ShouldShowMainToolbar
   
 End
 
-Private Sub ShowMainToolbar_Write(Value As Boolean)
+Private Sub ShouldShowMainToolbar_Write(shouldShowMainToolbar As Boolean)
   
-  $ShowMainToolbar = Value
-  $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = Value
+  $ShouldShowMainToolbar = shouldShowMainToolbar
+  $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = shouldShowMainToolbar
   $Settings.Save()
   
 End
 
-Private Function ShowMainStatusBar_Read() As Boolean
+Private Function ShouldShowMainStatusBar_Read() As Boolean
   
-  $ShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
-  Return $ShowMainToolbar
+  $ShouldShowMainStatusBar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
+  Return $ShouldShowMainStatusBar
   
 End
 
-Private Sub ShowMainStatusBar_Write(Value As Boolean)
+Private Sub ShouldShowMainStatusBar_Write(shouldShowMainStatusBar As Boolean)
   
-  $ShowMainToolbar = Value
-  $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = Value
+  $ShouldShowMainStatusBar = shouldShowMainStatusBar
+  $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = shouldShowMainStatusBar
   $Settings.Save()
   
 End
 
-Private Function DontShowAgainMoveTrash_Read() As Boolean
+Private Function ShouldSkipMoveTrashConfirmation_Read() As Boolean
   
-  $DontShowAgainMoveTrash = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
-  Return $DontShowAgainMoveTrash
+  $ShouldSkipMoveTrashConfirmation = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
+  Return $ShouldSkipMoveTrashConfirmation
   
 End
 
-Private Sub DontShowAgainMoveTrash_Write(Value As Boolean)
+Private Sub ShouldSkipMoveTrashConfirmation_Write(shouldSkipMoveTrashConfirmation As Boolean)
   
-  $DontShowAgainMoveTrash = Value
-  $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = Value
+  $ShouldSkipMoveTrashConfirmation = shouldSkipMoveTrashConfirmation
+  $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = shouldSkipMoveTrashConfirmation
   $Settings.Save()
   
 End
 
-Private Function DontShowAgainImportImages_Read() As Boolean
+Private Function ShouldSkipImportConfirmation_Read() As Boolean
   
-  $DontShowAgainImportImages = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
-  Return $DontShowAgainImportImages
+  $ShouldSkipImportConfirmation = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
+  Return $ShouldSkipImportConfirmation
   
 End
 
-Private Sub DontShowAgainImportImages_Write(Value As Boolean)
+Private Sub ShouldSkipImportConfirmation_Write(shouldSkipImportConfirmation As Boolean)
   
-  $DontShowAgainImportImages = Value
-  $Settings[Constants.DONTSHOWAGAIN_IMPORT] = Value
+  $ShouldSkipImportConfirmation = shouldSkipImportConfirmation
+  $Settings[Constants.DONTSHOWAGAIN_IMPORT] = shouldSkipImportConfirmation
   $Settings.Save()
   
+End
+
+Sub WhichGallery_Write(Value As Integer)
+  $WhichGallery = Value
 End

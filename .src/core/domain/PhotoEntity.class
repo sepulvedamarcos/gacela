@@ -22,7 +22,7 @@ Private $Hash256 As String = ""
 Private $Thumbnail As String
 Private $LastSyncDate As Date
 Private $SyncStatus As String = "pending"
-Private $SoftDelete As Boolean = False
+Private $IsSoftDeleted As Boolean = False
 Private $SoftDeleteDate As Date
 Private $SoftDeleteBy As String = ""
 Private $SoftDeleteAuto As Date
@@ -50,7 +50,7 @@ Property Hash256 As String                '' Hash of the image used for uniquene
 Property Thumbnail As String              '' Thumbnail
 Property LastSyncDate As Date             '' Last sync date
 Property SyncStatus As String             '' Sync status
-Property SoftDelete As Boolean            '' Indicates if it was deleted
+Property IsSoftDeleted As Boolean            '' Indicates if it was deleted
 Property SoftDeleteDate As Date           '' Deletion date
 Property SoftDeleteBy As String           '' User who performed the deletion
 Property SoftDeleteAuto As Date           '' Date when it will be removed from the trash
@@ -185,15 +185,15 @@ Private Sub ImportUser_Write(value As String)
 
 End
 
-Private Function SoftDelete_Read() As Boolean
+Private Function IsSoftDeleted_Read() As Boolean
 
-  Return $SoftDelete
+  Return $IsSoftDeleted
 
 End
 
-Private Sub SoftDelete_Write(value As Boolean)
+Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
 
-  $SoftDelete = value
+  $IsSoftDeleted = isSoftDeleted
 
 End
 
@@ -305,9 +305,9 @@ Private Function IsLocked_Read() As Boolean
 
 End
 
-Private Sub IsLocked_Write(Value As Boolean)
+Private Sub IsLocked_Write(isLocked As Boolean)
 
-  $IsLocked = value
+  $IsLocked = isLocked
 
 End
 

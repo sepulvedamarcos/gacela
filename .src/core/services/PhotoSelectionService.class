@@ -2,7 +2,7 @@
 
 Private $SelectedEntities As PhotoEntity[]
 
-Event SelectionChanged(iCount As Integer, bHasSelection As Boolean)        '' Fired when selection count or state changes
+Event SelectionChanged(iCount As Integer, hasSelection As Boolean)        '' Fired when selection count or state changes
 
 Property Read SelectedCount As Integer                                     '' Current number of selected items
 

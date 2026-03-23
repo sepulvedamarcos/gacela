@@ -43,9 +43,9 @@ End
 Public Sub btnAccept_Click()
   
   If $Action = Enumeration.DIALOG_SUMMARY_IMPORT Then
-    $Configuration.ImportShowSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
+    $Configuration.ShouldShowImportSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
   Else If $Action = Enumeration.DIALOG_SUMMARY_IMPORT Then
-    $Configuration.MoveToTrashSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
+    $Configuration.ShouldShowMoveToTrashSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
   Endif
   
   Me.Close(Enumeration.DLG_OK)

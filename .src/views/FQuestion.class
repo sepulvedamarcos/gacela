@@ -3,7 +3,6 @@
 Private $Question As QuestionInteractionService
 Private $Logger As LoggerPort
 Private $Titulo As String = "FQuestion"
-Private $DontShow As Boolean = False
 Private $LogMessage As LogMessage
 
 Public Sub _new(cQuestion As QuestionInteractionService, cLogger As LoggerPort, sTitle As String, sTexto As String)
@@ -40,6 +39,6 @@ End
 
 Public Sub SwitchButtonDontShowAgain_Click()
 
-  $Question.DontShowAgain = SwitchButtonDontShowAgain.Value
+  $Question.ShouldNotShowAgain = SwitchButtonDontShowAgain.Value
 
 End

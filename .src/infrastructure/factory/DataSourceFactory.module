@@ -6,7 +6,7 @@ Public Function CreatePhotoRepository(cConfiguration As Configuration, oLogger A
   
   Select Case cConfiguration.DatabaseProvider
     Case Constants.DATABASE_PROVIDER_SQLITE
-      Return New LocalRepositoryAdapter(cConfiguration, oLogger)
+      Return New SQLiteRepositoryAdapter(cConfiguration, oLogger)
     Default
       Error.Raise("Unsupported database provider: " & cConfiguration.DatabaseProvider)
   End Select
@@ -17,7 +17,7 @@ Public Function CreateFileStorage(cConfiguration As Configuration, oLogger As Lo
   
   Select Case cConfiguration.StorageProvider
     Case Constants.STORAGE_PROVIDER_LOCAL
-      Return New LocalFileStorageAdapter
+      Return New FileSystemStorageAdapter
     Default
       Error.Raise("Unsupported storage provider: " & cConfiguration.StorageProvider)
   End Select

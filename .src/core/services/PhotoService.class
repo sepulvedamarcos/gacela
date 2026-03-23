@@ -13,12 +13,12 @@ Private $Iterator As PhotoIterator
 Private $Titulo As String = "PhotoService"
 Private $LogMessage As LogMessage
 Private $ImageMetadata As ImageMetadataAdapter
-Private $Cancelled As Boolean
+Private $ShouldCancel As Boolean
 
 Event Progress(fValue As Float, sMessage As String) '' Signals progress during photo processing tasks.
 
-Property Cancelled As Boolean '' Flag to request early termination of current process.
-
+Property Read ShouldCancel As Boolean '' Flag to request early termination of current process.
+Property Read Repository As SQLiteRepositoryAdapter '' Exposed repository for sharing service usage.
 
 Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort, cConfiguration As Configuration, cFileStorage As FileStoragePort) '' Initializes the photo service with its dependencies.
 
@@ -29,23 +29,27 @@ Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort, 
   $Iterator = New PhotoIterator($PhotoRepository, $Logger)
   $ImageMetadata = New ImageMetadataAdapter($Logger)
   
-  Dim bIsNewDb As Boolean
-  bIsNewDb = $PhotoRepository.IsNewDatabase()
-  If $Configuration.IsFirstRun Or bIsNewDb Then
+  Dim isNewDatabase As Boolean
+  isNewDatabase = $PhotoRepository.IsNewDatabase()
+  If $Configuration.IsFirstRun Or isNewDatabase Then
     InsertSeedData()
   Endif
   
 End
 
-Private Function Cancelled_Read() As Boolean
+Private Function Repository_Read() As SQLiteRepositoryAdapter
+  Return $PhotoRepository
+End
 
-  Return $Cancelled
+Private Function ShouldCancel_Read() As Boolean
+
+  Return $ShouldCancel
 
 End
 
-Private Sub Cancelled_Write(Value As Boolean)
+Private Sub ShouldCancel_Write(shouldCancel As Boolean)
 
-  $Cancelled = Value
+  $ShouldCancel = shouldCancel
 
 End
 
@@ -95,15 +99,15 @@ End
 
 Public Sub ToggleGallery(iGallery As Integer) '' Switches between private and shared galleries.
   
-  Dim bIsNewDb As Boolean
+  Dim isNewDatabase As Boolean
   
   If Not ($Configuration.WhichGallery = iGallery) Then
     $Configuration.SetWhichGallery()
     $PhotoRepository.SwitchGallery()
   Endif
   
-  bIsNewDb = $PhotoRepository.IsNewDatabase()
-  If $Configuration.IsFirstRun Or bIsNewDb Then
+  isNewDatabase = $PhotoRepository.IsNewDatabase()
+  If $Configuration.IsFirstRun Or isNewDatabase Then
     InsertSeedData()
   Endif
   
@@ -118,7 +122,7 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumId As Integer
   
   Dim sPhoto As String
   Dim iI As Integer
-  Dim bDeleteOriginals As Boolean
+  Dim shouldDeleteOriginals As Boolean
   Dim oSummary As New Summary
   Dim iResp As Integer
   Dim oItem As SummaryItem
@@ -127,22 +131,21 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumId As Integer
   Dim sMessage As String
   Dim iTotal As Integer = imagesPath.Count
   
-  bDeleteOriginals = $Configuration.DeleteOriginals
-  $Cancelled = False
+  shouldDeleteOriginals = $Configuration.ShouldDeleteOriginals
+  $ShouldCancel = False
   
   For Each sPhoto In imagesPath
-    If $Cancelled Then Break
+    If $ShouldCancel Then Break
     
     iI += 1
     Raise Progress(iI / iTotal, ("Importing: ") & File.Name(sPhoto))
     
     $LogMessage = New LogMessage($Titulo, "ImportPhotos", "File to process" & ": " & sPhoto)
     $Logger.Debug($LogMessage)
-    iResp = SavePhoto(sPhoto, "", albumId, iI, bDeleteOriginals)
+    iResp = SavePhoto(sPhoto, "", albumId, iI, shouldDeleteOriginals)
     sFileName = File.Name(sPhoto)
-    oItem = New SummaryItem
+    oItem = New SummaryItem(sFileName)
     oItem.FilePath = sPhoto
-    oItem.FileName = sFileName
     If iResp > Enumeration.RESPONSE_OK Then
       $LogMessage = New LogMessage($Titulo, "ImportPhotos", ("Image has an import error") & ": " & sPhoto)
       $Logger.Debug($LogMessage)
@@ -190,20 +193,19 @@ Public Function MoveToTrash(oSelectedImages As PhotoEntity[]) As Summary  '' Mov
   Dim iTotal As Integer = oSelectedImages.Count
   Dim iCount As Integer = 0
   
-  $Cancelled = False
+  $ShouldCancel = False
   
   If Not $FileStorage.Exists(sTrashPath) Then
     $FileStorage.EnsureDirectory(sTrashPath)
   Endif
   
   For Each oPhoto In oSelectedImages
-    If $Cancelled Then Break
+    If $ShouldCancel Then Break
     
     iCount += 1
     Raise Progress(iCount / iTotal, ("Moving to trash: ") & oPhoto.FileName)
     
-    oItem = New SummaryItem
-    oItem.FileName = oPhoto.FileName
+    oItem = New SummaryItem(oPhoto.FileName)
     oItem.FilePath = oPhoto.ImagePath
     
     ' Move physical file but KEEP original ImagePath in DB for restoration
@@ -217,7 +219,7 @@ Public Function MoveToTrash(oSelectedImages As PhotoEntity[]) As Summary  '' Mov
       $Logger.Error($LogMessage)
     Else
       ' We DO NOT update oPhoto.ImagePath here to remember original location
-      oPhoto.SoftDelete = True
+      oPhoto.IsSoftDeleted = True
       oPhoto.SoftDeleteDate = Now
       oPhoto.SoftDeleteBy = User.Name
       Try $PhotoRepository.UpdatePhoto(oPhoto)
@@ -257,16 +259,15 @@ Public Function RestoreFromTrash(oSelectedImages As PhotoEntity[]) As Summary ''
   Dim iCount As Integer = 0
   Dim sCurrentTrashPath As String
   
-  $Cancelled = False
+  $ShouldCancel = False
   
   For Each oPhoto In oSelectedImages
-    If $Cancelled Then Break
+    If $ShouldCancel Then Break
     
     iCount += 1
     Raise Progress(iCount / iTotal, ("Restoring: ") & oPhoto.FileName)
     
-    oItem = New SummaryItem
-    oItem.FileName = oPhoto.FileName
+    oItem = New SummaryItem(oPhoto.FileName)
     oItem.FilePath = oPhoto.ImagePath
     
     ' The file IS in trash, so we calculate current path
@@ -280,7 +281,7 @@ Public Function RestoreFromTrash(oSelectedImages As PhotoEntity[]) As Summary ''
       oItem.Reason = Error.Text
       oItem.Message = ("Error restoring file physically")
     Else
-      oPhoto.SoftDelete = False
+      oPhoto.IsSoftDeleted = False
       oPhoto.SoftDeleteDate = Null
       oPhoto.SoftDeleteBy = ""
       Try $PhotoRepository.UpdatePhoto(oPhoto)
@@ -447,7 +448,7 @@ Catch
   
 End
 
-Private Function SavePhoto(sImagenPath As String, sDescription As String, Optional iAlbumId As Integer, Optional iIndex As Integer, Optional bDeletePhoto As Boolean = False) As Integer
+Private Function SavePhoto(sImagenPath As String, sDescription As String, Optional iAlbumId As Integer, Optional iIndex As Integer, Optional shouldDeletePhoto As Boolean = False) As Integer
   
   Dim oPhotoE As New PhotoEntity
   Dim oPhotoAlbumE As PhotoAlbumEntity
@@ -519,7 +520,7 @@ Private Function SavePhoto(sImagenPath As String, sDescription As String, Option
   
   $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Evaluating condition to delete original image"))
   $Logger.Debug($LogMessage)
-  If bDeletePhoto Then
+  If shouldDeletePhoto Then
     $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Condition true, delete original image"))
     $Logger.Debug($LogMessage)
     DeleteImageIO(sImagenPath)

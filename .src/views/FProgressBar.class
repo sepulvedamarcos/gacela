@@ -25,7 +25,7 @@ End
 Public Sub ButtonCancelProcess_Click() '' Button to cancel entire process
   
 
-  Try $Source.Cancelled = True
+  Try $Source.ShouldCancel = True
   
 
   ButtonCancelProcess.Enabled = False
