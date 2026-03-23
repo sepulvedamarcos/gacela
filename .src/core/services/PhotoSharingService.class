@@ -107,45 +107,62 @@ End
 
 Private Sub MovePhotoData(oPhoto As PhotoEntity, bToShared As Boolean)
     
-    Dim sTargetGalleryDir As String
+    Dim sTargetGalleryBaseDir As String
+    Dim sTargetSubDir As String
     Dim sTargetFilePath As String
     Dim sSourceFilePath As String = oPhoto.ImagePath
-    
-    ' Determine target directory
+    Dim sInternalFileName As String
+    Dim sExt As String
+    Dim oLogMsg As LogMessage    
+    ' Determine target base directory
     If bToShared Then
-        sTargetGalleryDir = Constants.GACELA_SHARED_GALLERY_DIRECTORY
+        sTargetGalleryBaseDir = Constants.GACELA_SHARED_GALLERY_DIRECTORY
     Else
-        sTargetGalleryDir = User.Home &/ Constants.GACELA_GALLERY_DIRECTORY
+        sTargetGalleryBaseDir = User.Home &/ Constants.GACELA_GALLERY_DIRECTORY
     Endif
     
-    ' Ensure directory exists
-    $Storage.EnsureDirectory(sTargetGalleryDir)
+    ' 1. Calculate target subdirectory by date (YYYYMMDD)
+    sTargetSubDir = sTargetGalleryBaseDir &/ Format(Now, "yyyymmdd")
     
-    ' Target file path (we keep the filename)
-    sTargetFilePath = sTargetGalleryDir &/ oPhoto.FileName
+    ' 2. Ensure directory exists
+    $Storage.EnsureDirectory(sTargetSubDir)
     
-    ' 1. Move file physically
-    $Storage.MoveFile(sSourceFilePath, sTargetFilePath)
+    ' 3. Calculate internal filename using Hash256 (ensure it has hash!)
+    If oPhoto.Hash256.Len = 0 Then
+        ' Fallback if hash is missing (should not happen for new imports)
+        oPhoto.Hash256 = Hash.Sha256(File.Load(sSourceFilePath))
+    Endif
     
-    ' 2. Update entity with new path and user info
+    sExt = Lower(File.Ext(sSourceFilePath))
+    sInternalFileName = oPhoto.Hash256 & "." & sExt
+    
+    ' 4. Final target file path
+    sTargetFilePath = sTargetSubDir &/ sInternalFileName
+    
+    ' 5. Move file physically
+    ' Check if it already exists physically in target to avoid error
+    If Not $Storage.Exists(sTargetFilePath) Then
+        $Storage.MoveFile(sSourceFilePath, sTargetFilePath)
+    Else
+        ' If it exists physically but we are here, it means DB was inconsistent or duplicate hash
+        ' For safety, we just link to existing one or log it
+        oLogMsg = New LogMessage("PhotoSharingService", "MovePhotoData", "Target file already exists physically: " & sTargetFilePath)
+        $Logger.Debug(oLogMsg)
+    Endif
+    
+    ' 6. Update entity with new path and user info
     oPhoto.ImagePath = sTargetFilePath
     If bToShared Then
         oPhoto.ImportUser = System.User.Name ' Mark as shared by me
     Endif
     
-    ' 3. Save to target DB
-    ' Note: CreatePhoto also handles relations if we pass a PhotoAlbumEntity, 
-    ' but as per specs, relations are NOT carried over.
+    ' 7. Save to target DB
     $TargetRepo.CreatePhoto(oPhoto)
     
-    ' 4. Delete from source DB (permanent delete from local)
-    ' We need a method in SQLiteRepositoryAdapter to permanently delete a record by ID.
-    ' Since we don't have it yet, let's call it and I'll add it in the next step.
+    ' 8. Delete from source DB
     $SourceRepo.PermanentlyDeletePhoto(oPhoto.Id)
     
 Catch
-    ' Rollback file if DB failed? 
-    ' Pragmatically, let's at least log it. Moving files and DB is non-atomic in SQLite.
     Error.Propagate
 End
 
