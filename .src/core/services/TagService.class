@@ -1,0 +1,131 @@
+' Gambas class file
+
+' Tag business logic handler class.
+
+Private $Logger As LoggerPort
+Private $PhotoRepository As PhotoRepositoryPort
+Private $Titulo As String = "TagService"
+Private $LogMessage As LogMessage
+
+Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort) '' Initializes tag service dependencies.
+
+  $Logger = oLogger
+  $PhotoRepository = cPhotoRepository
+
+End
+
+Public Function FindTags(Optional text As String, Optional id As Integer = 0) As TagEntity[] '' Retrieves tags using repository filters.
+
+  $LogMessage = New LogMessage($Titulo, "FindTags", "Search tags: [" & text & "]")
+  $Logger.Debug($LogMessage)
+  
+  Return $PhotoRepository.FindTags(text, id)
+
+End
+
+Public Function AddTag(name As String, description As String, color As String) As Boolean '' Creates a new tag from primitive values.
+
+  Dim oTag As New TagEntity
+  Dim iKey As Integer
+
+  oTag.Name = name
+  oTag.Description = description
+  oTag.Color = color
+  oTag.CreationUser = User.Name
+
+  $LogMessage = New LogMessage($Titulo, "AddTag", "Creating tag entity to persist")
+  $Logger.Debug($LogMessage)
+  iKey = $PhotoRepository.CreateTag(oTag)
+  
+  Return iKey > 0
+
+Catch
+  $LogMessage = New LogMessage($Titulo, "AddTag", "Problems creating a tag")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+
+End
+
+Public Function EditTag(oTag As TagEntity) As Boolean '' Updates tag data by delegating to the repository port.
+
+  If oTag = Null Then Return False
+  If oTag.Id <= 0 Then Return False
+
+  $LogMessage = New LogMessage($Titulo, "EditTag", "Updating tag entity [" & oTag.Id & "]")
+  $Logger.Debug($LogMessage)
+
+  Return $PhotoRepository.EditTag(oTag)
+
+Catch
+  $LogMessage = New LogMessage($Titulo, "EditTag", "Problems editing a tag")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+
+End
+
+Public Function RemoveTag(id As Integer) As Boolean '' Removes a tag and its current relations.
+
+  Dim iKey As Integer
+
+  $LogMessage = New LogMessage($Titulo, "RemoveTag", "Deleting tag entity [" & id & "]")
+  $Logger.Debug($LogMessage)
+  iKey = $PhotoRepository.DeleteTag(id)
+
+  Return iKey > 0
+
+Catch
+  $LogMessage = New LogMessage($Titulo, "RemoveTag", "Problems deleting a tag")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+
+End
+
+Public Function AddPhotosToTags(photoIds As Integer[], tagIds As Integer[]) As Integer '' Creates relations between photos and tags.
+
+  Dim iPhotoId As Integer
+  Dim iTagId As Integer
+  Dim iCount As Integer
+
+  If photoIds = Null Or tagIds = Null Then Return 0
+
+  For Each iPhotoId In photoIds
+    For Each iTagId In tagIds
+      If $PhotoRepository.AddPhotoToTag(iPhotoId, iTagId, User.Name) Then
+        iCount += 1
+      Endif
+    Next
+  Next
+
+  Return iCount
+
+Catch
+  $LogMessage = New LogMessage($Titulo, "AddPhotosToTags", "Problems adding selected photos to tags")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+
+End
+
+Public Function RemovePhotosFromTags(photoIds As Integer[], tagIds As Integer[]) As Integer '' Removes relations between photos and tags.
+
+  Dim iPhotoId As Integer
+  Dim iTagId As Integer
+  Dim iCount As Integer
+
+  If photoIds = Null Or tagIds = Null Then Return 0
+
+  For Each iPhotoId In photoIds
+    For Each iTagId In tagIds
+      If $PhotoRepository.RemovePhotoFromTag(iPhotoId, iTagId) Then
+        iCount += 1
+      Endif
+    Next
+  Next
+
+  Return iCount
+
+Catch
+  $LogMessage = New LogMessage($Titulo, "RemovePhotosFromTags", "Problems removing selected photos from tags")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+
+End

@@ -1,0 +1,47 @@
+' Gambas class file
+
+' QuestionInteractionService.class
+
+Private $Logger As LoggerPort
+Private $ShouldNotShowAgain As Boolean = False
+Private $Titulo As String = "QuestionInteractionService"
+Private $LogMessage As LogMessage
+
+' Property ShouldNotShowAgain As Boolean
+
+Public Sub _new(cLogger As LoggerPort)
+  
+  $Logger = cLogger
+  
+End
+
+' Determina si el sistema debe realizar la pregunta al usuario (Regla de Negocio)
+Public Function ShouldAsk(cConfiguration As Configuration, sConfigKey As String) As Boolean
+  
+  Select Case sConfigKey
+    Case Constants.DONTSHOWAGAIN_MOVETRASH
+      Return Not cConfiguration.ShouldSkipMoveTrashConfirmation
+    Case Constants.DONTSHOWAGAIN_IMPORT
+      Return Not cConfiguration.ShouldSkipImportConfirmation
+    Case Else
+      Return True ' Por defecto preguntamos si no conocemos la clave
+  End Select
+  
+End
+
+' Centraliza la persistencia de la decisión del usuario (DRY)
+Public Sub SaveUserDecision(cConfiguration As Configuration, sConfigKey As String, shouldNotShowAgain As Boolean)
+  
+  If Not shouldNotShowAgain Then Return ' Si no marcó el flag, no hacemos nada
+  
+  $LogMessage = New LogMessage($Titulo, "SaveUserDecision", "User decided to not show again for: " & sConfigKey)
+  $Logger.Info($LogMessage)
+  
+  Select Case sConfigKey
+    Case Constants.DONTSHOWAGAIN_MOVETRASH
+      cConfiguration.ShouldSkipMoveTrashConfirmation = True
+    Case Constants.DONTSHOWAGAIN_IMPORT
+      cConfiguration.ShouldSkipImportConfirmation = True
+  End Select
+  
+End

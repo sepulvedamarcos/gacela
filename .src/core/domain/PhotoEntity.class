@@ -2,318 +2,347 @@
 
 '
 ' Gambas class file - PhotoEntity
-' Modelo de dominio para representar una foto en Gacela
+' Domain model for representing a photo in Gacela
 '
+'  Remember that variable names should not match class names, even in lowercase, because Gambas treats them as the same.
 
-' Propiedades privadas del modelo
-Private $id As Integer = 0
-Private $fileName As String = ""
-Private $widthPixels As Integer = 0
-Private $heightPixels As Integer = 0
-Private $creationDate As Date
-Private $importDate As Date
-Private $description As String = ""
-Private $stars As Integer = 0
-Private $importUser As String = ""
-Private $imagePath As String = ""
-Private $hash256 As String = ""
-Private $thumbnail As String
-Private $lastSyncDate As Date
-Private $syncStatus As String = "pending"
-Private $softDelete As Boolean = False
-Private $softDeleteDate As Date
-Private $softDeleteBy As String = ""
-Private $softDeleteAuto As Date
-Private $isLocked As Boolean = False
-Private $lockedBy As String = ""
-Private $lockReason As String = ""
+' Private model properties
+Private $Id As Integer = 0
+Private $FileName As String = ""
+Private $WidthPixels As Integer = 0
+Private $HeightPixels As Integer = 0
+Private $CreationDate As Date
+Private $ImportDate As Date
+Private $Description As String = ""
+Private $Stars As Integer = 0
+Private $ImportUser As String = ""
+Private $ImagePath As String = ""
+Private $OriginalPath As String = ""
+Private $Hash256 As String = ""
+Private $Thumbnail As String
+Private $LastSyncDate As Date
+Private $SyncStatus As String = "pending"
+Private $IsSoftDeleted As Boolean = False
+Private $SoftDeleteDate As Date
+Private $SoftDeleteBy As String = ""
+Private $SoftDeleteAuto As Date
+Private $IsLocked As Boolean = False
+Private $LockedBy As String = ""
+Private $LockedReason As String = ""
+Private $LockedDate As Date
 ' =============================================
 '
-'            PROPIEDADES PÚBLICAS
+'            PUBLIC PROPERTIES
 '
 '==============================================
-Property Id As Integer                    '' ID único de la foto
-Property FileName As String               '' Nombre del archivo original
-Property WidthPixels As Integer           '' Ancho en píxeles
-Property HeightPixels As Integer          '' Alto en píxeles
-Property CreationDate As Date             '' Fecha de creación de la foto (desde metadatos EXIF)
-Property ImportDate As Date               '' Fecha de importación a Gacela
-Property Description As String            '' Descripción de la foto
-Property Stars As Integer                 '' Indicador de estrellas de la foto
-Property ImportUser As String             '' Usuario que importó la foto
-Property ImagePath As String              '' Ruta de acceso a la imagen fisica
-Property Hash256 As String                '' Acceso al hash de la imagen que la hace unica
-Property Thumbnail As String              '' Miniatura
-Property LastSyncDate As Date             '' Ultima fecha de sincronizacion
-Property SyncStatus As String             '' Estado de la sincronizacion
-Property SoftDelete As Boolean            '' Indicador para saber si fue borrada
-Property SoftDeleteDate As Date           '' Fecha de la accion de borrado
-Property SoftDeleteBy As String           '' Usuario que ejecuto la accion de borrado
-Property SoftDeleteAuto As Date           '' Fecha en que se eliminara de la bandeja de eliminacion
-Property IsLocked As Boolean              '' Indicador para saber si la imagen esta bloquedad para eliminacion
-Property LockedBy As String               '' Usuario que realiza la accion de bloqueo
-Property Lockreason As String             '' Razon del bloqueo de la imagen
-Property Read HasThumbnail As Boolean     '' Indicador para saber si tiene miniatura
+Property Id As Integer                    '' Unique photo ID
+Property FileName As String               '' Original file name
+Property WidthPixels As Integer           '' Width in pixels
+Property HeightPixels As Integer          '' Height in pixels
+Property CreationDate As Date             '' Photo creation date (from EXIF metadata)
+Property ImportDate As Date               '' Import date into Gacela
+Property Description As String            '' Photo description
+Property Stars As Integer                 '' Photo star rating
+Property ImportUser As String             '' User who imported the photo
+Property ImagePath As String              '' Path to the physical image
+Property OriginalPath As String           '' Original source path
+Property Hash256 As String                '' Hash of the image used for uniqueness
+Property Thumbnail As String              '' Thumbnail
+Property LastSyncDate As Date             '' Last sync date
+Property SyncStatus As String             '' Sync status
+Property IsSoftDeleted As Boolean            '' Indicates if it was deleted
+Property SoftDeleteDate As Date           '' Deletion date
+Property SoftDeleteBy As String           '' User who performed the deletion
+Property SoftDeleteAuto As Date           '' Date when it will be removed from the trash
+Property IsLocked As Boolean              '' Indicates if the image is locked for deletion
+Property LockedBy As String               '' User who locked the image
+Property LockedReason As String           '' Reason for image lock
+Property LockedDate As Date               '' Date to locked
+Property Read HasThumbnail As Boolean     '' Indicates if it has a thumbnail
 '=================================================
 '
 '        Getters and Setters
 '
 '=================================================
 
-Function Id_Read() As Integer
+Private Function Id_Read() As Integer
 
-  Return $id
-
-End
-
-Sub Id_Write(value As Integer)
-
-  $id = value
+  Return $Id
 
 End
 
-Function FileName_Read() As String
+Private Sub Id_Write(value As Integer)
 
-  Return $fileName
-
-End
-
-Sub FileName_Write(value As String)
-
-  $fileName = value
+  $Id = value
 
 End
 
-Function WidthPixels_Read() As Integer
+Private Function FileName_Read() As String
 
-  Return $widthPixels
-
-End
-
-Sub WidthPixels_Write(value As Integer)
-
-  $widthPixels = value
+  Return $FileName
 
 End
 
-Function HeightPixels_Read() As Integer
+Private Sub FileName_Write(value As String)
 
-  Return $heightPixels
-
-End
-
-Sub HeightPixels_Write(value As Integer)
-
-  $heightPixels = value
+  $FileName = value
 
 End
 
-Function CreationDate_Read() As Date
+Private Function WidthPixels_Read() As Integer
 
-  Return $creationDate
-
-End
-
-Sub CreationDate_Write(value As Date)
-
-  $creationDate = value
+  Return $WidthPixels
 
 End
 
-Function ImportDate_Read() As Date
+Private Sub WidthPixels_Write(value As Integer)
 
-  Return $importDate
-
-End
-
-Sub ImportDate_Write(value As Date)
-
-  $importDate = value
+  $WidthPixels = value
 
 End
 
-Function LastSyncDate_Read() As Date
+Private Function HeightPixels_Read() As Integer
 
-  Return $lastSyncDate
-
-End
-
-Sub LastSyncDate_Write(LastSync As Date)
-
-  $lastSyncDate = LastSync
+  Return $HeightPixels
 
 End
 
-Function Description_Read() As String
+Private Sub HeightPixels_Write(value As Integer)
 
-  Return $description
-
-End
-
-Sub Description_Write(value As String)
-
-  $description = value
+  $HeightPixels = value
 
 End
 
-Function ImportUser_Read() As String
+Private Function CreationDate_Read() As Date
 
-  Return $importUser
-
-End
-
-Sub ImportUser_Write(value As String)
-
-  $importUser = value
+  Return $CreationDate
 
 End
 
-Function SoftDelete_Read() As Boolean
+Private Sub CreationDate_Write(value As Date)
 
-  Return $softDelete
-
-End
-
-Sub SoftDelete_Write(value As Boolean)
-
-  $SoftDelete = value
+  $CreationDate = value
 
 End
 
-Function Thumbnail_Read() As String
+Private Function ImportDate_Read() As Date
 
-  Return $thumbnail
-
-End
-
-Sub Thumbnail_Write(value As String)
-
-  $thumbnail = value
+  Return $ImportDate
 
 End
 
-Function HasThumbnail_Read() As Boolean
+Private Sub ImportDate_Write(value As Date)
 
-  Return $thumbnail <> Null And $thumbnail.Len > 0
+  $ImportDate = value
+
+End
+
+Private Function LastSyncDate_Read() As Date
+
+  Return $LastSyncDate
+
+End
+
+Private Sub LastSyncDate_Write(LastSync As Date)
+
+  $LastSyncDate = LastSync
+
+End
+
+Private Function Description_Read() As String
+
+  Return $Description
+
+End
+
+Private Sub Description_Write(value As String)
+
+  $Description = value
+
+End
+
+Private Function ImportUser_Read() As String
+
+  Return $ImportUser
+
+End
+
+Private Function OriginalPath_Read() As String
+  
+  Return $OriginalPath
+  
+End
+
+Private Sub OriginalPath_Write(value As String)
+  
+  $OriginalPath = value
+  
+End
+
+Private Sub ImportUser_Write(value As String)
+
+  $ImportUser = value
+
+End
+
+Private Function IsSoftDeleted_Read() As Boolean
+
+  Return $IsSoftDeleted
+
+End
+
+Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
+
+  $IsSoftDeleted = isSoftDeleted
+
+End
+
+Private Function Thumbnail_Read() As String
+
+  Return $Thumbnail
+
+End
+
+Private Sub Thumbnail_Write(value As String)
+
+  $Thumbnail = value
+
+End
+
+Private Function HasThumbnail_Read() As Boolean
+
+  Return $Thumbnail <> Null And $Thumbnail.Len > 0
 
 End
 
 Private Function Stars_Read() As Integer
 
-  Return $stars
+  Return $Stars
 
 End
 
 Private Sub Stars_Write(Value As Integer)
 
-  $stars = value
+  $Stars = value
 
 End
 
 Private Function ImagePath_Read() As String
 
-  Return $imagePath
+  Return $ImagePath
 
 End
 
 Private Sub ImagePath_Write(Value As String)
 
-  $imagePath = value
+  $ImagePath = value
 
 End
 
 Private Function Hash256_Read() As String
 
-  Return $hash256
+  Return $Hash256
 
 End
 
 Private Sub Hash256_Write(Value As String)
 
-  $hash256 = value
+  $Hash256 = value
 
 End
 
 Private Function SyncStatus_Read() As String
 
-  Return $syncStatus
+  Return $SyncStatus
 
 End
 
 Private Sub SyncStatus_Write(Value As String)
 
-  $syncStatus = value
+  $SyncStatus = value
 
 End
 
 Private Function SoftDeleteDate_Read() As Date
 
-  Return $softDeleteDate
+  Return $SoftDeleteDate
 
 End
 
 Private Sub SoftDeleteDate_Write(Value As Date)
 
-  $softDeleteDate = value
+  $SoftDeleteDate = value
 
 End
 
 Private Function SoftDeleteBy_Read() As String
 
-  Return $softDeleteBy
+  Return $SoftDeleteBy
 
 End
 
 Private Sub SoftDeleteBy_Write(Value As String)
 
-  $softDeleteBy = value
+  $SoftDeleteBy = value
 
 End
 
 Private Function SoftDeleteAuto_Read() As Date
 
-  Return $softDeleteAuto
+  Return $SoftDeleteAuto
 
 End
 
 Private Sub SoftDeleteAuto_Write(Value As Date)
 
-  $softDeleteAuto = value
+  $SoftDeleteAuto = value
 
 End
 
 Private Function IsLocked_Read() As Boolean
 
-  Return $isLocked
+  Return $IsLocked
 
 End
 
-Private Sub IsLocked_Write(Value As Boolean)
+Private Sub IsLocked_Write(isLocked As Boolean)
 
-  $isLocked = value
+  $IsLocked = isLocked
 
 End
 
 Private Function LockedBy_Read() As String
 
-  Return $lockedBy
+  Return $LockedBy
 
 End
 
 Private Sub LockedBy_Write(Value As String)
 
-  $lockedBy = value
+  $LockedBy = value
 
 End
 
-Private Function Lockreason_Read() As String
+Private Function LockedReason_Read() As String
 
-  Return $lockReason
+  Return $LockedReason
 
 End
 
-Private Sub Lockreason_Write(Value As String)
+Private Sub LockedReason_Write(Value As String)
 
-  $lockReason = value
+  $LockedReason = value
+
+End
+
+Private Function LockedDate_Read() As Date
+
+  Return $LockedDate
+
+End
+
+Private Sub LockedDate_Write(Value As Date)
+
+  $LockedDate = Value
 
 End

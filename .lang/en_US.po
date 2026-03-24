@@ -1,0 +1,434 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: gacela 3.21.1\n"
+"POT-Creation-Date: 2026-01-12 23:34 UTC\n"
+"PO-Revision-Date: 2026-01-12 22:38 UTC\n"
+"Last-Translator: sepulvedamarcos <sepulvedamarcos@gmail.com>\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .project:1
+msgid "Gestor de Álbumes Compartidos en Linux Avanzado"
+msgstr ""
+
+#: .project:2
+msgid "Gestor de álbumes de fotos familiares compartidos en computadores con linux"
+msgstr ""
+
+#: Constants.module:30
+msgid "Private"
+msgstr ""
+
+#: Constants.module:31
+msgid "Shared"
+msgstr ""
+
+#: FImportDialog.class:12
+msgid "Importar las fotos en un album"
+msgstr ""
+
+#: FImportDialog.class:13
+msgid "Importar las fotos en el album"
+msgstr ""
+
+#: FImportDialog.class:27
+msgid "Creando la ventana de dialogo y la lista de albumes"
+msgstr ""
+
+#: FImportDialog.class:61
+msgid "Debe seleccionar fotos para procesar"
+msgstr ""
+
+#: FImportDialog.class:64
+msgid "Estas seguro de importar las fotos seleccionadas en el album con las opciones seleccionadas?"
+msgstr ""
+
+#: FImportDialog.class:64
+msgid "No"
+msgstr ""
+
+#: FImportDialog.class:64
+msgid "Si"
+msgstr ""
+
+#: FImportDialog.class:70
+msgid "Comienza procesamiento de importacion de fotos"
+msgstr ""
+
+#: FImportDialog.class:73
+msgid "Proceso terminado, para ver el resumen da click en la barra de estados"
+msgstr ""
+
+#: FImportDialog.class:82
+msgid "Se presento un problema al intentar importar las imagenes"
+msgstr ""
+
+#: FImportDialog.class:83
+msgid "Se presento un problema al intentar iomportar las imagenes"
+msgstr ""
+
+#: FImportDialog.class:111
+msgid "Click en checkbox para asociar album "
+msgstr ""
+
+#: FImportDialog.class:134
+msgid "Debe seleccionar un album para continuar"
+msgstr ""
+
+#: FImportDialog.class:154
+msgid "Selecciona un album para asociar"
+msgstr ""
+
+#: FImportDialog.class:162
+msgid "Cancela la asociación de album, vuelve todo atras"
+msgstr ""
+
+#: FImportDialog.class:173
+msgid "Intento de agrega nuevo album"
+msgstr ""
+
+#: FImportDialog.class:175
+msgid "Debe ingresar un nombre de album para continuar"
+msgstr ""
+
+#: FImportDialog.class:189
+msgid "Nuevo album agregado con exito, lo cargamos a la lista"
+msgstr ""
+
+#: FImportDialog.class:193
+msgid "Nuevo album agregado con exito"
+msgstr ""
+
+#: FImportDialog.class:194
+msgid "Error al intentar agregar un nuevo album"
+msgstr ""
+
+#: FImportDialog.class:199 PhotoService.class:182
+msgid "Problemas al crear un album"
+msgstr ""
+
+#: FImportDialog.class:216
+msgid "Agregar una nuevas fotos"
+msgstr ""
+
+#: FImportDialog.class:219
+msgid "Agregando una nueva foto"
+msgstr ""
+
+#: FImportDialog.class:237
+msgid "Se detecto una eliminacion de un album"
+msgstr ""
+
+#: FImportDialog.class:242
+msgid "Datos de eliminacion coinciden se envia codigo"
+msgstr ""
+
+#: FImportDialog.class:260
+msgid "Selección de album"
+msgstr ""
+
+#: FImportDialog.form:32
+msgid "Dialogo de importación de fotos"
+msgstr ""
+
+#: FImportDialog.form:50
+msgid "Pre visualización"
+msgstr ""
+
+#: FImportDialog.form:55
+msgid "Lista de fotos a importar"
+msgstr ""
+
+#: FImportDialog.form:75
+msgid "Borrar las imagenes originales y dejar solo las de gacela"
+msgstr ""
+
+#: FImportDialog.form:102 FImportResume.form:78
+msgid "OK"
+msgstr ""
+
+#: FImportDialog.form:107
+msgid "Cancel"
+msgstr ""
+
+#: FImportDialog.form:127
+msgid "Album a buscar"
+msgstr ""
+
+#: FImportDialog.form:136
+msgid "Selección de Album"
+msgstr ""
+
+#: FImportDialog.form:167
+msgid "Nombre y descripción del album"
+msgstr ""
+
+#: FImportResume.form:20
+msgid "Resumen de importación"
+msgstr ""
+
+#: FImportResume.form:32
+msgid "Cantidad de imagenes importadas"
+msgstr ""
+
+#: FImportResume.form:41
+msgid "Cantidad de imagenes subidas con exito"
+msgstr ""
+
+#: FImportResume.form:50
+msgid "Cantidad de imagenes que fallaron"
+msgstr ""
+
+#: FImportResume.form:59
+msgid "No mostar esta ventana de sialogo en cada importación"
+msgstr ""
+
+#: FImportResume.form:68
+msgid "Predefinido"
+msgstr ""
+
+#: FImportResume.form:84
+msgid "Cancelar"
+msgstr ""
+
+#: FMain.class:90
+msgid "Algunos de los archivos que se intenta importar no son validos"
+msgstr ""
+
+#: FMain.form:54
+msgid "File"
+msgstr ""
+
+#: FMain.form:58
+msgid "Private collection"
+msgstr ""
+
+#: FMain.form:64
+msgid "Shared collection"
+msgstr ""
+
+#: FMain.form:73
+msgid "Import images"
+msgstr ""
+
+#: FMain.form:81
+msgid "Exit"
+msgstr ""
+
+#: FMain.form:87
+msgid "Options"
+msgstr ""
+
+#: FMain.form:90
+msgid "Gazelle configurations"
+msgstr ""
+
+#: FMain.form:95
+msgid "About gazelle"
+msgstr ""
+
+#: FMain.form:100
+msgid "CollectionTool"
+msgstr ""
+
+#: FMain.form:122
+msgid "hole"
+msgstr ""
+
+#: FMain.form:151
+msgid "Libreria"
+msgstr ""
+
+#: FMain.form:156
+msgid "Personal"
+msgstr ""
+
+#: FMain.form:162
+msgid "Compartida"
+msgstr ""
+
+#: FMain.form:171
+msgid "Albums"
+msgstr ""
+
+#: FMain.form:176
+msgid "ererer"
+msgstr ""
+
+#: FMain.form:182
+msgid "asdad"
+msgstr ""
+
+#: FMain.form:194
+msgid "Tags"
+msgstr ""
+
+#: FMain.form:209
+msgid ",mn,mn,nm"
+msgstr ""
+
+#: Main.module:21
+msgid "Iniciando Gacela"
+msgstr ""
+
+#: Main.module:43
+msgid "Se detecto un problema grave y se detendra la aplicación : "
+msgstr ""
+
+#: PhotoRepository.class:146
+msgid "Problemas al crear un album, se hace Rollback"
+msgstr ""
+
+#: PhotoRepository.class:167
+msgid "Problemas al eliminar un album, se hace Rollback"
+msgstr ""
+
+#: PhotoRepository.class:190
+msgid "Problemas al eliminar una imagen de la bd, se hace Rollback"
+msgstr ""
+
+#: PhotoRepository.class:230
+msgid "Codigo de foto creado"
+msgstr ""
+
+#: PhotoRepository.class:242
+msgid "Codigo de foto-album creado"
+msgstr ""
+
+#: PhotoRepository.class:263
+msgid "Validacion en tabla con el Hash256 enviado"
+msgstr ""
+
+#: PhotoRepository.class:271
+msgid "Existe ya la imagen con ese Hash256"
+msgstr ""
+
+#: PhotoRepository.class:276
+msgid "No existe la imagen"
+msgstr ""
+
+#: PhotoRepository.class:280
+msgid "Error al buscar foto por hash256"
+msgstr ""
+
+#: PhotoService.class:32
+msgid "Obtencion de todas las fotos"
+msgstr ""
+
+#: PhotoService.class:35
+msgid "Error al leer las fotos : "
+msgstr ""
+
+#: PhotoService.class:61
+msgid "Se envio a eliminar la imagen"
+msgstr ""
+
+#: PhotoService.class:64
+msgid "Se obtuvo el path de la imagen"
+msgstr ""
+
+#: PhotoService.class:71
+msgid "No se encontro imagen para elimianr"
+msgstr ""
+
+#: PhotoService.class:84
+msgid "Carga inicial insertando datos de prueba en tabla photos..."
+msgstr ""
+
+#: PhotoService.class:90
+msgid "Datos de prueba insertados exitosamente"
+msgstr ""
+
+#: PhotoService.class:93
+msgid "Error insertando foto de prueba"
+msgstr ""
+
+#: PhotoService.class:173
+msgid "Creacion de entidad album para enviar grabar"
+msgstr ""
+
+#: PhotoService.class:191
+msgid "Eliminacion de entidad album"
+msgstr ""
+
+#: PhotoService.class:201
+msgid "Problemas al eliminar un album"
+msgstr ""
+
+#: PhotoService.class:217
+msgid "Validación de existencia de imagen y directorio de destino"
+msgstr ""
+
+#: PhotoService.class:222
+msgid "Intento de copia de imagen en el directorio"
+msgstr ""
+
+#: PhotoService.class:224
+msgid "Copia de la imagen realizada con exito en el directorio"
+msgstr ""
+
+#: PhotoService.class:229
+msgid "Problema al intentar grabar imagen"
+msgstr ""
+
+#: PhotoService.class:236
+msgid "Intento de eliminación de imagen en el directorio"
+msgstr ""
+
+#: PhotoService.class:238
+msgid "Eliminación de imagen realizada con exito en el directorio"
+msgstr ""
+
+#: PhotoService.class:241
+msgid "Problema al intentar eliminar imagen original"
+msgstr ""
+
+#: PhotoService.class:263
+msgid "valida existencia del archivo fisico en la importacion"
+msgstr ""
+
+#: PhotoService.class:265
+msgid "Existe el archivo fisico en la importacion"
+msgstr ""
+
+#: PhotoService.class:270
+msgid "No existe el archivo fisico en la importacion"
+msgstr ""
+
+#: PhotoService.class:274
+msgid "Problema al valida existencia del archivo"
+msgstr ""
+
+#: PhotoService.class:323
+msgid "Chequeo de existencia del archivo fisico en la importacion"
+msgstr ""
+
+#: PhotoService.class:325
+msgid "El archivo ya existe"
+msgstr ""
+
+#: PhotoService.class:329
+msgid "Chequeo de existencia del archivo por hash256 dentro de la BD"
+msgstr ""
+
+#: PhotoService.class:334
+msgid "Vamos a grabar la imagen en el directorio de importación"
+msgstr ""
+
+#: PhotoService.class:337
+msgid "Evaluamos condicion verdadera para eliminar imagen original"
+msgstr ""
+
+#: PhotoService.class:339
+msgid "Condicion verdadera, eliminar imagen original"
+msgstr ""
+
+#: PhotoService.class:361
+msgid "Error al intentar grabar en la foto en la BD"
+msgstr ""
+
+#~ msgid "Acerca de "
+#~ msgstr "About"

@@ -1,0 +1,47 @@
+' Gambas class file
+
+Private $SelectedIds As Integer[]
+
+Public Sub _new() '' Initializes empty tag selection state.
+
+  $SelectedIds = New Integer[]
+
+End
+
+Public Function HasSelection() As Boolean '' Indicates whether any tag is selected.
+
+  Return $SelectedIds.Count > 0
+
+End
+
+Public Function GetSelectedIds() As Integer[] '' Returns a copy of selected tag ids.
+
+  Dim aCopy As New Integer[]
+  Dim iTagId As Integer
+
+  For Each iTagId In $SelectedIds
+    aCopy.Add(iTagId)
+  Next
+
+  Return aCopy
+
+End
+
+Public Sub ReplaceSelection(aTagIds As Integer[]) '' Replaces current selection with provided tag ids.
+
+  Dim iTagId As Integer
+
+  $SelectedIds = New Integer[]
+  If aTagIds = Null Then Return
+
+  For Each iTagId In aTagIds
+    $SelectedIds.Add(iTagId)
+  Next
+
+End
+
+Public Sub Clear() '' Clears the current tag selection.
+
+  $SelectedIds = New Integer[]
+
+End

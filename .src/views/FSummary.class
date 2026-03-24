@@ -1,0 +1,106 @@
+' Gambas class file
+
+Private $Logger As LoggerPort
+Private $Configuration As Configuration
+Private $Summary As Summary
+Private $Titulo As String = "FSummary"
+Private $Action As Integer                        '' Used by Enum DIALOG_SUMMARY
+
+Private $LogMessage As LogMessage
+
+Public Sub _new(oSummary As Summary, oLogger As LoggerPort, oConfiguration As Configuration, iAction As Integer)
+  
+  $Summary = oSummary
+  $Logger = oLogger
+  $Configuration = oConfiguration
+  $Action = iAction
+  
+  If $Summary <> Null Then
+    LabelTotalAmount.Text = Str($Summary.Total)
+    LabelSuccessful.Text = Str($Summary.OkCount)
+    LabelFailed.Text = Str($Summary.FailCount)
+  Else
+    LabelTotalAmount.Text = "0"
+    LabelSuccessful.Text = "0"
+    LabelFailed.Text = "0"
+  Endif
+  
+  InitializeGrid()
+  
+End
+
+Public Sub Form_Open()
+  
+  BindGrid()
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "Form_Open", ("Some error occurrs") & " " & Error.Text)
+  $Logger.Debug($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Sub btnAccept_Click()
+  
+  If $Action = Enumeration.DIALOG_SUMMARY_IMPORT Then
+    $Configuration.ShouldShowImportSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
+  Else If $Action = Enumeration.DIALOG_SUMMARY_IMPORT Then
+    $Configuration.ShouldShowMoveToTrashSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
+  Endif
+  
+  Me.Close(Enumeration.DLG_OK)
+  
+End
+
+Public Sub btnExit_Click()
+  
+  Me.Close()
+  
+End
+
+Private Sub InitializeGrid()
+  
+  With GridViewSummary
+    .Columns.Count = 3
+    .Rows.Count = 0
+    .Header = GridView.Horizontal
+    .Resizable = False
+    
+    .Columns[0].Text = ("Result")
+    .Columns[0].Alignment = Align.Center
+    .Columns[0].Width = 60
+    
+    .Columns[1].Text = ("Reason")
+    .Columns[1].Alignment = Align.Left
+    .Columns[1].Width = 75
+    
+    .Columns[2].Text = ("Image")
+    .Columns[2].Alignment = Align.Left
+  End With
+  
+End
+
+Private Sub BindGrid()
+  
+  Dim oSummaryItem As SummaryItem[]
+  Dim oISI As SummaryItem
+  Dim iRow As Integer = 0
+  
+  If $Summary <> Null Then
+    oSummaryItem = $Summary.Items
+    For Each oSumm As SummaryItem In oSummaryItem
+      iRow = GridViewSummary.Rows.Count
+      GridViewSummary.Rows.Count = GridViewSummary.Rows.Count + 1
+      If oSumm.Status = Summary.STATUS_FAIL Then
+        GridViewSummary[iRow, 0].Picture = Picture["icon:/16/cancel"]
+      Else
+        GridViewSummary[iRow, 0].Picture = Picture["icon:/16/ok"]
+      Endif
+      GridViewSummary[iRow, 0].Alignment = Align.Center
+      
+      GridViewSummary[iRow, 1].Text = Trim(oSumm.Reason)
+      GridViewSummary[iRow, 2].Text = Trim(oSumm.FileName)
+    Next
+  Endif
+  
+End

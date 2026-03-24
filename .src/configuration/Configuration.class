@@ -1,235 +1,612 @@
 ' Gambas class file
 
-' Clase Configuration - Gacela
-' Maneja la configuración de la aplicación usando Settings de Gambas
+'
+' Class Configuration
+'
+'
+Private $Settings As Settings                                                 '' Settings file handler
+Private $SettingPath As String                                                '' Settings file path
+Private $IsFirstRun As Boolean = False                                        '' First run indicator
+Private $WhichGallery As Integer = Enumeration.GalleryType_Private            '' Active gallery type
+Private $AppPath As String                                                    '' Application files path
+Private $Logger As LoggerPort                                                 '' Logger instance
+Private $OsTheme As Integer                                                   '' Current OS theme
+Private $AppTheme As Integer                                                  '' Application theme
+Private $IsSharedEnabled As Boolean                                           '' Shared gallery directory enabled
+Private $Titulo As String = "Configuration"
+Private $LogMessage As LogMessage
+Private $LogLevel As Integer
+Private $LogOutput As Integer
+Private $LogPath As String                                                    '' Log file path
+Private $LogSize As Integer
+Private $LogFiles As Integer
+Private $DeletedMaxSizeMB As Integer
+Private $DeletedMaxCount As Integer
+Private $ShouldShowImportSummary As Boolean
+Private $ShouldShowMoveToTrashSummary As Boolean
+Private $ShouldShowMainToolbar As Boolean
+Private $ShouldShowMainStatusBar As Boolean
+Private $ShouldSkipMoveTrashConfirmation As Boolean
+Private $ShouldSkipImportConfirmation As Boolean
 
-' Constantes que definen la sección de Settings globales
-Private Const GLOBAL_VERSION As String = "Global/Version"
-Private Const GLOBAL_LIBRARY_TYPE As String = "Global/LibraryType"
-Private Const GLOBAL_LIBRARY_DIRECTORY As String = "Global/LibraryDirectory"
-Private Const GLOBAL_LIBRARY_PHOTOS_PER_VIEW As String = "Global/PhotosPerView"
-Private Const GLOBAL_APPLICATION_THEME As String = "Global/Theme"
-
-' Constantes que definen la seccion de Log4Gambas
-Private Const LOG4GAMBAS_LEVEL As String = "Log4Gambas/Level"
-Private Const LOG4GAMBAS_OUTPUT As String = "Log4Gambas/Output"
-Private Const LOG4GAMBAS_MAXFILES As String = "Log4Gambas/MaxFiles"
-Private Const LOG4GAMBAS_SIZELOG As String = "Log4Gambas/SizeLog"
-Private Const LOG4GAMBAS_LOGFILE As String = "Log4Gambas/LogFile"
-Private Const LOG4GAMBAS_MAXFILESIZE As String = "Log4Gambas/MaxFilesSize"
-
-' Variable privadas
-Private $settings As Settings                                                 '' Objeto que referencia al archivo de settings
-Private $isFirstRun As Boolean = False                                        '' Indicador de primera ejecucion
-Private $whichLibrary As Integer = Enumeration.LibraryType_Private            '' Indicador de tipo de libreria activa
-Private $appPath As String                                                    '' Ruta de los archivos de la aplicación
-Private $log4gambas As New Log4Gambas3                                        '' Objeto para hacer logger
-Private $soTheme As Integer                                                   '' Indica el tema activo del SO
-Private $appTheme As Integer                                                  '' Indica el tema que usa la aplicacion
-Private $libraryName As String                                                '' Nombre de la libreria
-
-' Propiedades
-Property Read IsFirstRun As Boolean                                           '' Indicador de primera ejecución
-Property Read LibraryPath As String                                           '' Entrega path a la biblioteca actualmente activa
-Property Read whichLibrary As Integer                                         '' Entrega indicador de biblioteca seleccionada por el usuario
-Property Read IsSharedLibraryAvailable As Boolean                              '' Indicador de biblioteca compartida disponible para trabajar
+Property WhichGallery As Integer                                         '' Which gallery is active
+Property Read IsFirstRun As Boolean                                           '' First execution indicator
+Property Read GalleryPath As String                                           '' Gallery path
+Property Read IsSharedGalleryAvailable As Boolean                             '' Shared gallery is available
+Property Read DatabaseProvider As String
+Property Read StorageProvider As String
+Property ShouldDeleteOriginals As Boolean                                           '' Delete originals images after import
+Property LogLevel As Integer
+Property LogOutput As Integer
+Property LogPath As String
+Property LogSize As Integer
+Property LogFiles As Integer
+Property DeletedMaxSizeMB As Integer
+Property DeletedMaxCount As Integer
+Property ShouldShowImportSummary As Boolean
+Property ShouldShowMoveToTrashSummary As Boolean                                      '' Indicate dialog summary is show it
+Property ShouldShowMainToolbar As Boolean
+Property ShouldShowMainStatusBar As Boolean
+Property ShouldSkipMoveTrashConfirmation As Boolean
+Property ShouldSkipImportConfirmation As Boolean
 
 '============================================
 '
-'      Métodos publicos
+'      Public methods
 '
 '============================================
+
 Public Sub _new()
-
-  ' Cargamos la ruta de la bilioteca privada como valor inicial y detectar primera vez
-  $appPath = User.Home &/ Constants.GACELA_DIRECTORY
-  'Revisamos cual es el tema definido por el sistema operativo
-  $soTheme = FindSOTheme()
-
-  $settings = New Settings($appPath &/ Constants.CONFIG_NAME)
-  If $settings.Count = 0 Then
-    'Cargamos variable para indicar que es primera vez que se ingresa
-    $isFirstRun = True
-    'Inicializamos el arvhivo settings
+  
+  $SettingPath = User.Home &/ Constants.GACELA_SETTING_DIRECTORY
+  $LogPath = User.Home &/ Constants.GACELA_LOG_DIRECTORY
+  $OsTheme = FindOSTheme()
+  
+  $Settings = New Settings($SettingPath &/ Constants.CONFIG_NAME)
+  $Logger = LoggerFactory.Create($Settings)
+  If $Settings.Count = 0 Then
+    $LogMessage = New LogMessage($Titulo, "_new", ("First launch detected. The application will be configured in private mode."))
+    $Logger.Info($LogMessage)
+    $IsFirstRun = True
     FirstInitializeSettings()
-    'Inicializamos la seccion Log4Gambas
     FirstInitializeLogger()
-
-    $log4Gambas.Info("Se detecto que es el primer inicio. Se configurara la aplicacion privada y se detectara el sector compartido")
   Endif
-
+  
+  MigrateLoggerSettings()
+  
+  $IsSharedEnabled = DetectShareEnabled()
+  
 Catch
-  $log4gambas.Error("Error inicializando configuración: " & Error.Text)
-  Error.Raise("Error inicializando configuración: " & Error.Text)
-
+  $LogMessage = New LogMessage($Titulo, "_new", ("Error initializing configuration: ") & Error.Text)
+  $Logger.Error($LogMessage)
+  Error.Raise($LogMessage.ToText())
+  
 End
 
-Public Sub InitializeEnvironment() ''Carga ambiente  definido en la configuracion
-
-  $log4gambas.info("Inicializando entorno")
-
-  If $settings[GLOBAL_LIBRARY_TYPE, Null] = Null Then
-    Error.Raise("Problemas al cargar configuraciones iniciales")
-  Else
-    $whichLibrary = $settings[GLOBAL_LIBRARY_TYPE]
-    $appTheme = $settings[GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_SO]
-  Endif
-
-End
-
-Public Function InitializeLogger() As Log4Gambas3
-
-  $log4gambas.warning("creando archivo ini con datos del log4gambas3")
-  ' configuramos el logger
-  $log4gambas.SetAppName(Application.Name)
-  $log4gambas.SetMinLevel($settings[LOG4GAMBAS_LEVEL, $log4gambas.LEVEL_DEBUG])
-  $log4gambas.SetOutput($settings[LOG4GAMBAS_OUTPUT, $log4gambas.OUTPUT_CONSOLE])
-  $log4gambas.SetLogFile($settings[LOG4GAMBAS_LOGFILE, $log4gambas.GetLogFile()])
-  $log4gambas.SetMaxFileSize($settings[LOG4GAMBAS_MAXFILESIZE, $log4gambas.GetMaxFileSize()])
-  $log4gambas.SetMaxFiles($settings[LOG4GAMBAS_MAXFILES, $log4gambas.GetMaxFiles()])
-
-  Return $log4gambas
-
-End
-
-Public Sub SetWichLibrary(value As Integer)
-
-  $whichLibrary = Value
-  $settings[GLOBAL_LIBRARY_TYPE] = value
-  $settings.Save
-
-End
-
-'================================================
-'
-'         Métodos privados
-'
-'================================================
-Private Sub FirstInitializeSettings() ''Creacion de configuraciones iniciales
-
-  $log4gambas.info("creando archivo ini con datos iniciales")
-
-  ' Verificamos que exista el archivo de Settings
-  If Not Exist($appPath &/ Constants.CONFIG_NAME) Then
-    If Not Exist($appPath) Then
-      Mkdir $appPath
+Public Sub InitializeEnvironment()
+  
+  $LogMessage = New LogMessage($Titulo, "InitializeEnvironment", "Initializing environment")
+  $Logger.Info($LogMessage)
+  
+  If $Settings[Constants.GLOBAL_GALLERY_TYPE, Null] = Null Then
+    If $Settings["Global/LibraryType", Null] <> Null Then
+      $Settings[Constants.GLOBAL_GALLERY_TYPE] = $Settings["Global/LibraryType"]
+      $Settings.Save()
+    Else
+      $LogMessage = New LogMessage($Titulo, "InitializeEnvironment", "Problems loading initial configuration")
+      Error.Raise($LogMessage.ToText())
     Endif
   Endif
+  
+  If $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED, Null] = Null Then
+    If $Settings["Global/Shared", Null] <> Null Then
+      $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED] = $Settings["Global/Shared"]
+    Endif
+  Endif
+  
+  If $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, Null] = Null Then
+    $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = 2048
+  Endif
+  
+  If $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, Null] = Null Then
+    $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
+  Endif
+  
+  If $Settings[Constants.IMPORT_SHOW_SUMMARY, Null] = Null Then
+    $Settings[Constants.IMPORT_SHOW_SUMMARY] = True
+  Endif
+  
+  If $Settings[Constants.MOVETRASH_SHOW_SUMMARY, Null] = Null Then
+    $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = True
+  Endif
+  
+  If $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, Null] = Null Then
+    $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = True
+  Endif
+  
+  If $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, Null] = Null Then
+    $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = True
+  Endif
+  
+  If $Settings[Constants.GLOBAL_DATABASE_PROVIDER, Null] = Null Then
+    $Settings[Constants.GLOBAL_DATABASE_PROVIDER] = Constants.DATABASE_PROVIDER_SQLITE
+  Endif
+  
+  If $Settings[Constants.GLOBAL_STORAGE_PROVIDER, Null] = Null Then
+    $Settings[Constants.GLOBAL_STORAGE_PROVIDER] = Constants.STORAGE_PROVIDER_LOCAL
+  Endif
+  
+  If $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, Null] = Null Then
+    $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = True
+  Endif
+  
+  If $Settings[Constants.DONTSHOWAGAIN_IMPORT, Null] = Null Then
+    $Settings[Constants.DONTSHOWAGAIN_IMPORT] = True
+  Endif
+  
+  $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
+  $AppTheme = $Settings[Constants.GLOBAL_APPLICATION_THEME, Enumeration.APP_THEME_OS]
+  $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
+  $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 10000]
+  $ShouldShowImportSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
+  $ShouldShowMoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
+  $ShouldShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
+  $ShouldShowMainStatusBar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
+  $ShouldSkipMoveTrashConfirmation = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
+  $ShouldSkipImportConfirmation = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
+  
+  $Settings.Save()
+  
+End
 
-  ' Sección Global
-  $settings[GLOBAL_VERSION] = Application.Version
-  $settings[GLOBAL_LIBRARY_TYPE] = Enumeration.LibraryType_Private
-  $settings[GLOBAL_LIBRARY_TYPE] = Me.whichLibrary
-  $settings[GLOBAL_APPLICATION_THEME] = $soTheme
-  $settings.Save()
+Private Function DatabaseProvider_Read() As String
+  
+  Return LCase($Settings[Constants.GLOBAL_DATABASE_PROVIDER, Constants.DATABASE_PROVIDER_SQLITE])
+  
+End
 
+Private Function StorageProvider_Read() As String
+  
+  Return LCase($Settings[Constants.GLOBAL_STORAGE_PROVIDER, Constants.STORAGE_PROVIDER_LOCAL])
+  
+End
+
+Public Function InitializeLogger() As LoggerPort
+  
+  $LogMessage = New LogMessage($Titulo, "InitializeLogger", ("Creating logger with configured data"))
+  $Logger.Info($LogMessage)
+  
+  $Logger.SetAppName(Application.Name)
+  $Logger.SetMinLevel($Settings[Constants.LOGGER_LEVEL, $Logger.GetDefaultLevelDebug()])
+  $Logger.SetOutput($Settings[Constants.LOGGER_OUTPUT, $Logger.GetDefaultOutputBoth()])
+  $Logger.SetLogFile($Settings[Constants.LOGGER_LOGFILE, $Logger.GetLogFile()])
+  $Logger.SetMaxFileSize($Settings[Constants.LOGGER_MAXFILESIZE, $Logger.GetMaxFileSize()])
+  $Logger.SetMaxFiles($Settings[Constants.LOGGER_MAXFILES, $Logger.GetMaxFiles()])
+  
+  Return $Logger
+  
+End
+
+Public Sub SetWhichGallery()
+  
+  If Enumeration.GalleryType_Private = $Settings[Constants.GLOBAL_GALLERY_TYPE] Then
+    $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Shared
+  Else 
+    $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Private
+  Endif
+  $Settings.Save()
+  $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
+  
+End
+
+'================================================
+'
+'         Private methods
+'
+'================================================
+Private Sub FirstInitializeSettings() '' Initial configuration setup
+  
+  $LogMessage = New LogMessage($Titulo, "FirstInitializeSettings", ("Creating ini file with initial data"))
+  $Logger.Info($LogMessage)
+  
+  If Not Exist($SettingPath &/ Constants.CONFIG_NAME) Then
+    If Not Exist($SettingPath) Then
+      Mkdir $SettingPath
+    Endif
+  Endif
+  
+  $Settings[Constants.GLOBAL_VERSION] = Application.Version
+  $Settings[Constants.GLOBAL_GALLERY_TYPE] = Enumeration.GalleryType_Private
+  $Settings[Constants.GLOBAL_GALLERY_TYPE] = Me.WhichGallery
+  $Settings[Constants.GLOBAL_APPLICATION_THEME] = $OsTheme
+  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = False
+  $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = 2048
+  $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = 10000
+  $Settings[Constants.IMPORT_SHOW_SUMMARY] = True
+  $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = True
+  $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = True
+  $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = True
+  $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = True
+  $Settings[Constants.DONTSHOWAGAIN_IMPORT] = True
+  
+  $Settings.Save()
+  
 Catch
-  $log4gambas.Error("Error detectado al intentar crear directorio de archivo settings" & Error.Text)
-  Error.Raise("Error detectado al intentar crear directorio de archivo settings" & Error.Text)
-
+  $LogMessage = New LogMessage($Titulo, "FirstInitializeSettings", ("Error while creating settings directory") & Error.Text)
+  $Logger.Error($LogMessage)
+  Error.Raise($LogMessage.ToText())
+  
 End
 
-Private Function FirstInitializeLogger() As Log4Gambas3
-
-  $log4gambas.info("creando logger con datos iniciales")
-
-  $settings[LOG4GAMBAS_LEVEL] = $log4gambas.GetMinLevel()
-  $settings[LOG4GAMBAS_OUTPUT] = $log4gambas.GetOutput()
-  $settings[LOG4GAMBAS_LOGFILE] = $appPath
-  $settings[LOG4GAMBAS_MAXFILESIZE] = $log4gambas.GetMaxFileSize()
-  $settings[LOG4GAMBAS_MAXFILES] = $log4gambas.GetMaxFiles()
-  $settings.Save()
-
+Private Function FirstInitializeLogger() As LoggerPort
+  
+  $LogMessage = New LogMessage($Titulo, "FirstInitializeLogger", ("Creating logger with initial data"))
+  $Logger.Info($LogMessage)
+  
+  If Not Exist($LogPath) Then
+    Mkdir $LogPath
+  Endif
+  
+  $Settings[Constants.LOGGER_LEVEL] = $Logger.GetMinLevel()
+  $Settings[Constants.LOGGER_OUTPUT] = $Logger.GetDefaultOutputBoth()
+  $Settings[Constants.LOGGER_LOGFILE] = $LogPath
+  $Settings[Constants.LOGGER_MAXFILESIZE] = $Logger.GetMaxFileSize()
+  $Settings[Constants.LOGGER_MAXFILES] = $Logger.GetMaxFiles()
+  $Settings.Save()
+  
 End
 
-Private Function FindSOTheme() As Integer
+Private Sub MigrateLoggerSettings()
+  
+  Dim hasChanged As Boolean
+  
+  hasChanged = MigrateSetting(Constants.LOGGER_PROVIDER, "Log4Gambas/Provider", "log4gambas") Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_LEVEL, "Log4Gambas/Level", $Logger.GetDefaultLevelDebug()) Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_OUTPUT, "Log4Gambas/Output", $Logger.GetDefaultOutputBoth()) Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_LOGFILE, "Log4Gambas/LogFile", $LogPath) Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_MAXFILESIZE, "Log4Gambas/MaxFilesSize", $Logger.GetMaxFileSize()) Or hasChanged
+  hasChanged = MigrateSetting(Constants.LOGGER_MAXFILES, "Log4Gambas/MaxFiles", $Logger.GetMaxFiles()) Or hasChanged
+  
+  If hasChanged Then
+    $Settings.Save()
+  Endif
+  
+End
 
-  Dim bgColor As Integer = Color.Background
-  Dim brightness As Float
-  Dim r, g, b As Integer
+Private Function MigrateSetting(sNewKey As String, sLegacyKey As String, vDefaultValue As Variant) As Boolean
+  
+  If $Settings[sNewKey, Null] <> Null Then
+    Return False
+  Endif
+  
+  If $Settings[sLegacyKey, Null] <> Null Then
+    $Settings[sNewKey] = $Settings[sLegacyKey]
+  Else
+    $Settings[sNewKey] = vDefaultValue
+  Endif
+  
+  Return True
+  
+End
 
-  ' Extraer componentes RGB
-  r = Color[bgColor].Red
-  g = Color[bgColor].Green
-  b = Color[bgColor].Blue
-
-  ' Calcular brillo (luminosidad)
-  brightness = (r * 0.299 + g * 0.587 + b * 0.114)
-
-  ' Si el brillo es menor a 128, es tema oscuro
-  If brightness < 128 Then
+Private Function FindOSTheme() As Integer
+  
+  Dim iBgColor As Integer = Color.Background
+  Dim fBrightness As Float
+  Dim vR, vG, iB As Integer
+  
+  ' Extract RGB components
+  vR = Color[iBgColor].Red
+  vG = Color[iBgColor].Green
+  iB = Color[iBgColor].Blue
+  
+  ' Compute brightness (luminance)
+  fBrightness = (vR * 0.299 + vG * 0.587 + iB * 0.114)
+  
+  ' If brightness is below 128, use dark theme
+  If fBrightness < 128 Then
     Return Enumeration.APP_THEME_DARK
   Else
     Return Enumeration.APP_THEME_LIGHT
   Endif
-
+  
   Return 0
+  
+End
 
+Private Function DetectShareEnabled() As Boolean
+  
+  Dim sGroupAvailable As String
+  Dim aGroup As Array
+  Dim aUsers As Array
+  Dim isFound As Boolean
+  Dim cell As String
+  
+  ' Verify the group exists
+  $LogMessage = New LogMessage($Titulo, "DetectShareEnabled", ("Checking group existence") & " " & Constants.GRUPO_GACELA)
+  $Logger.Debug($LogMessage)
+  Shell "getent group " & Constants.GRUPO_GACELA To sGroupAvailable
+  If sGroupAvailable = "" Then
+    Return False
+  Endif
+  
+  ' Verify the user is in the group
+  aGroup = Split(sGroupAvailable, ":")
+  aUsers = Split(aGroup[aGroup.Count - 1], ",")
+  For Each cell In aUsers
+    If Replace(cell, "\n", "") = User.name Then
+      isFound = True
+    Endif
+  Next
+  If Not isFound Then
+    Return False
+  Endif
+  
+  ' Verify the directory exists
+  If Not Exist(Constants.GACELA_SHARED_GALLERY_DIRECTORY) Then
+    Return False
+  Endif
+  
+  ' Verify write permissions
+  If Exist(Constants.GACELA_SHARED_GALLERY_DIRECTORY) Then
+    Try File.Save(Constants.GACELA_SHARED_GALLERY_DIRECTORY &/ ".test", "test")
+    If Error Then Return False
+    Try Kill Constants.GACELA_SHARED_GALLERY_DIRECTORY &/ ".test"
+  Endif
+  
+  $Settings[Constants.GLOBAL_SHARED_GALLERY_ENABLED] = True
+  $Settings.Save()
+  
+  Return True
+  
+Catch 
+  $LogMessage = New LogMessage($Titulo, "DetectShareEnabled", ("Error detecting whether the shared directory is active") & " " & Error.Text)
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
 End
 
 ' =======================================================
 '
-'       Métodos para las propiedades públicas
+'       Methods for public properties
 '
 ' =======================================================
 Function IsFirstRun_Read() As Boolean
-
-  Return $isFirstRun
-
+  
+  Return $IsFirstRun
+  
 End
 
-Private Function whichLibrary_Read() As Integer
-
-  Return $whichLibrary
-
+Function WhichGallery_Read() As Integer
+  
+  Return $WhichGallery
+  
 End
 
-Private Function LibraryPath_Read() As String
-
-  If $whichLibrary = Enumeration.LibraryType_Private Then
-    Return $appPath
+Function GalleryPath_Read() As String
+  
+  If $WhichGallery = Enumeration.GalleryType_Private Then
+    Return User.Home &/ Constants.GACELA_GALLERY_DIRECTORY
   Else
-    Return Constants.GACELA_DIRECTORY_SHARED
+    Return Constants.GACELA_SHARED_GALLERY_DIRECTORY
   Endif
-
+  
 End
 
-Function IsSharedLibraryAvailable_Read() As Boolean
+Function IsSharedGalleryAvailable_Read() As Boolean
+  
+  Return $IsSharedEnabled
+  
+End
 
-  Dim hasGroup As Boolean
-  Dim hasDirectory As Boolean
-  Dim hasPermissions As Boolean
-  Dim groupAvailable As String
+Function ShouldDeleteOriginals_Read() As Boolean
+  
+  Return $Settings[Constants.IMPORT_DELETE_ORIGINALS, False]
+  
+End
 
-  ' Verificar que existe el grupo
-  Shell "getent group " & Constants.GRUPO_GACELA To groupAvailable
-  If groupAvailable = "" Then
-    Return False
-  Endif
+Sub ShouldDeleteOriginals_Write(shouldDeleteOriginals As Boolean)
+  
+  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = shouldDeleteOriginals
+  $Settings.Save()
+  
+End
 
-  ' Verificar que el usuario esta en el grupo
-  If InStr(groupAvailable, User.Name) <= 0 Then
-    Return False
-  Endif
+Private Function LogLevel_Read() As Integer
+  
+  Return $Settings[Constants.LOGGER_LEVEL, $Logger.GetDefaultLevelDebug()]
+  
+End
 
-  ' Verificar que existe el directorio
-  If Not Exist(Constants.GACELA_DIRECTORY_SHARED) Then
-    Return False
-  Endif
+Private Sub LogLevel_Write(Value As Integer)
+  
+  $Settings[Constants.LOGGER_LEVEL] = Value
+  $Settings.Save()
+  
+  $Logger.SetMinLevel($Settings[Constants.LOGGER_LEVEL, $Logger.GetDefaultLevelDebug()])
+  
+End
 
-  ' Verificar permisos de escritura
-  If Exist(Constants.GACELA_DIRECTORY_SHARED) Then
-    Try File.Save(Constants.GACELA_DIRECTORY_SHARED &/ ".test", "test")
-    If Error Then Return False
-    Try Kill Constants.GACELA_DIRECTORY_SHARED &/ ".test"
-  Endif
+Private Function LogOutput_Read() As Integer
+  
+  Return $Settings[Constants.LOGGER_OUTPUT, $Logger.GetDefaultOutputBoth()]
+  
+End
 
-  'sudo Chown -R root:gacela - users/usr/share/gacela && \
-  'sudo Chmod 755 /usr/share/gacela && \
-  'sudo Chmod -R 775 /usr/share/gacela/biblioteca && \
-  'sudo find /usr/share/gacela/biblioteca -type d -exec Chmod g+s {} \; && \
-  'echo "Permisos configurados correctamente"
+Private Sub LogOutput_Write(Value As Integer)
+  
+  $Settings[Constants.LOGGER_OUTPUT] = Value
+  $Settings.Save()
+  
+  $Logger.SetOutput($Settings[Constants.LOGGER_OUTPUT, $Logger.GetDefaultOutputBoth()])
+  
+End
 
-  Return True
+Private Function LogSize_Read() As Integer
+  
+  Return $Settings[Constants.LOGGER_MAXFILESIZE, $Logger.GetMaxFileSize()] / 1024 / 1024
+  
+End
 
+Private Sub LogSize_Write(Value As Integer)
+  
+  $Logger.SetMaxFileSize(Value * 1024 * 1024)
+  
+  $Settings[Constants.LOGGER_MAXFILESIZE] = $Logger.GetMaxFileSize()
+  $Settings.Save()
+  
+End
+
+Private Function LogFiles_Read() As Integer
+  
+  Return $Settings[Constants.LOGGER_MAXFILES, $Logger.GetMaxFiles()]
+  
+End
+
+Private Sub LogFiles_Write(Value As Integer)
+  
+  $Settings[Constants.LOGGER_MAXFILES] = Value
+  $Settings.Save()
+  
+  $Logger.SetMaxFiles($Settings[Constants.LOGGER_MAXFILES, $Logger.GetMaxFiles()])
+  
+End
+
+Private Function LogPath_Read() As String
+  
+  Return $Settings[Constants.LOGGER_LOGFILE, $Logger.GetLogFile()]
+  
+End
+
+Private Sub LogPath_Write(Value As String)
+  
+  $Settings[Constants.LOGGER_LOGFILE] = Value
+  $Settings.Save()
+  
+  $Logger.SetLogFile($Settings[Constants.LOGGER_LOGFILE, $Logger.GetLogFile()])
+  
+End
+
+Private Function DeletedMaxSizeMB_Read() As Integer
+  
+  $DeletedMaxSizeMB = $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB, 2048]
+  Return $DeletedMaxSizeMB
+  
+End
+
+Private Sub DeletedMaxSizeMB_Write(Value As Integer)
+  
+  $DeletedMaxSizeMB = Value
+  $Settings[Constants.GLOBAL_DELETED_MAX_SIZE_MB] = Value
+  $Settings.Save()
+  
+End
+
+Private Function DeletedMaxCount_Read() As Integer
+  
+  $DeletedMaxCount = $Settings[Constants.GLOBAL_DELETED_MAX_COUNT, 1000]
+  Return $DeletedMaxCount
+  
+End
+
+Private Sub DeletedMaxCount_Write(Value As Integer)
+  
+  $DeletedMaxCount = Value
+  $Settings[Constants.GLOBAL_DELETED_MAX_COUNT] = Value
+  $Settings.Save()
+  
+End
+
+Private Function ShouldShowImportSummary_Read() As Boolean
+  
+  $ShouldShowImportSummary = $Settings[Constants.IMPORT_SHOW_SUMMARY, True]
+  Return $ShouldShowImportSummary
+  
+End
+
+Private Sub ShouldShowImportSummary_Write(shouldShowImportSummary As Boolean)
+  
+  $ShouldShowImportSummary = shouldShowImportSummary
+  $Settings[Constants.IMPORT_SHOW_SUMMARY] = shouldShowImportSummary
+  $Settings.Save()
+  
+End
+
+Private Function ShouldShowMoveToTrashSummary_Read() As Boolean
+  
+  $ShouldShowMoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
+  Return $ShouldShowMoveToTrashSummary
+  
+End
+
+Private Sub ShouldShowMoveToTrashSummary_Write(shouldShowMoveToTrashSummary As Boolean)
+  
+  $ShouldShowMoveToTrashSummary = shouldShowMoveToTrashSummary
+  $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = shouldShowMoveToTrashSummary
+  $Settings.Save()
+  
+End
+
+Private Function ShouldShowMainToolbar_Read() As Boolean
+  
+  $ShouldShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
+  Return $ShouldShowMainToolbar
+  
+End
+
+Private Sub ShouldShowMainToolbar_Write(shouldShowMainToolbar As Boolean)
+  
+  $ShouldShowMainToolbar = shouldShowMainToolbar
+  $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = shouldShowMainToolbar
+  $Settings.Save()
+  
+End
+
+Private Function ShouldShowMainStatusBar_Read() As Boolean
+  
+  $ShouldShowMainStatusBar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
+  Return $ShouldShowMainStatusBar
+  
+End
+
+Private Sub ShouldShowMainStatusBar_Write(shouldShowMainStatusBar As Boolean)
+  
+  $ShouldShowMainStatusBar = shouldShowMainStatusBar
+  $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = shouldShowMainStatusBar
+  $Settings.Save()
+  
+End
+
+Private Function ShouldSkipMoveTrashConfirmation_Read() As Boolean
+  
+  $ShouldSkipMoveTrashConfirmation = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
+  Return $ShouldSkipMoveTrashConfirmation
+  
+End
+
+Private Sub ShouldSkipMoveTrashConfirmation_Write(shouldSkipMoveTrashConfirmation As Boolean)
+  
+  $ShouldSkipMoveTrashConfirmation = shouldSkipMoveTrashConfirmation
+  $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = shouldSkipMoveTrashConfirmation
+  $Settings.Save()
+  
+End
+
+Private Function ShouldSkipImportConfirmation_Read() As Boolean
+  
+  $ShouldSkipImportConfirmation = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
+  Return $ShouldSkipImportConfirmation
+  
+End
+
+Private Sub ShouldSkipImportConfirmation_Write(shouldSkipImportConfirmation As Boolean)
+  
+  $ShouldSkipImportConfirmation = shouldSkipImportConfirmation
+  $Settings[Constants.DONTSHOWAGAIN_IMPORT] = shouldSkipImportConfirmation
+  $Settings.Save()
+  
+End
+
+Sub WhichGallery_Write(Value As Integer)
+  $WhichGallery = Value
 End

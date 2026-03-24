@@ -1,0 +1,39 @@
+' Gambas class file
+
+'' Entity to hold photo import selection data.
+Private $SelectedPaths As String[]
+Private $SelectedAlbumId As Integer
+
+Property SelectedPaths As String[] '' List of file paths selected for import.
+Property SelectedAlbumId As Integer '' ID of the album to which the photos will be associated.
+
+Public Sub _new() '' Initializes a new photo import entity.
+
+  $SelectedPaths = New String[]
+  $SelectedAlbumId = 0
+
+End Sub
+
+Private Function SelectedPaths_Read() As String[]
+
+  Return $SelectedPaths
+
+End
+
+Private Sub SelectedPaths_Write(Value As String[])
+
+  $SelectedPaths = Value
+
+End
+
+Private Function SelectedAlbumId_Read() As Integer
+
+  Return $SelectedAlbumId
+
+End
+
+Private Sub SelectedAlbumId_Write(Value As Integer)
+
+  $SelectedAlbumId = Value
+
+End

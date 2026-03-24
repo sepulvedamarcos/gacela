@@ -1,0 +1,25 @@
+' Gambas module file
+
+' Centralized creation of datasource implementations.
+
+Public Function CreatePhotoRepository(cConfiguration As Configuration, oLogger As LoggerPort) As PhotoRepositoryPort
+  
+  Select Case cConfiguration.DatabaseProvider
+    Case Constants.DATABASE_PROVIDER_SQLITE
+      Return New SQLiteRepositoryAdapter(cConfiguration, oLogger)
+    Default
+      Error.Raise("Unsupported database provider: " & cConfiguration.DatabaseProvider)
+  End Select
+  
+End
+
+Public Function CreateFileStorage(cConfiguration As Configuration, oLogger As LoggerPort) As FileStoragePort
+  
+  Select Case cConfiguration.StorageProvider
+    Case Constants.STORAGE_PROVIDER_LOCAL
+      Return New FileSystemStorageAdapter
+    Default
+      Error.Raise("Unsupported storage provider: " & cConfiguration.StorageProvider)
+  End Select
+  
+End

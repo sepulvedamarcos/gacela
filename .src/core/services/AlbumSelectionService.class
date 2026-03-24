@@ -1,0 +1,53 @@
+' Gambas class file
+
+Private $SelectedEntities As AlbumEntity[]  '' List of album entities selected.
+
+Property Read SelectedCount As Integer '' Returns the total number of albums currently selected.
+
+Public Sub _new() '' Initializes a new instance of the AlbumSelectionService.
+  
+  $SelectedEntities = New AlbumEntity[]
+  
+End
+
+Public Function HasSelection() As Boolean '' Checks if at least one album is currently selected.
+  
+  Return $SelectedEntities.Count > 0
+  
+End
+
+Public Function GetSelectedAlbumEntities() As AlbumEntity[] '' Returns a copy of the list of selected album entities.
+  
+  Dim oResponse As New AlbumEntity[]
+  
+  For Each oAlbum As AlbumEntity In $SelectedEntities
+    oResponse.Add(oAlbum)
+  Next
+  
+  Return oResponse
+  
+End
+
+Public Sub AddAlbumSelected(oAlbum As AlbumEntity) '' Adds an album to the current selection if not already present.
+  
+  If oAlbum = Null Then Return
+  
+  For Each oCurrentAlbum As AlbumEntity In $SelectedEntities
+    If oCurrentAlbum.Id = oAlbum.Id Then Return
+  Next
+  
+  $SelectedEntities.Add(oAlbum)
+  
+End
+
+Public Sub Clear() '' Clears the current album selection.
+  
+  $SelectedEntities = New AlbumEntity[]
+  
+End
+
+Private Function SelectedCount_Read() As Integer
+  
+  Return $SelectedEntities.Count
+  
+End

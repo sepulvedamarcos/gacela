@@ -1,0 +1,40 @@
+' Gambas class file
+
+Private $Source As Object
+
+Public Sub _new(oSource As Object, sTitle As String) '' Creates a progress bar attached to an observable object.
+  
+  Me.Text = sTitle
+  $Source = oSource
+  
+  ' Attach this form as an observer of the source object
+  ' Events from $Source will be prefixed with "Source_"
+  Object.Attach($Source, Me, "Source")
+  
+End
+
+Public Sub Source_Progress(fValue As Float, sMessage As String) '' Calculate percent and display
+  
+  ProgressBarProcess.Value = fValue
+  Label2.Text = sMessage
+
+  LabelItemsCount.Text = Str(CInt(fValue * 100)) & "%"
+  
+End
+
+Public Sub ButtonCancelProcess_Click() '' Button to cancel entire process
+  
+
+  Try $Source.ShouldCancel = True
+  
+
+  ButtonCancelProcess.Enabled = False
+  ButtonCancelProcess.Text = ("Stopping...")
+  
+End
+
+Public Sub Form_Open()
+
+  Me.Center
+
+End

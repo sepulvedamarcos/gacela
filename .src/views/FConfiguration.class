@@ -1,0 +1,55 @@
+' Gambas class file
+
+Private $Configuration As Configuration
+Private $Logger As LoggerPort
+
+Public Sub _new(oLogger As LoggerPort, oConfiguration As Configuration)
+  
+  $Logger = oLogger
+  $Configuration = oConfiguration
+  
+  ComboBoxOutput.List = $Logger.GetOutputs()
+  ComboBoxLevel.List = $Logger.GetLevels()
+  
+End
+
+Public Sub Form_Open()
+  
+  SwitchButtonDeleteOriginal.Value = $Configuration.ShouldDeleteOriginals
+  SpinBoxMaxFileDeleted.Value = $Configuration.DeletedMaxCount
+  SpinBoxDeleteMaxSize.Value = $Configuration.DeletedMaxSizeMB
+  
+  ComboBoxLevel.Index = $Configuration.LogLevel
+  ComboBoxOutput.Index = $Configuration.LogOutput
+  DirBoxFilePath.Value = $Configuration.LogPath
+  SpinBoxFileSize.Value = $Configuration.LogSize
+  SpinBoxBackupFiles.Value = $Configuration.LogFiles
+
+  SwitchButtonShowSummaryDialog.value = $Configuration.ShouldShowImportSummary
+  
+End
+
+
+Public Sub ButtonAccept_Click()
+  
+  $Configuration.ShouldDeleteOriginals = SwitchButtonDeleteOriginal.Value
+  $Configuration.DeletedMaxCount = SpinBoxMaxFileDeleted.Value
+  $Configuration.DeletedMaxSizeMB = SpinBoxDeleteMaxSize.Value
+  
+  $Configuration.LogLevel = ComboBoxLevel.Index
+  $Configuration.LogOutput = ComboBoxOutput.Index
+  $Configuration.LogPath = DirBoxFilePath.Value
+  $Configuration.LogSize = SpinBoxFileSize.Value
+  $Configuration.LogFiles = SpinBoxBackupFiles.Value
+  
+  $Configuration.ShouldShowImportSummary = SwitchButtonShowSummaryDialog.Value
+
+  Me.Close
+  
+End
+
+Public Sub ButtonExit_Click()
+  
+  Me.Close
+  
+End

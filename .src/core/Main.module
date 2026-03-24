@@ -1,47 +1,41 @@
 ' Gambas module file
 
-' Modulo de inicio de la aplicación Gestor de Álbumes Compartidos en Linux Avanzado
+' Startup module for the Advanced Shared Albums Manager on Linux
 
-Private $configuration As Configuration
-Private $log4Gambas As Log4Gambas3
-Private $connDB As SQLiteContext
-Private $photorepository As PhotoRepository
-Private $photoService As PhotoService
-Private $compressionService As CompressionService
+Private $Configuration As Configuration
+Private $Logger As LoggerPort
+Private $PhotoRepository As PhotoRepositoryPort
+Private $FileStorage As FileStoragePort
+Private $PhotoService As PhotoService
+Private $AlbumService As AlbumService
+Private $TagService As TagService
+Private $Titulo As String = "Main"
+
+Private $LogMessage As LogMessage
 
 Public Sub Main()
+  Dim cFormMain As FMain
 
-  Dim response As Integer
-  Dim formMain As FMain
-  Dim result As String
-
-  $configuration = New Configuration
-  $log4Gambas = $configuration.InitializeLogger()
-  $log4Gambas.Info("Iniciando Gacela v" & Application.Version)
-
-  ' Inicializa el entorno segun lo definido en el settings
-  $configuration.InitializeEnvironment()
-
-  ' Inicializacion e inyectores
-  $connDB = New SQLiteContext($configuration, $log4gambas)
-  ' Crea la clase de capa repository
-  $photorepository = New PhotoRepository($configuration, $log4Gambas, $connDB)
-  ' Crea el servicio de compresion
-  $compressionService = New CompressionService($configuration, $log4gambas)
-  ' Crea el servicio de creacion de fotos
-  $photoService = New PhotoService($log4gambas, $photorepository, $compressionService, $configuration)
-
-  ' Si es primera vez, insertar datos de prueba en base privada
-  If $configuration.IsFirstRun Then
-    $photoService.InsertSeedData()
-  Endif
-
-  ' Creamos e inyectamos en el formulario
-  formMain = New FMain($configuration, $log4gambas, $photoService)
-  formMain.Show()
-
+  $Configuration = New Configuration
+  $Logger = $Configuration.InitializeLogger()
+  $LogMessage = New LogMessage($Titulo, "Main", ("Starting Gacela") & " V" & Application.Version)
+  $Logger.Info($LogMessage)
+  
+  $Configuration.InitializeEnvironment()
+  
+  $PhotoRepository = DataSourceFactory.CreatePhotoRepository($Configuration, $Logger)
+  $FileStorage = DataSourceFactory.CreateFileStorage($Configuration, $Logger)
+  
+  $PhotoService = New PhotoService($Logger, $PhotoRepository, $Configuration, $FileStorage)
+  $AlbumService = New AlbumService($Logger, $PhotoRepository)
+  $TagService = New TagService($Logger, $PhotoRepository)
+  
+  cFormMain = New FMain($Configuration, $Logger, $PhotoService, $AlbumService, $TagService)
+  cFormMain.Show()
+  
 Catch
-  Print "Se detecto un problema grave y se detendra la aplicación " & Error.Text
-  Message.Error("Se detecto un problema grave y se detendra la aplicación " & Error.Text)
+  $LogMessage = New LogMessage($Titulo, "Main", ("A critical problem was detected and the application will stop: ") & Error.Text)
+  Print $LogMessage.ToText()
+  Message.Error($LogMessage.ToText())
 
 End

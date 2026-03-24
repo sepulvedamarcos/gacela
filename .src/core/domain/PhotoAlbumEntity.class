@@ -1,0 +1,112 @@
+' Gambas class file
+
+'
+' Gambas class file - PhotoAlbumEntity
+' Domain model for representing a photo-album association in Gacela
+'
+'  Remember that variable names should not match class names, even in lowercase, because Gambas treats them as the same.
+
+' Private model properties
+Private $iId As Integer = 0
+Private $iPhotoId As Integer
+Private $iAlbumId As Integer
+Private $iOrderInAlbum As Integer = 0
+Private $dAddedDate As Date
+Private $sAddedUser As String
+Private $IsSoftDeleted As Boolean
+
+' =============================================
+'
+'            PUBLIC PROPERTIES
+'
+'==============================================
+Property Id As Integer                     '' Unique ID for the photo-album relation
+Property PhotoId As Integer                '' Photo identifier
+Property AlbumId As Integer                '' Album identifier
+Property OrderInAlbum As Integer           '' Position within the album
+Property AddedDate As Date                 '' Date added to the album
+Property AddedUser As String               '' User who added the photo to the album
+Property IsSoftDeleted As Boolean             '' Indicates if it was deleted
+
+Private Function Id_Read() As Integer
+
+  Return $iId
+
+End
+
+Private Sub Id_Write(Value As Integer)
+
+  $iId = value
+
+End
+
+Private Function PhotoId_Read() As Integer
+
+  Return $iPhotoId
+
+End
+
+Private Sub PhotoId_Write(Value As Integer)
+
+  $iPhotoId = value
+
+End
+
+Private Function AlbumId_Read() As Integer
+
+  Return $iAlbumId
+
+End
+
+Private Sub AlbumId_Write(Value As Integer)
+
+  $iAlbumId = value
+
+End
+
+Private Function OrderInAlbum_Read() As Integer
+
+  Return $iOrderInAlbum
+
+End
+
+Private Sub OrderInAlbum_Write(Value As Integer)
+
+  $iOrderInAlbum = value
+
+End
+
+ Private Function AddedDate_Read() As Date
+
+Return $dAddedDate  
+
+End
+
+Private Sub AddedDate_Write(Value As Date)
+
+  $dAddedDate = value
+
+End
+
+Private Function AddedUser_Read() As String
+
+  Return $sAddedUser
+End
+
+Private Sub AddedUser_Write(Value As String)
+
+  $sAddedUser = value
+
+End
+
+Private Function IsSoftDeleted_Read() As Boolean
+
+  Return $IsSoftDeleted
+
+End
+
+Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
+
+  $IsSoftDeleted = isSoftDeleted
+
+End

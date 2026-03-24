@@ -1,0 +1,80 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,109,63)
+  Text = ("Photo import dialog")
+  Resizable = False
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  Margin = True
+  Padding = 4
+  { PanelList Panel
+    MoveScaled(1,1,107,53)
+    { PictureBoxPreview PictureBox
+      MoveScaled(72,4,34,38)
+      Alignment = Align.Center
+      Border = Border.Plain
+      Mode = PictureBox.Contain
+    }
+    { Label4 Label
+      MoveScaled(72,1,18,3)
+      Text = ("Preview")
+    }
+    { Label3 Label
+      MoveScaled(1,1,25,3)
+      Text = ("Photos to import")
+    }
+    { ListEditorPhotos ListEditor
+      MoveScaled(1,4,70,48)
+      Moveable = False
+    }
+    { CheckBoxEnableAlbum CheckBox
+      MoveScaled(72,43,33,4)
+      Text = ("Import photos into an album")
+    }
+    { !LabelAlbumNameSelected Label
+      MoveScaled(73,48,32,4)
+      #Public = True
+      Visible = False
+      Alignment = Align.Center
+      Border = Border.Plain
+      BorderWidth = 1
+      BorderRadius = 15
+      BorderColor = &H2298FF
+    }
+  }
+  { VBoxButtons2 VBox
+    MoveScaled(2,55,106,8)
+    Expand = True
+    { Separator2 Separator
+      MoveScaled(0,0,72,2)
+    }
+    { HBoxButtons2 HBox
+      MoveScaled(0,2,104,5)
+      Spacing = True
+      Padding = 4
+      { LabelMessageDeleteOriginals Label
+        MoveScaled(1,1,58,3)
+        Background = &H0DED1F34
+        Foreground = Color.ButtonBackground
+        Alignment = Align.Center
+        Border = Border.Plain
+        BorderRadius = 4
+        BorderColor = &HFFFFFF
+      }
+      { Spring2 Spring
+        MoveScaled(65,0,4,4)
+      }
+      { ButtonAccept Button
+        MoveScaled(69,0,18,4)
+        Text = ("Accept")
+        Default = True
+      }
+      { ButtonExit Button
+        MoveScaled(86,0,18,4)
+        Text = ("Exit")
+        Cancel = True
+      }
+    }
+  }
+}

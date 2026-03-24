@@ -1,144 +1,351 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,138,73)
+  MoveScaled(0,0,137,87)
   Drop = True
-  Expand = True
-  Arrangement = Arrange.Horizontal
-  Padding = 4
-  { buscar Menu
-    Toggle = True
-    { nombre Menu
-      Text = ("nombre")
-      Checked = True
+  Text = ("Gacela")
+  Arrangement = Arrange.Vertical
+  { MainMenu Menu
+    Text = ("File")
+    Radio = True
+    { Menu1 Menu
+      Text = ("Send to trash folder")
+    }
+    { Menu7 Menu
+      Text = ("Delete permanently")
+      Visible = False
+    }
+    { Menu6 Menu
+    }
+    { MainMenu_ExportImages Menu
+      Text = ("Export images")
+    }
+    { MainMenu_ImportImages Menu
+      Text = ("Import images")
+    }
+    { Menu2 Menu
+    }
+    { MainMenu_AlbumManage Menu
+      Text = ("Albums")
+    }
+    { MainMenu_TagManage Menu
+      Text = ("Tags")
+    }
+    { Menu15 Menu
+    }
+    { MainMenu_Exit Menu
+      Text = ("Exit")
+      Picture = Picture["icon:/medium/quit"]
     }
   }
-  { HBox1 HBox
-    MoveScaled(0,0,137,72)
-    Expand = True
-    Spacing = True
-    { PanelIzquierdo Panel
-      MoveScaled(1,1,27,69)
-      Background = &HCDD9E4
-      Arrangement = Arrange.Row
-      { Label2 Label
-        MoveScaled(2,2,13,3)
-        Font = Font["Poppins,16"]
-        Text = ("Libreria")
+  { EditMenu Menu
+    Text = ("Edit")
+    { EditMenu_SelectAll Menu
+      Text = ("Select all")
+    }
+    { EditMenu_UnselectAll Menu
+      Text = ("Unselect all")
+    }
+    { Menu3 Menu
+    }
+    { EditMenu_AddSelectedToAlbums Menu
+      Text = ("Add selected to albums")
+      Enabled = False
+    }
+    { EditMenu_RemoveSelectedFromAlbums Menu
+      Text = ("Remove selected from albums")
+      Enabled = False
+    }
+    { Menu12 Menu
+    }
+    { EditMenu_Trash Menu
+      Text = ("Move to trash")
+      Enabled = False
+    }
+    { EditMenu_TrashOut Menu
+      Text = ("Restore images")
+      Enabled = False
+    }
+    { Menu13 Menu
+    }
+    { EditMenu_Share Menu
+      Text = ("Share selected images")
+      Enabled = False
+    }
+    { EditMenu_Unshare Menu
+      Text = ("Unshare selected images")
+      Enabled = False
+    }
+  }
+  { ViewMenu Menu
+    Text = ("View")
+    { ViewGallery_ViewGallery Menu
+      Text = ("View Gallery")
+      Picture = Picture["icon:/medium/directory"]
+    }
+    { ViewGallery_TrashCollection Menu
+      Text = ("View deleted files")
+      Picture = Picture["icon:/22/trash-full"]
+    }
+    { Menu5 Menu
+    }
+    { ViewMenu_show Menu
+      Text = ("Show")
+      { ViewMenu_Show_Menu Menu
+        Text = ("View Menu")
+        Checked = True
       }
-      { ToggleButtonPersonal ToggleButton
-        MoveScaled(0,6,27,5)
-        Text = ("Personal")
-        Radio = True
+      { ViewMenu_Show_Toolbar Menu
+        Text = ("View Toolbar")
+        Checked = True
       }
-      { ToggleButtonCompartida ToggleButton
-        MoveScaled(0,11,27,5)
-        Text = ("Compartida")
-        Radio = True
-      }
-      { Expander1 Expander
-        MoveScaled(1,18,24,26)
-        Font = Font["Poppins,16"]
-        Expand = True
-        Text = ("Albums")
-        { CheckBox1 CheckBox
-          MoveScaled(2,2,16,4)
-          Font = Font["Poppins,-1"]
-          Text = ("ererer")
-        }
-        { CheckBox2 CheckBox
-          MoveScaled(2,6,16,4)
-          Font = Font["Poppins,+1"]
-          Text = ("asdad")
-        }
-        { Button5 Button
-          MoveScaled(3,12,16,4)
-        }
-      }
-      { Expander2 Expander
-        MoveScaled(1,44,24,21)
-        Font = Font["Poppins,16"]
-        Expand = True
-        Text = ("Tags")
+      { ViewMenu_Show_Statusbar Menu
+        Text = ("View Statusbar")
+        Checked = True
       }
     }
-    { PanelDerecho VBox
-      MoveScaled(29,1,102,69)
+    { Menu4 Menu
+    }
+    { ViewMenu_ZoomIn Menu
+      Text = ("Zoom in")
+      Picture = Picture["icon:/medium/zoom-in"]
+    }
+    { ViewMenu_ZoomOut Menu
+      Text = ("Zoom out")
+      Picture = Picture["icon:/medium/zoom-out"]
+    }
+  }
+  { GalleryMenu Menu
+    Text = ("Gallery")
+    { GalleryMenu_PrivateGallery Menu
+      Text = ("Private gallery")
+      Picture = Picture["icon:/medium/folder-home"]
+      Radio = True
+    }
+    { GalleryMenu_ShareGallery Menu
+      Text = ("Shared gallery")
+      Picture = Picture["icon:/medium/user-group"]
+      Radio = True
+    }
+  }
+  { OptionsMenu Menu
+    Text = ("Options")
+    { OptionsMenu_Albums Menu
+      Text = ("Albums")
+    }
+    { OptionsMenu_Tags Menu
+      Text = ("Tags")
+    }
+    { Menu11 Menu
+    }
+    { OptionsMenu_Configuration Menu
+      Text = ("Gacela settings")
+      Picture = Picture["icon:/medium/options"]
+    }
+  }
+  { HelpMenu Menu
+    Text = ("?")
+    { HelpMenu_About Menu
+      Text = ("About Gacela")
+    }
+  }
+  { SearchByMenu Menu
+    Text = ("SearchBy")
+    Visible = False
+    { SearchByMenu_UnFiltered Menu
+      Text = ("Unfiltered")
+      Radio = True
+      Checked = True
+    }
+    { SearchByMenu_PhotoName Menu
+      Text = ("Photo Name")
+      Radio = True
+    }
+    { SearchByMenu_Description Menu
+      Text = ("Description")
+      Radio = True
+    }
+    { SearchByMenu_Date Menu
+      Text = ("Date")
+      Radio = True
+    }
+    { SearchByMenu_Album Menu
+      Text = ("Album")
+      Radio = True
+    }
+    { SearchByMenu_Tag Menu
+      Text = ("Tag")
+      Radio = True
+    }
+  }
+  { HBoxToolBar HBox
+    MoveScaled(0,0,137,8)
+    Margin = True
+    Padding = 2
+    { ToolButtonImport ToolButton
+      MoveScaled(0,0,8,8)
+      ToolTip = ("Import images")
+      Picture = Picture["icon:/32/upload"]
+      Border = True
+    }
+    { ToolButtonExport ToolButton
+      MoveScaled(8,0,8,8)
+      ToolTip = ("Export images")
+      Picture = Picture["icon:/32/download"]
+      Border = True
+    }
+    { PanelSpring2 Panel
+      MoveScaled(16,0,2,8)
+    }
+    { ToolButtonTrash ToolButton
+      MoveScaled(18,0,8,8)
+      Enabled = False
+      Picture = Picture["icon:/32/trash"]
+      Border = True
+    }
+    { SpringToolBar Spring
+      MoveScaled(67,1,4,6)
+      Direction = Direction.LeftToRight
+    }
+    { ToolButtonAlbum ToolButton
+      MoveScaled(101,0,8,8)
+      Picture = Picture["icon:/32/exclusive"]
+      Border = True
+    }
+    { ToolButtonTags ToolButton
+      MoveScaled(109,0,8,8)
+      Picture = Picture["icon:/32/tag"]
+      Border = True
+    }
+    { PanelSpring1 Panel
+      MoveScaled(117,0,2,8)
+    }
+    { ToolButtonConfiguration ToolButton
+      MoveScaled(119,0,8,8)
+      ToolTip = ("Gacela settings")
+      Picture = Picture["icons/64x64/package_settings.png"]
+      Border = True
+    }
+    { PanelSpring3 Panel
+      MoveScaled(127,0,2,8)
+    }
+    { ToolButtonExit ToolButton
+      MoveScaled(129,0,8,8)
+      ToolTip = ("Exit")
+      Picture = Picture["icon:/medium/logout"]
+      Border = True
+    }
+  }
+  { HBoxContext HBox
+    MoveScaled(0,8,137,70)
+    Expand = True
+    { PanelIzquierdo Panel
+      MoveScaled(0,0,27,70)
+      Arrangement = Arrange.Vertical
+      { Panel3 Panel
+        MoveScaled(0,3,26,63)
+        Expand = True
+        Arrangement = Arrange.Row
+        Margin = True
+        Padding = 4
+        { ExpanderAlbum Expander
+          MoveScaled(2,2,21,4)
+          Expand = True
+          Arrangement = Arrange.Fill
+          Border = False
+          Text = ("Albums")
+        }
+        { ExpanderTags Expander
+          MoveScaled(2,12,24,4)
+          Expand = True
+          Arrangement = Arrange.Fill
+          Border = False
+          Text = ("Tags")
+        }
+      }
+    }
+    { PanelDerecho Panel
+      MoveScaled(29,3,93,47)
       Expand = True
+      Arrangement = Arrange.Vertical
       { PanelBusqueda Panel
         MoveScaled(1,1,90,7)
         Arrangement = Arrange.Horizontal
         Padding = 8
-        { Label1 Label
-          MoveScaled(2,2,27,3)
-          Font = Font["Ubuntu Sans,Bold,10"]
-          Text = ("Photos en xxxx GRoup")
-        }
-        { MenuButton1 MenuButton
-          MoveScaled(25,1,20,4)
-          Text = (",mn,mn,nm")
-          Picture = Picture["icon:/medium/find"]
-          Menu = "buscar"
-        }
-        { ButtonBox1 ButtonBox
-          MoveScaled(46,1,43,5)
-          Expand = True
-          PopupMenu = "buscar"
+        { SpringToolBar2 Spring
+          MoveScaled(1,0,4,6)
           Direction = Direction.LeftToRight
-          Picture = Picture["icon:/medium/find"]
-          ClearButton = True
         }
-      }
-      { HBox2 Panel
-        MoveScaled(1,8,90,6)
-        Arrangement = Arrange.Horizontal
-        { HBox3 HBox
-          MoveScaled(1,0,8,6)
-          Background = Color.LightBackground
+        { ButtonBoxPhotoFilter ButtonBox
+          MoveScaled(8,1,67,5)
+          ToolTip = ("Images Filter ")
           Expand = True
+          Placeholder = ("Unfilter")
+          Button = False
+          ClearButton = True
+          Filter = True
+          FilterMenu = "SearchByMenu"
+          FilterPicture = Picture["icon:/22/filter"]
         }
-        { Panel1 Panel
-          MoveScaled(40,0,50,6)
-          { ButtonZoomIn Button
-            MoveScaled(40,1,4,4)
-            Picture = Picture["icon:/medium/zoom-in"]
-          }
-          { ButtonZoomOut Button
-            MoveScaled(44,1,4,4)
-            Picture = Picture["icon:/medium/zoom-out"]
-          }
-          { SpinBoxPaginas SpinBox
-            MoveScaled(22,1,9,4)
-          }
-          { Button1 Button
-            MoveScaled(14,1,4,4)
-            Picture = Picture["icon:/medium/start"]
-          }
-          { Button2 Button
-            MoveScaled(35,1,4,4)
-            Picture = Picture["icon:/medium/end"]
-          }
-          { Button3 Button
-            MoveScaled(31,1,4,4)
-            Picture = Picture["icon:/medium/forward"]
-          }
-          { Button4 Button
-            MoveScaled(18,1,4,4)
-            Picture = Picture["icon:/medium/rewind"]
-          }
+        { ButtonZoomIn Button
+          MoveScaled(75,1,5,5)
+          Visible = False
+          ToolTip = ("Zoom In")
+          Picture = Picture["icon:/medium/zoom-in"]
+        }
+        { ButtonZoomOut Button
+          MoveScaled(81,1,5,5)
+          Visible = False
+          ToolTip = ("Zoom Out")
+          Picture = Picture["icon:/medium/zoom-out"]
         }
       }
-      { !PanelDespliegue ScrollView
-        MoveScaled(1,17,90,27)
-        #Public = True
+      { PanelGalleryContent ScrollView
+        MoveScaled(2,20,41,24)
+        Background = Color.SelectedBackground
         Expand = True
         Arrangement = Arrange.Row
         Spacing = True
         Margin = True
         Padding = 4
+        Border = False
         ScrollBar = Scroll.Vertical
+        Focus = True
         Shadow = True
       }
+    }
+  }
+  { HBoxStatusBar HBox
+    MoveScaled(0,78,137,5)
+    { MenuButtonCollection MenuButton
+      MoveScaled(0,0,25,5)
+      Text = ("Shared gallery")
+      Arrow = False
+      Menu = "GalleryMenu"
+    }
+    { LabelStatusBar Label
+      MoveScaled(25,0,58,5)
+      Expand = True
+      Padding = 4
+      Spacing = True
+      Border = Border.Etched
+      Text = ("Status bar")
+      Trim = True
+    }
+    { SliderZoomer Slider
+      MoveScaled(113,0,16,4)
+      Mouse = Cursor.ZoomIn
+      MinValue = 1
+      MaxValue = 10
+      PageStep = 1
+      Orientation = ScrollBar.Horizontal
+      Value = 1
+    }
+    { ToolButtonViewTrash ToolButton
+      MoveScaled(132,0,5,5)
+      ToolTip = ("View deleted files")
+      Picture = Picture["icon:/22/trash"]
+      Border = True
     }
   }
 }

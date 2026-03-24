@@ -1,0 +1,140 @@
+' Gambas class file
+
+'
+'
+' Album business logic handler class
+'
+'
+Private $Logger As LoggerPort
+Private $PhotoRepository As PhotoRepositoryPort
+Private $Titulo As String = "AlbumService"
+Private $LogMessage As LogMessage
+
+Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort) '' Initializes album service dependencies.
+  
+  $Logger = oLogger
+  $PhotoRepository = cPhotoRepository
+  
+End
+
+Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[] '' Retrieves albums using repository filters.
+  
+  $LogMessage = New LogMessage($Titulo, "FindAlbums", "Search albums: [" & text & "] use softdelete [" & useSoftDelete & "]")
+  $Logger.Debug($LogMessage)
+  
+  Return $PhotoRepository.FindAlbums(text, id, useSoftDelete)
+  
+End
+
+Public Function AddAlbum(name As String, description As String) As Boolean ''Method to add a new album
+  
+  Dim oAlbum As New AlbumEntity
+  Dim iKey As Integer
+  
+  oAlbum.Name = name
+  oAlbum.Description = description
+  oAlbum.CreationUser = User.Name
+  
+  $LogMessage = New LogMessage($Titulo, "AddAlbum", ("Creating album entity to persist"))
+  $Logger.Debug($LogMessage)
+  iKey = $PhotoRepository.CreateAlbum(oAlbum)
+  If iKey Then
+    Return True
+  Endif
+  
+  Return False
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "AddAlbum", ("Problems creating an album"))
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Function EditAlbum(oAlbum As AlbumEntity) As Boolean '' Updates album data by delegating to the repository port.
+  
+  If oAlbum = Null Then Return False
+  If oAlbum.Id <= 0 Then Return False
+  
+  $LogMessage = New LogMessage($Titulo, "EditAlbum", "Updating album entity [" & oAlbum.Id & "]")
+  $Logger.Debug($LogMessage)
+  
+  Return $PhotoRepository.EditAlbum(oAlbum)
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "EditAlbum", "Problems editing an album")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Function RemoveAlbum(id As Integer) As Boolean '' Soft-deletes an album and its current relations.
+  
+  Dim iKey As Integer
+  
+  $LogMessage = New LogMessage($Titulo, "RemoveAlbum", ("Deleting album entity") & Str(id))
+  $Logger.Debug($LogMessage)
+  iKey = $PhotoRepository.DeleteAlbum(id)
+  
+  If iKey Then
+    Return True
+  Endif
+  
+  Return False
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "RemoveAlbum", ("Problems deleting an album"))
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Function AddPhotosToAlbums(photoIds As Integer[], albumIds As Integer[]) As Integer '' Creates relations between photos and albums.
+  
+  Dim iPhotoId As Integer
+  Dim iAlbumId As Integer
+  Dim iCount As Integer
+  
+  If photoIds = Null Or albumIds = Null Then Return 0
+  
+  For Each iPhotoId In photoIds
+    For Each iAlbumId In albumIds
+      If $PhotoRepository.AddPhotoToAlbum(iPhotoId, iAlbumId, 0, User.Name) Then
+        iCount += 1
+      Endif
+    Next
+  Next
+  
+  Return iCount
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "AddPhotosToAlbums", "Problems adding selected photos to albums")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Function RemovePhotosFromAlbums(photoIds As Integer[], albumIds As Integer[]) As Integer '' Removes relations between photos and albums.
+  
+  Dim iPhotoId As Integer
+  Dim iAlbumId As Integer
+  Dim iCount As Integer
+  
+  If photoIds = Null Or albumIds = Null Then Return 0
+  
+  For Each iPhotoId In photoIds
+    For Each iAlbumId In albumIds
+      If $PhotoRepository.RemovePhotoFromAlbum(iPhotoId, iAlbumId) Then
+        iCount += 1
+      Endif
+    Next
+  Next
+  
+  Return iCount
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "RemovePhotosFromAlbums", "Problems removing selected photos from albums")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End

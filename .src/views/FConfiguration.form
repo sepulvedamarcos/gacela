@@ -1,0 +1,144 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,90,63)
+  Text = ("Configuration Panel")
+  Arrangement = Arrange.Vertical
+  Margin = True
+  Padding = 4
+  { Panel1 Panel
+    MoveScaled(0,0,90,54)
+    Arrangement = Arrange.Vertical
+    { IconPanelGacela IconPanel
+      MoveScaled(1,2,87,46)
+      Expand = True
+      Count = 3
+      Index = 0
+      Text = ("General")
+      Picture = Picture["icon:/medium/access"]
+      { Label1 Label
+        MoveScaled(1,2,50,3)
+        Text = ("Move images to internal repository")
+      }
+      { SwitchButtonDeleteOriginal SwitchButton
+        MoveScaled(53,2,8,4)
+      }
+      { Label3 Label
+        MoveScaled(1,5,48,6)
+        Font = Font["Adwaita Mono,-3"]
+        Alignment = Align.Justify
+        Text = ("If enabled, Gacela will move imported images to its internal repository and remove them from their original location. This action cannot be undone.")
+        Trim = True
+      }
+      { Label8 Label
+        MoveScaled(1,14,42,3)
+        Text = ("Maximun files in Trash folder")
+      }
+      { SpinBoxMaxFileDeleted SpinBox
+        MoveScaled(44,13,17,4)
+        MaxValue = 1000
+        MinText = ("1000")
+      }
+      { Label9 Label
+        MoveScaled(1,22,59,7)
+        Font = Font["Adwaita Mono,-3"]
+        Alignment = Align.Justify
+        Text = ("Once the trash folder reaches its maximum capacity, further deletions will be disabled. To resume deleting files, please perform a manual empty of the trash bin.")
+        Trim = True
+      }
+      { Label10 Label
+        MoveScaled(1,19,42,3)
+        Text = ("Maximum storage limit for the trash folder")
+      }
+      { SpinBoxDeleteMaxSize SpinBox
+        MoveScaled(44,18,17,4)
+        MaxValue = 1024
+        MinText = ("0")
+        Suffix = "Mg"
+        Value = 1
+      }
+      Index = 1
+      Text = ("Logger")
+      Picture = Picture["icon:/medium/memory"]
+      { Label2 Label
+        MoveScaled(1,3,20,3)
+        Text = ("Log Level")
+      }
+      { ComboBoxLevel ComboBox
+        MoveScaled(22,2,21,4)
+        ReadOnly = True
+      }
+      { Label4 Label
+        MoveScaled(1,8,20,3)
+        Text = ("Log Output")
+      }
+      { ComboBoxOutput ComboBox
+        MoveScaled(22,7,21,4)
+        ReadOnly = True
+      }
+      { Label5 Label
+        MoveScaled(1,13,20,3)
+        Text = ("Log File Path")
+      }
+      { Label6 Label
+        MoveScaled(1,18,20,3)
+        Text = ("Max Log File Size")
+      }
+      { Label7 Label
+        MoveScaled(1,23,20,3)
+        Text = ("Max Backup Files")
+      }
+      { DirBoxFilePath DirBox
+        MoveScaled(22,12,38,4)
+      }
+      { SpinBoxBackupFiles SpinBox
+        MoveScaled(22,22,13,4)
+        MinValue = 1
+        MaxValue = 10
+        MinText = ("1")
+        Value = 1
+      }
+      { SpinBoxFileSize SpinBox
+        MoveScaled(22,17,13,4)
+        MinValue = 1
+        MaxValue = 50
+        MinText = ("1")
+        Suffix = "Mg"
+        Value = 1
+      }
+      Index = 2
+      Text = ("Import/Export")
+      Picture = Picture["icon:/22/upload"]
+      { Label11 Label
+        MoveScaled(0,1,36,3)
+        Text = ("Show import summary dialog")
+      }
+      { SwitchButtonShowSummaryDialog SwitchButton
+        MoveScaled(44,1,9,4)
+      }
+      Index = 0
+    }
+  }
+  { VBoxButtons2 VBox
+    MoveScaled(0,54,84,8)
+    { Separator2 Separator
+      MoveScaled(0,0,72,2)
+    }
+    { HBoxButtons2 HBox
+      MoveScaled(0,2,82,5)
+      Spacing = True
+      Padding = 4
+      { Spring2 Spring
+        MoveScaled(38,0,4,4)
+      }
+      { ButtonAccept Button
+        MoveScaled(45,0,18,4)
+        Text = ("Accept")
+      }
+      { ButtonExit Button
+        MoveScaled(63,0,18,4)
+        Text = ("Exit")
+      }
+    }
+  }
+}

@@ -1,0 +1,149 @@
+' Gambas class file
+
+'
+'
+' Business logic handler class
+'
+'
+Private $PhotoService As PhotoService
+Private $AlbumService As AlbumService
+Private $Logger As LoggerPort
+Private $Titulo As String = "FImportDialog"
+Private $LogMessage As LogMessage
+Private $IdAlbum As Integer
+Private $Fmain As Fmain
+Private $Configuration As Configuration
+Private $ImportSelection As PhotoImportSelectionService
+
+' ==================================================
+'
+'          Public methods
+'
+' ==================================================
+Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, cAlbumService As AlbumService, oLogger As LoggerPort, cImportSelection As PhotoImportSelectionService, oConfiguration As Configuration) '' Creates a new import dialog linked to the main window and selection service.
+  
+  $PhotoService = cPhotoService
+  $AlbumService = cAlbumService
+  $Logger = oLogger
+  $ImportSelection = cImportSelection
+  $Fmain = cFmain
+  $Configuration = oConfiguration
+  
+  $LogMessage = New LogMessage($Titulo, "_new", ("Creating dialog window and album list"))
+  $Logger.Info($LogMessage)
+  
+  ListEditorPhotos.ReadOnly = True
+  ListEditorPhotos.List = $ImportSelection.SelectedPaths
+  ListEditorPhotos.Unique = True
+  
+End
+
+Public Sub ButtonAccept_Click()
+  
+  Dim iResp As Integer
+  
+  If ListEditorPhotos.List.Count = 0 Then
+    Message.Warning(("You must select photos to process"))
+    Return
+  End If
+  iResp = Message.Question(("Are you sure you want to import the selected photos into the album with the chosen options?"), ("Yes"), ("No"))
+  
+  If iResp = 2 Then
+    Return
+  Else
+    $ImportSelection.SetPaths(ListEditorPhotos.List)
+    $ImportSelection.SetAlbumId($IdAlbum)
+  Endif
+  
+  Me.Close(Enumeration.DLG_OK)
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "ButtonAccept_Click()", ("A problem occurred while setting selection") & " [" & Error.Text & "]")
+  $Logger.Error($LogMessage)
+  Message.Error(("A problem occurred while setting selection") & " [" & Error.Text & "]")
+  
+End
+
+Public Sub CheckBoxEnableAlbum_Click()
+  
+  Dim oDialog As FAlbumSelection
+  Dim oAlbumSelection As AlbumSelectionService
+  Dim oLabel As Label
+  Dim iResponse As Integer
+  
+  $LogMessage = New LogMessage($Titulo, "CheckBoxEnableAlbum_Click", ("Checkbox click to associate album ") & "[" & Str(CheckBoxEnableAlbum.Value) & "]")
+  $Logger.Debug($LogMessage)
+  
+  If CheckBoxEnableAlbum.Value Then
+    
+    oAlbumSelection = New AlbumSelectionService
+    oDialog = New FAlbumSelection($AlbumService, $Logger, oAlbumSelection, Enumeration.ALBUM_ADD_ACTION, Null, False)
+    iResponse = oDialog.ShowModal()
+    
+    If iResponse = Enumeration.DLG_OK Then
+      If oAlbumSelection.HasSelection() Then
+        For Each oAlbum As AlbumEntity In oAlbumSelection.GetSelectedAlbumEntities()
+          $IdAlbum = oAlbum.Id
+          LabelAlbumNameSelected.Text = oAlbum.Name
+          LabelAlbumNameSelected.Visible = True
+        Next
+      Endif
+    Else
+      $IdAlbum = 0
+      LabelAlbumNameSelected.Text = ""
+      LabelAlbumNameSelected.Visible = False
+      CheckBoxEnableAlbum.Value = False
+    Endif
+  Else
+    $IdAlbum = 0
+    LabelAlbumNameSelected.Text = ""
+    LabelAlbumNameSelected.Visible = False
+  Endif
+  
+End
+
+Public Sub ButtonExit_Click()
+  
+  $LogMessage = New LogMessage($Titulo, "ButtonExit_Click()", ("Cancel album association, revert changes"))
+  $Logger.Debug($LogMessage)
+  CheckBoxEnableAlbum.Value = False
+  
+  Me.Close()
+  
+End
+
+Public Sub ListEditorPhotos_Add()
+  
+  Dim vImg As Variant
+  
+  Dialog.Title = "Select a file"
+  Dialog.Filter = ["*.png; *.jpg", "Image files"]
+  Dialog.FilterIndex = 0
+  Dialog.Path = Desktop.GetDirectory("PICTURES")
+  If Dialog.OpenFile(True) Then
+    Return ' Process canceled by the user
+  Endif
+  
+  $LogMessage = New LogMessage($Titulo, "ListEditorPhotos_Add", ("Adding new photos"))
+  $Logger.Debug($LogMessage)
+  
+  For Each vImg In Dialog.Paths
+    $LogMessage = New LogMessage($Titulo, "ListEditorPhotos_Add", ("Adding a new photo") & "[" & vImg & "]")
+    $Logger.Debug($LogMessage)
+    ListEditorPhotos.Add(vImg)
+  Next
+  
+End
+
+Public Sub ListEditorPhotos_Select()
+  
+  PictureBoxPreview.Image = Image.Load(ListEditorPhotos.Text)
+  
+End
+
+Public Sub Form_Show()
+
+  If $Configuration.ShouldDeleteOriginals Then
+    LabelMessageDeleteOriginals.Text = ("Warning!, All images are delete from original position")
+  End If
+End

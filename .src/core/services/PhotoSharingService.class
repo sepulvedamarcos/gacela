@@ -1,0 +1,175 @@
+' Gambas class file
+
+' PhotoSharingService.class
+' Service to handle moving photos between local and shared gallery.
+' It orchestrates both file system and database record movement.
+
+Inherits PhotoSelectionService
+
+' Dependencies
+Private $PhotoService As PhotoService
+Private $Configuration As Configuration
+Private $Logger As LoggerPort
+Private $Summary As Summary
+Private $ShouldCancel As Boolean = False
+
+' Storage and Repositories
+Private $Storage As FileSystemStorageAdapter
+Private $SourceRepo As SQLiteRepositoryAdapter
+Private $TargetRepo As SQLiteRepositoryAdapter
+
+' Events expected by FProgressBar
+Event Progress(fValue As Float, sMessage As String)
+
+Property ShouldCancel As Boolean
+
+Public Sub _new(oPhotoService As PhotoService, cConfiguration As Configuration, oLogger As LoggerPort)
+  
+  $PhotoService = oPhotoService
+  $Configuration = cConfiguration
+  $Logger = oLogger
+  $Summary = New Summary
+  $Storage = New FileSystemStorageAdapter
+  
+End
+
+'' Executes the sharing/unsharing process for the selected photos.
+'' bToShared: True to move from local to shared, False to move from shared to local.
+Public Function Execute(aPhotos As PhotoEntity[], bToShared As Boolean) As Summary
+  
+  Dim iTotal As Integer = aPhotos.Count
+  Dim iCurrent As Integer = 0
+  Dim oPhoto As PhotoEntity
+  Dim oItem As SummaryItem
+  Dim sActionName As String = If(bToShared, ("Sharing"), ("Unsharing"))
+  
+  ' 0. Initialize Repositories
+  ' Source is the current active one
+  $SourceRepo = $PhotoService.Repository
+  
+  ' Target needs a temporary configuration pointing to the other side
+  Dim cTargetConfig As New Configuration
+  cTargetConfig.WhichGallery = If(bToShared, Enumeration.GalleryType_Shared, Enumeration.GalleryType_Private)
+  $TargetRepo = New SQLiteRepositoryAdapter(cTargetConfig, $Logger)
+
+  For Each oPhoto In aPhotos
+    If $ShouldCancel Then Exit
+    
+    iCurrent += 1
+    Raise Progress(iCurrent / iTotal, sActionName & ": " & oPhoto.FileName)
+    
+    ' 1. Basic Validations
+    If oPhoto.IsLocked Then
+      oItem = New SummaryItem(oPhoto.FileName, Summary.STATUS_FAIL, ("Photo is locked by: ") & oPhoto.LockedBy)
+      $Summary.AddItem(oItem)
+      Continue
+    Endif
+    
+    If oPhoto.IsSoftDeleted Then
+      oItem = New SummaryItem(oPhoto.FileName, Summary.STATUS_FAIL, ("Photo is in trash"))
+      $Summary.AddItem(oItem)
+      Continue
+    Endif
+    
+    ' 2. Ownership Validation (Only for unsharing)
+    ' If unsharing, current user must be the one who shared it.
+    If Not bToShared And If(oPhoto.ImportUser.Len > 0, oPhoto.ImportUser <> System.User.Name, False) Then
+        oItem = New SummaryItem(oPhoto.FileName, Summary.STATUS_FAIL, ("Only the user who shared it can unshare it"))
+        $Summary.AddItem(oItem)
+        Continue
+    Endif
+
+    ' 3. Check if it already exists in target (Hash collision)
+    If $TargetRepo.ValidateHash256Exist(oPhoto.Hash256) Then
+        oItem = New SummaryItem(oPhoto.FileName, Summary.STATUS_FAIL, ("Photo already exists in target gallery (Hash match)"))
+        $Summary.AddItem(oItem)
+        Continue
+    Endif
+
+    ' 4. Orchestrate Movement
+    Try MovePhotoData(oPhoto, bToShared)
+    Dim oLogMsg As LogMessage
+    
+    If Error Then
+      oLogMsg = New LogMessage("PhotoSharingService", "Execute", ("Error ") & sActionName & " " & oPhoto.FileName & ": " & Error.Text)
+      $Logger.Error(oLogMsg)
+      oItem = New SummaryItem(oPhoto.FileName, Summary.STATUS_FAIL, Error.Text)
+    Else
+      oItem = New SummaryItem(oPhoto.FileName, Summary.STATUS_OK, ("Success"))
+    Endif
+    
+    $Summary.AddItem(oItem)
+  Next
+  
+  Return $Summary
+  
+End
+
+Private Sub MovePhotoData(oPhoto As PhotoEntity, bToShared As Boolean)
+    
+    Dim sTargetGalleryBaseDir As String
+    Dim sTargetSubDir As String
+    Dim sTargetFilePath As String
+    Dim sSourceFilePath As String = oPhoto.ImagePath
+    Dim sInternalFileName As String
+    Dim sExt As String
+    Dim oLogMsg As LogMessage    
+    ' Determine target base directory
+    If bToShared Then
+        sTargetGalleryBaseDir = Constants.GACELA_SHARED_GALLERY_DIRECTORY
+    Else
+        sTargetGalleryBaseDir = User.Home &/ Constants.GACELA_GALLERY_DIRECTORY
+    Endif
+    
+    ' 1. Calculate target subdirectory by date (YYYYMMDD)
+    sTargetSubDir = sTargetGalleryBaseDir &/ Format(Now, "yyyymmdd")
+    
+    ' 2. Ensure directory exists
+    $Storage.EnsureDirectory(sTargetSubDir)
+    
+    ' 3. Calculate internal filename using Hash256 (ensure it has hash!)
+    If oPhoto.Hash256.Len = 0 Then
+        ' Fallback if hash is missing (should not happen for new imports)
+        oPhoto.Hash256 = Hash.Sha256(File.Load(sSourceFilePath))
+    Endif
+    
+    sExt = Lower(File.Ext(sSourceFilePath))
+    sInternalFileName = oPhoto.Hash256 & "." & sExt
+    
+    ' 4. Final target file path
+    sTargetFilePath = sTargetSubDir &/ sInternalFileName
+    
+    ' 5. Move file physically
+    ' Check if it already exists physically in target to avoid error
+    If Not $Storage.Exists(sTargetFilePath) Then
+        $Storage.MoveFile(sSourceFilePath, sTargetFilePath)
+    Else
+        ' If it exists physically but we are here, it means DB was inconsistent or duplicate hash
+        ' For safety, we just link to existing one or log it
+        oLogMsg = New LogMessage("PhotoSharingService", "MovePhotoData", "Target file already exists physically: " & sTargetFilePath)
+        $Logger.Debug(oLogMsg)
+    Endif
+    
+    ' 6. Update entity with new path and user info
+    oPhoto.ImagePath = sTargetFilePath
+    If bToShared Then
+        oPhoto.ImportUser = System.User.Name ' Mark as shared by me
+    Endif
+    
+    ' 7. Save to target DB
+    $TargetRepo.CreatePhoto(oPhoto)
+    
+    ' 8. Delete from source DB
+    $SourceRepo.PermanentlyDeletePhoto(oPhoto.Id)
+    
+Catch
+    Error.Propagate
+End
+
+Private Function ShouldCancel_Read() As Boolean
+  Return $ShouldCancel
+End
+
+Private Sub ShouldCancel_Write(Value As Boolean)
+  $ShouldCancel = Value
+End

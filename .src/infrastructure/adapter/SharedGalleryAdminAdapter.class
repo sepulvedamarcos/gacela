@@ -1,0 +1,33 @@
+' Gambas class file
+
+' Infra adapter to execute privileged tasks via pkexec
+
+'Public Function EnableSharedMode() As String
+'
+'  Dim hProc As Process
+'  Dim sOut As String
+'  Dim sErr As String
+'  Dim sScriptPath As String = Application.Dir
+'  
+'  hProc = New Process
+'  hProc.Arguments = ["pkexec", "/bin/bash", sScriptPath]
+'  hProc.RedirectStdout = True
+'  hProc.RedirectStderr = True
+'  
+'  Try hProc.Start
+'  If Error Then
+'    Return "Error running pkexec: " & Error.Text
+'  Endif
+'  
+'  hProc.Wait
+'  
+'  sOut = hProc.ReadAll()
+'  sErr = hProc.ReadError()
+'  
+'  If hProc.ExitCode <> 0 Then
+'    Return "Failure (" & hProc.ExitCode & "): " & sErr & " " & sOut
+'  Endif
+'  
+'  Return "OK: " & sOut
+'
+'End

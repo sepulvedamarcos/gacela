@@ -1,0 +1,50 @@
+' Gambas class file
+
+Public Const STATUS_OK As Integer = 1                                      '' Operation was successful for this item
+Public Const STATUS_FAIL As Integer = 0                                    '' Operation failed for this item
+
+Private $Items As New SummaryItem[]
+Private $OkCount As Integer
+Private $FailCount As Integer
+
+Property Read Items As SummaryItem[]                                       '' List of all summary items
+Property Read Total As Integer                                             '' Total number of processed items
+Property Read OkCount As Integer                                           '' Count of successful items
+Property Read FailCount As Integer                                         '' Count of failed items
+
+Public Sub AddItem(oItem As SummaryItem)                                   '' Adds a new item to the summary and updates counters
+  
+  If oItem = Null Then Return
+  
+  $Items.Add(oItem)
+  If oItem.Status = STATUS_OK Then
+    $OkCount += 1
+  Else
+    $FailCount += 1
+  Endif
+  
+End
+
+Private Function Items_Read() As SummaryItem[]
+  
+  Return $Items
+  
+End
+
+Private Function Total_Read() As Integer
+  
+  Return $Items.Count
+  
+End
+
+Private Function OkCount_Read() As Integer
+  
+  Return $OkCount
+  
+End
+
+Private Function FailCount_Read() As Integer
+  
+  Return $FailCount
+  
+End

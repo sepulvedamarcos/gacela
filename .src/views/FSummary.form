@@ -1,0 +1,66 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,64,67)
+  Text = ("Import Summary")
+  Resizable = False
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  Margin = True
+  { Panel2 Panel
+    MoveScaled(1,1,62,56)
+    { LabelTotalAmount Label
+      MoveScaled(2,0,8,3)
+      Alignment = Align.Right
+    }
+    { Label1 Label
+      MoveScaled(12,0,39,3)
+      Text = ("Images imported")
+    }
+    { LabelSuccessful Label
+      MoveScaled(2,4,8,3)
+      Alignment = Align.Right
+    }
+    { Label2 Label
+      MoveScaled(12,4,39,3)
+      Text = ("Images successfully imported")
+    }
+    { LabelFailed Label
+      MoveScaled(2,8,8,3)
+      Alignment = Align.Right
+    }
+    { Label3 Label
+      MoveScaled(12,8,39,3)
+      Text = ("Images failed to import")
+    }
+    { CheckBoxNotShowSummary CheckBox
+      MoveScaled(11,52,41,3)
+      Text = ("Do not show this dialog again")
+    }
+    { GridViewSummary GridView
+      MoveScaled(1,14,60,37)
+      ScrollBar = Scroll.Vertical
+    }
+  }
+  { Separator1 Separator
+    MoveScaled(0,57,63,2)
+    Expand = True
+  }
+  { HBox1 HBox
+    MoveScaled(1,60,62,5)
+    { Panel1 Panel
+      MoveScaled(6,1,4,3)
+      Expand = True
+    }
+    { btnAccept Button
+      MoveScaled(22,0,18,5)
+      Text = ("Accept")
+      Default = True
+    }
+    { btnExit Button
+      MoveScaled(43,0,18,5)
+      Text = ("Exit")
+      Cancel = True
+    }
+  }
+}

@@ -1,0 +1,31 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,83,48)
+  Text = ("About Gacela")
+  Centered = True
+  { PictureBox1 PictureBox
+    MoveScaled(29,3,26,26)
+    Background = Color.Transparent
+    Picture = Picture.Load("images/Gemini_Generated_Image_87c8qc87c8qc87c8 (1).png")
+    Stretch = True
+    Alignment = Align.Center
+    Mode = PictureBox.Fill
+  }
+  { Label1 Label
+    MoveScaled(32,32,8,3)
+    Text = ("Version")
+  }
+  { LabelSlogan Label
+    MoveScaled(3,37,78,3)
+    Font = Font["Hack,+3"]
+    Text = ("Gestor de Álbumes Compartidos En Linux Avanzado")
+  }
+  { LabelVersion Label
+    MoveScaled(42,32,8,3)
+  }
+  { URLLabel URLLabel
+    MoveScaled(24,42,41,3)
+    Text = ("https://github.com/sepulvedamarcos/gacela")
+  }
+}

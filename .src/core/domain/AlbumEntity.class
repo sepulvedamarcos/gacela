@@ -1,0 +1,155 @@
+' Gambas class file
+
+'
+' Gambas class file - AlbumEntity
+' Domain model for representing an album in Gacela
+'
+'  Remember that variable names should not match class names, even in lowercase, because Gambas treats them as the same.
+
+' Private model properties
+Private $iId As Integer = 0
+Private $sName As String = ""
+Private $sDescription As String = ""
+Private $dCreationDate As Date
+Private $sCreationUser As String
+Private $dModificationDate As Date
+Private $sModificationUser As String
+Private $sThumbnail As String
+Private $IsSoftDeleted As Boolean
+Private $iPhotoCount As Integer
+
+' =============================================
+'
+'            PUBLIC PROPERTIES
+'
+'==============================================
+Property Id As Integer                      '' Unique album ID
+Property Name As String                     '' Album name
+Property Description As String              '' Album description
+Property CreationDate As Date               '' Album creation date
+Property CreationUser As String             '' User who created the album
+Property ModificationDate As Date           '' Album last modification date
+Property ModificationUser As String         '' User who last modified the album
+Property Thumbnail As String                '' Album thumbnail image
+Property IsSoftDeleted As Boolean              '' Indicates if it was deleted
+Property PhotoCount As Integer              '' Number of associated photos
+
+Private Function Id_Read() As Integer
+
+  Return $iId
+
+End
+
+Private Sub Id_Write(Value As Integer)
+
+  $iId = value
+
+End
+
+Private Function Name_Read() As String
+
+  Return $sName
+
+End
+
+Private Sub Name_Write(Value As String)
+
+  $sName = value
+
+End
+
+Private Function Description_Read() As String
+
+  Return $sDescription
+
+End
+
+Private Sub Description_Write(Value As String)
+
+  $sDescription = value
+
+End
+
+Private Function CreationDate_Read() As Date
+
+  Return $dCreationDate
+
+End
+
+Private Sub CreationDate_Write(Value As Date)
+
+  $dCreationDate = value
+  
+End
+
+Private Function CreationUser_Read() As String 
+
+  Return $sCreationUser
+
+End
+
+Private Sub CreationUser_Write(Value As String)
+
+  $sCreationUser = value
+
+End
+
+Private Function ModificationDate_Read() As Date
+
+  Return $dModificationDate
+
+End
+
+Private Sub ModificationDate_Write(Value As Date)
+
+  $dModificationDate = Value
+
+End
+
+Private Function ModificationUser_Read() As String
+
+  Return $sModificationUser
+
+End
+
+Private Sub ModificationUser_Write(Value As String)
+
+  $sModificationUser = Value
+
+End
+
+Private Function Thumbnail_Read() As String
+
+  Return $sThumbnail
+
+End
+
+Private Sub Thumbnail_Write(Value As String)
+
+  $sThumbnail = value
+
+End
+
+Private Function IsSoftDeleted_Read() As Boolean
+
+  Return $IsSoftDeleted
+
+End
+
+Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
+
+  $IsSoftDeleted = isSoftDeleted
+
+End
+
+Private Function PhotoCount_Read() As Integer
+
+  Return $iPhotoCount
+
+End
+
+Private Sub PhotoCount_Write(Value As Integer)
+
+  $iPhotoCount = Value
+
+End

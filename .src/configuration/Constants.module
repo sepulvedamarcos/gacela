@@ -1,25 +1,65 @@
 ' Gambas module file
 
-' Constantes de la aplicación
-Public Const GACELA_DIRECTORY As String = ".config/gacela"      '' Ruta de la configuracion de gacela
-Public Const GACELA_DIRECTORY_SHARED As String = "/usr/share/gacela"    '' Ruta de la biblioteca compartida
-Public Const DATABASE_NAME As String = "gacela.db"              '' Nombre de la Base de datos
-Public Const DATABASE_SQLITE3 As String = "sqlite3"                 '' Tipo de la base de datos
-Public Const CONFIG_NAME As String = "gacela.conf"              '' Nombre del archivo de settings
+' Constants that define the global Settings section
+Public Const GLOBAL_VERSION As String = "Global/Version"                        '' Software version key in settings
+Public Const GLOBAL_GALLERY_TYPE As String = "Global/GalleryType"               '' Selected gallery type key
+Public Const GLOBAL_GALLERY_PHOTOS_PER_VIEW As String = "Global/PhotosPerView"  '' Number of photos to load per page
+Public Const GLOBAL_APPLICATION_THEME As String = "Global/Theme"                '' Application visual theme key
+Public Const GLOBAL_SHARED_GALLERY_ENABLED As String = "Global/SharedGallery"   '' Flag to enable/disable shared gallery
+Public Const GLOBAL_DATABASE_PROVIDER As String = "Global/DatabaseProvider"     '' Database provider type key
+Public Const GLOBAL_STORAGE_PROVIDER As String = "Global/StorageProvider"       '' File storage provider type key
+Public Const GLOBAL_DELETED_MAX_SIZE_MB As String = "Global/DeletedMaxSizeMB"   '' Maximum size for the trash directory in MB
+Public Const GLOBAL_DELETED_MAX_COUNT As String = "Global/DeletedMaxCount"      '' Maximum number of files in the trash
+Public Const GLOBAL_SHOWMAINTOOLBAR As String = "Global/ShowMainToolbar"        '' Notice if Main toolbar is show
+Public Const GLOBAL_SHOWMAINSTATUSBAR As String = "Global/ShowMainStatusbar"    '' Notice if Main Statusbar is show
 
-Public Const GRUPO_GACELA As String = "gacela-users"            '' Nombre del grupo de usuarios de gacela
+Public Const IMPORT_SHOW_SUMMARY As String = "Summary/ShowImport"               '' Flag to show the import summary dialog
+Public Const MOVETRASH_SHOW_SUMMARY As String = "Summary/MoveToTrash"           '' Flag to show the MoveTrash summary dialog
 
-' Constantes de nombres de tablas
-Public Const TABLE_PHOTOS As String = "photos"                  '' Tabla de Fotos
-Public Const TABLE_ALBUMS As String = "albums"                  '' Tala de Albumes
-Public Const TABLE_TAGS As String = "tags"                      '' Tabla de Tags
-Public Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"     '' Tabla de relacion Fotos-Album
-Public Const TABLE_PHOTOS_TAGS As String = "photos_tags"        '' Tabla de relacion Foto-Tag
+Public Const DONTSHOWAGAIN_MOVETRASH As String = "Question/MoveToTrash"         '' Flag to define dont show again move to trash question
+Public Const DONTSHOWAGAIN_IMPORT As String = "Question/Import"                 '' Flag to define dont show again import images question
 
-' Fotos semilla para iniciar la aplicacion
-Public Const PHOTO_SEED_1 As String = "./img-126.png"           '' Foto para iniciar aplicacion
-Public Const PHOTO_SEED_2 As String = "./img-125.png"           '' Foto para iniciar aplicacion
+' Constants that define the Logger section
+Public Const LOGGER_PROVIDER As String = "Logger/Provider"                      '' Logger implementation provider key
+Public Const LOGGER_LEVEL As String = "Logger/Level"                            '' Logging verbosity level key
+Public Const LOGGER_OUTPUT As String = "Logger/Output"                          '' Logging output destination key
+Public Const LOGGER_MAXFILES As String = "Logger/MaxFiles"                      '' Maximum number of rotated log files
+Public Const LOGGER_SIZELOG As String = "Logger/SizeLog"                        '' Individual log file size limit
+Public Const LOGGER_LOGFILE As String = "Logger/LogFile"                        '' Log file name/path key
+Public Const LOGGER_MAXFILESIZE As String = "Logger/MaxFilesSize"               '' Total maximum size for all log files
 
-' Textos para indicar estado de sincronizacion
-Public Const SYNC_PENDING As String = "Pendiente"               '' Estado de sincronizacion pendiente
-Public Const SYNC_SYNCED As String = "Sincronizado"             '' Estado de sincronizacion realizada
+' Constants that define Imports
+Public Const IMPORT_DELETE_ORIGINALS As String = "Import/DeleteOriginals"       '' Delete originals after import
+
+' Application constants
+Public Const GACELA_SETTING_DIRECTORY As String = ".config/gacela"              '' Directory where settings are stored
+Public Const GACELA_LOG_DIRECTORY As String = ".local/state/gacela"             '' Log directory
+Public Const GACELA_GALLERY_DIRECTORY As String = ".local/share/gacela"         '' Gacela gallery directory
+Public Const GACELA_TRASH_DIRECTORY As String = ".local/share/gacela/trash"     '' Directory to move selected images to delete
+Public Const GACELA_SHARED_GALLERY_DIRECTORY As String = "/home/.gacela-shared"      '' Shared gallery directory
+Public Const DATABASE_NAME As String = "gacela.db"                              '' Database name
+Public Const DATABASE_SQLITE3 As String = "sqlite3"                             '' Database type
+Public Const DATABASE_PROVIDER_SQLITE As String = "sqlite"                      '' Identifier for SQLite database provider
+Public Const STORAGE_PROVIDER_LOCAL As String = "local"                         '' Identifier for local file storage provider
+Public Const CONFIG_NAME As String = "gacela.conf"                              '' Settings file name
+
+Public Const GRUPO_GACELA As String = "gacela-shared"                           '' Gacela users group name
+
+' Seed photos for initial application startup
+Public Const PHOTO_SEED_1 As String = "images/img-126.png"                      '' Initial seed photo
+Public Const PHOTO_SEED_2 As String = "images/img-125.png"                      '' Initial seed photo
+
+' Texts to indicate sync status
+Public Const SYNC_PENDING As String = "Pending"                            '' Pending sync status
+Public Const SYNC_SYNCED As String = "Synced"                              '' Completed sync status
+
+Public Const USE_SOFT_TRUE As Integer = 1                                  '' Value indicating softDelete is used
+Public Const USE_SOFT_FALSE As Integer = 0                                 '' Value indicating softDelete is not used
+
+Public Const GALLERY_PRIVATE As String = ("Private")                       '' Indicates private gallery
+Public Const GALLERY_SHARED As String = ("Shared")                         '' Indicates shared gallery
+
+Public Const RESPONSE_OK As String = ("Image saved successfully")          '' Success message for image saving
+Public Const RESPONSE_FILEEXIST As String = ("The file already exists")    '' Error message when file already exists
+Public Const RESPONSE_DBERROR As String = ("Error while saving the photo to the database") '' Error message for database persistence failure
+Public Const RESPONSE_ERROR As String = ("Some error ocurred")             '' General error message

@@ -1,0 +1,44 @@
+' Gambas class file
+
+Private $Question As QuestionInteractionService
+Private $Logger As LoggerPort
+Private $Titulo As String = "FQuestion"
+Private $LogMessage As LogMessage
+
+Public Sub _new(cQuestion As QuestionInteractionService, cLogger As LoggerPort, sTitle As String, sTexto As String)
+    
+  $Question = cQuestion
+  $Logger = cLogger
+  
+  Me.Text = sTitle
+  LabelQuestion.Text = sTexto
+  
+End
+
+Public Sub Form_Open()
+  
+End
+
+Public Sub ButtonOk_Click()
+  
+  $LogMessage = New LogMessage($Titulo, "ButtonOk_Click()", ("Ok button select..."))
+  $Logger.Info($LogMessage)
+  
+  Me.Close(Enumeration.DLG_OK)
+
+End
+
+Public Sub ButtonCancel_Click()
+  
+  $LogMessage = New LogMessage($Titulo, "ButtonCancel_Click()", ("Cancel button select..."))
+  $Logger.Debug($LogMessage)
+
+  Me.Close()
+  
+End
+
+Public Sub SwitchButtonDontShowAgain_Click()
+
+  $Question.ShouldNotShowAgain = SwitchButtonDontShowAgain.Value
+
+End

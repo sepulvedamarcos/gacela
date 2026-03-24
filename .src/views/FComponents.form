@@ -1,0 +1,58 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,103,74)
+  Text = ("Formulario catalogo para copiar controles reutilizables")
+  { VBoxButtons VBox
+    MoveScaled(3,13,84,8)
+    { Separator1 Separator
+      MoveScaled(0,0,72,2)
+    }
+    { HBoxButtons HBox
+      MoveScaled(0,2,82,5)
+      Spacing = True
+      Padding = 4
+      { ButtonNew Button
+        MoveScaled(1,0,18,4)
+        Text = ("New Album")
+      }
+      { ButtonRemove Button
+        MoveScaled(19,0,18,4)
+        Text = ("Remove Album")
+      }
+      { Spring1 Spring
+        MoveScaled(38,0,4,4)
+      }
+      { ButtonOK Button
+        MoveScaled(45,0,18,4)
+        Text = ("OK")
+      }
+      { ButtonCancel Button
+        MoveScaled(63,0,18,4)
+        Text = ("Cancel")
+      }
+    }
+  }
+  { VBoxButtons2 VBox
+    MoveScaled(3,29,84,8)
+    { Separator2 Separator
+      MoveScaled(0,0,72,2)
+    }
+    { HBoxButtons2 HBox
+      MoveScaled(0,2,82,5)
+      Spacing = True
+      Padding = 4
+      { Spring2 Spring
+        MoveScaled(31,0,4,4)
+      }
+      { ButtonAccept Button
+        MoveScaled(41,0,18,4)
+        Text = ("Accept")
+      }
+      { ButtonExit Button
+        MoveScaled(63,0,18,4)
+        Text = ("Exit")
+      }
+    }
+  }
+}

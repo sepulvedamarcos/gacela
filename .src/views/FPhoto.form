@@ -1,19 +1,21 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,15,14)
-  Expand = True
-  { PictureBoxPhoto PictureBox
-    MoveScaled(1,1,12,11)
-    Padding = 4
-    Alignment = Align.Center
-    Border = Border.Sunken
-    Mode = PictureBox.Fill
-  }
+  MoveScaled(0,0,24,16)
+  Margin = True
+  Padding = 2
   { ButtonSeleccionar Button
-    MoveScaled(1,1,3,3)
+    MoveScaled(1,1,3.4286,3.4286)
     Visible = False
-    AutoResize = True
-    Picture = Picture["icon:/medium/add"]
+    Picture = Picture["icon:/tiny/add"]
+  }
+  { PanelPhoto Panel
+    MoveScaled(1,5,10,10)
+    Expand = True
+    Arrangement = Arrange.Vertical
+    { PictureBoxPhoto PictureBox
+      MoveScaled(2,2,6,6)
+      Expand = True
+    }
   }
 }

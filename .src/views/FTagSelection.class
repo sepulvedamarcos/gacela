@@ -1,0 +1,346 @@
+' Gambas class file
+
+Private $TagService As TagService
+Private $SelectionService As TagSelectionService
+Private $Logger As LoggerPort
+Private $Titulo As String = "FTagSelection"
+Private $LogMessage As LogMessage
+Private $Action As Integer
+Private $EditCode As TagEntity
+
+Public Sub _new(oTagService As TagService, oLogger As LoggerPort, oSelectionService As TagSelectionService, iAction As Integer) '' Initializes the tag dialog according to the requested action.
+
+  $TagService = oTagService
+  $SelectionService = oSelectionService
+  $Logger = oLogger
+  $Action = iAction
+  If $SelectionService <> Null Then $SelectionService.Clear()
+  
+  VBoxListTags.Visible = True
+  VBoxManageTag.Visible = False
+  Me.Width = VBoxButtons.Width + 10
+  Me.Height = 430
+  
+  If iAction = Enumeration.TAG_ADD_ACTION Then
+    Me.Text = ("Add selected photos to tags")
+    ButtonAccept.Text = ("Accept")
+  Else If iAction = Enumeration.TAG_REMOVE_ACTION Then
+    Me.Text = ("Remove selected photos from tags")
+    ButtonAccept.Text = ("Accept")
+  Else
+    Me.Text = ("Manage tags")
+    ButtonAccept.Visible = False
+  Endif
+  
+  InitializeGrid()
+  FindTags()
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "_new", "Problem loading tags: " & Error.Text)
+  If $Logger <> Null Then $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Sub ButtonAccept_Click() '' Persists selected tag ids into the temporary selection service.
+
+  Dim oTag As TagEntity
+  Dim aSelectedTagIds As New Integer[]
+  
+  For Each oTag In GetSelectedTags()
+    aSelectedTagIds.Add(oTag.Id)
+  Next
+  
+  If aSelectedTagIds.Count = 0 Then
+    Message.Warning(("You must select at least one tag"))
+    Return
+  Endif
+  
+  If $SelectionService <> Null Then
+    $SelectionService.ReplaceSelection(aSelectedTagIds)
+  Endif
+  
+  Me.Close(Enumeration.DLG_OK)
+
+End
+
+Public Sub ButtonExit_Click() '' Cancels the dialog and clears temporary selections.
+
+  If $SelectionService <> Null Then $SelectionService.Clear()
+  Me.Close(Enumeration.DLG_CANCEL)
+
+End
+
+Public Sub ButtonAddNew_Click() '' Creates or updates a tag using the form values.
+
+  Dim oTag As TagEntity
+  
+  If TextBoxTag.Text = "" Then
+    Message.Warning(("You must add a tag to continue"))
+    TextBoxTag.SetFocus()
+    Return
+  Endif
+  
+  If $EditCode <> Null Then
+    oTag = FindTagByName(TextBoxTag.Text, $EditCode.Id)
+    If oTag <> Null Then
+      Message.Warning(("The item already exists."))
+      TextBoxTag.SetFocus()
+      Return
+    Endif
+    
+    oTag = BuildTagFromForm($EditCode)
+    If $TagService.EditTag(oTag) Then
+      $EditCode = Null
+      FindTags()
+      ChangePanels(False)
+    Else
+      Message.Error(("Error while editing a tag"))
+    Endif
+    
+  Else
+    If FindTagByName(TextBoxTag.Text) <> Null Then
+      Message.Warning(("The item already exists."))
+      TextBoxTag.SetFocus()
+      Return
+    Endif
+    
+    If $TagService.AddTag(Trim(TextBoxTag.Text), Trim(TextAreaTagDescription.Text), CStr(ColorButtonTag.Value)) Then
+      FindTags()
+      ChangePanels(False)
+    Else
+      Message.Error(("Error while adding a new tag"))
+    Endif
+  Endif
+
+End
+
+Public Sub ButtonCancel_Click() '' Returns to tag list mode without persisting form changes.
+
+  $EditCode = Null
+  ChangePanels(False)
+
+End
+
+Public Sub ButtonNewTag_Click() '' Prepares the form to create a new tag.
+
+  $EditCode = Null
+  ChangePanels(True)
+  TextBoxTag.Text = ""
+  TextAreaTagDescription.Text = ""
+  ' TextBoxTagColor.Text = "#ffffff"
+  TextBoxTag.SetFocus()
+
+End
+
+Public Sub ButtonEdit_Click() '' Loads the selected tag into the edit form.
+
+  If TableViewTags.Rows.Selection.Count > 1 Then
+    Message.Error("Only one selection is allowed.")
+    TableViewTags.Rows.UnSelectAll()
+    Return
+  Endif
+  
+  If TableViewTags.Rows.Selection.Count = 0 Then
+    Message.Warning(("You must select one tag"))
+    Return
+  Endif
+  
+  ChangePanels(True)
+  $EditCode = FindTagByRow(TableViewTags.Rows.Selection[0])
+  If $EditCode = Null Then Return
+  
+  TextBoxTag.Text = $EditCode.Name
+  TextAreaTagDescription.Text = $EditCode.Description
+  ColorButtonTag.Value = CInt($EditCode.Color)
+  TextBoxTag.SetFocus()
+
+End
+
+Public Sub ButtonRemoveTags_Click() '' Removes selected tags after confirmation.
+
+  Dim aSelectedTags As TagEntity[]
+  Dim oTag As TagEntity
+  Dim iRemoved As Integer
+  
+  aSelectedTags = GetSelectedTags()
+  If aSelectedTags.Count = 0 Then
+    Message.Warning(("You must select at least one tag"))
+    Return
+  Endif
+  
+  If Message.Question(BuildRemoveTagsMessage(aSelectedTags), ("Yes"), ("No")) <> 1 Then Return
+  
+  For Each oTag In aSelectedTags
+    If $TagService.RemoveTag(oTag.Id) Then
+      iRemoved += 1
+    Endif
+  Next
+  
+  If iRemoved > 0 Then
+    Wait 0.5
+    FindTags()
+  Endif
+
+End
+
+Private Sub InitializeGrid() '' Configures the tag list table columns.
+
+  With TableViewTags
+    .Columns.Count = 4
+    .Rows.Count = 0
+    .Header = GridView.Horizontal
+    
+    .Columns[0].Text = ("Tags")
+    .Columns[0].Expand = True
+    
+    .Columns[1].Text = ("Description")
+    .Columns[1].Expand = True
+    
+    .Columns[2].Text = ("Color")
+    .Columns[2].Width = 70
+    
+    .Columns[3].Text = ("Count")
+    .Columns[3].Alignment = Align.Right
+    .Columns[3].Width = 45
+  End With
+
+End
+
+Private Sub BindGrid(oTags As TagEntity[]) '' Binds tags to the table and caches entities in Tag.
+
+  Dim iRow As Integer = 0
+  
+  TableViewTags.Rows.Count = 0
+  For Each oTag As TagEntity In oTags
+    iRow = TableViewTags.Rows.Count
+    TableViewTags.Rows.Count += 1
+    TableViewTags[iRow, 0].Text = Trim(oTag.Name)
+    TableViewTags[iRow, 1].Text = Trim(oTag.Description)
+    TableViewTags[iRow, 2].Text = Trim(oTag.Color)
+     ' TableViewTags[iRow, 2].Background = 65280
+    TableViewTags[iRow, 2].Background = CInt(oTag.Color)
+    TableViewTags[iRow, 3].Text = Trim(CStr(oTag.PhotoCount)) & " "
+  Next
+  TableViewTags.Tag = oTags
+
+End
+
+Private Function FindTagByName(sTagName As String, Optional iExcludeId As Integer = 0) As TagEntity '' Finds one tag by name, excluding an optional id.
+
+  Dim oTag As TagEntity
+  
+  For Each oTag In GetTags()
+    If oTag.Id <> iExcludeId And oTag.Name = sTagName Then
+      Return oTag
+    Endif
+  Next
+  
+  Return Null
+
+End
+
+Private Sub FindTags() '' Loads current tags into the list.
+
+  Dim oTags As TagEntity[]
+  
+  oTags = $TagService.FindTags("")
+  BindGrid(oTags)
+  
+  If oTags.Count = 0 Then
+    LabelTitle.Text = ("No tags available")
+    ButtonAccept.Enabled = False
+  Else
+    LabelTitle.Text = ("Choose one or more tags")
+    ButtonAccept.Enabled = True
+  Endif
+
+End
+
+Private Sub ChangePanels(shouldShowManagePanel As Boolean) '' Switches between list mode and manage mode.
+
+  If shouldShowManagePanel Then
+    VBoxListTags.Visible = False
+    VBoxManageTag.Visible = True
+    TextBoxTag.SetFocus()
+  Else
+    VBoxListTags.Visible = True
+    VBoxManageTag.Visible = False
+    TableViewTags.SetFocus()
+  Endif
+
+End
+
+Private Function GetSelectedTags() As TagEntity[] '' Returns tag entities for the currently selected rows.
+
+  Dim aSelected As New TagEntity[]
+  Dim oTag As TagEntity
+  Dim iRow As Integer
+  
+  For iRow = 0 To TableViewTags.Rows.Max
+    If TableViewTags.Rows[iRow].Selected Then
+      oTag = FindTagByRow(iRow)
+      If oTag <> Null Then aSelected.Add(oTag)
+    Endif
+  Next
+  
+  Return aSelected
+
+End
+
+Private Function GetTags() As TagEntity[] '' Returns cached tags stored in the table Tag.
+
+  If TableViewTags.Tag = Null Then Return New TagEntity[]
+  
+  Return TableViewTags.Tag
+
+End
+
+Private Function FindTagByRow(iRow As Integer) As TagEntity '' Resolves the tag represented by a table row.
+
+  Dim aTags As TagEntity[]
+  
+  aTags = GetTags()
+  If iRow < 0 Then Return Null
+  If iRow > aTags.Max Then Return Null
+  
+  Return aTags[iRow]
+
+End
+
+Private Function BuildTagFromForm(Optional oBaseTag As TagEntity = Null) As TagEntity '' Builds a tag entity from current form fields.
+
+  Dim oTag As TagEntity
+  
+  If oBaseTag = Null Then
+    oTag = New TagEntity
+  Else
+    oTag = oBaseTag
+  Endif
+  
+  oTag.Name = Trim(TextBoxTag.Text)
+  oTag.Description = Trim(TextAreaTagDescription.Text)
+  oTag.Color = CStr(ColorButtonTag.Value)
+  
+  Return oTag
+
+End
+
+Private Function BuildRemoveTagsMessage(aTags As TagEntity[]) As String '' Builds the confirmation message for tag deletion.
+
+  Dim oTag As TagEntity
+  Dim iPhotoCount As Integer
+  Dim sMessage As String
+  
+  For Each oTag In aTags
+    iPhotoCount += oTag.PhotoCount
+  Next
+  
+  sMessage = ("Are you sure you want to remove the selected tags?")
+  If iPhotoCount > 0 Then
+    sMessage &= "\n\n" & ("This action will also remove ") & iPhotoCount & (" associated image relations.")
+  Endif
+  
+  Return sMessage
+
+End

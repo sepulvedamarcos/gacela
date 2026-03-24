@@ -1,0 +1,67 @@
+' Gambas class file
+
+' Structured log payload used by LoggerPort.
+
+Private $Component As String
+Private $Method As String
+Private $Text As String
+
+Property Component As String
+Property Method As String
+Property Text As String
+
+Public Sub _new(component As String, methodName As String, message As String)
+  $Component = component
+  $Method = methodName
+  $Text = message
+End
+
+Public Function ToText() As String
+  Dim sComponent, sMethod, sDate As String
+  
+  sComponent = NormalizeComponent($Component)
+  sMethod = NormalizeComponent($Method)
+  sDate = Format(Now, "yyyy-mm-dd hh:nn:ss")
+  
+  If sComponent <> "" And sMethod <> "" Then
+    Return "[" & sDate & "][" & sComponent & "][" & sMethod & "]{" & $Text & "}"
+  Else If $Method <> "" Then
+    Return "[" & sDate & "][" & sMethod & "]{" & $Text & "}"
+  Else
+    Return "[" & sDate & "]{" & $Text & "}"
+  Endif
+End
+
+Private Function Component_Read() As String
+  Return $Component
+End
+
+Private Sub Component_Write(Value As String)
+  $Component = Value
+End
+
+Private Function Method_Read() As String
+  Return $Method
+End
+
+Private Sub Method_Write(Value As String)
+  $Method = Value
+End
+
+Private Function Text_Read() As String
+  Return $Text
+End
+
+Private Sub Text_Write(Value As String)
+  $Text = Value
+End
+
+Private Function NormalizeComponent(Value As String) As String
+  Dim sValue As String
+  
+  sValue = Trim(Value)
+  sValue = Replace(sValue, "[", "")
+  sValue = Replace(sValue, "]", "")
+  
+  Return Trim(sValue)
+End
