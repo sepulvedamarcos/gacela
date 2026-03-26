@@ -78,6 +78,10 @@ Public Function PermanentlyDeletePhoto(id As Integer) As Boolean '' Permanently 
   Error.Raise("PhotoRepositoryPort.PermanentlyDeletePhoto not implemented")
 End
 
+Public Function UpdatePhotoLockStatus(id As Integer, isLocked As Boolean, Optional lockedBy As String = "", Optional lockReason As String = "") As Boolean '' Updates only the lock status of a photo.
+  Error.Raise("PhotoRepositoryPort.UpdatePhotoLockStatus not implemented")
+End
+
 Public Function ValidateHash256Exist(sHash256 As String) As Boolean '' Checks if a photo with the given hash already exists.
   Error.Raise("PhotoRepositoryPort.ValidateHash256Exist not implemented")
 End

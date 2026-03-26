@@ -7,7 +7,7 @@ Private $ShouldNotShowAgain As Boolean = False
 Private $Titulo As String = "QuestionInteractionService"
 Private $LogMessage As LogMessage
 
-' Property ShouldNotShowAgain As Boolean
+Property ShouldNotShowAgain As Boolean
 
 Public Sub _new(cLogger As LoggerPort)
   
@@ -19,10 +19,12 @@ End
 Public Function ShouldAsk(cConfiguration As Configuration, sConfigKey As String) As Boolean
   
   Select Case sConfigKey
-    Case Constants.DONTSHOWAGAIN_MOVETRASH
-      Return Not cConfiguration.ShouldSkipMoveTrashConfirmation
-    Case Constants.DONTSHOWAGAIN_IMPORT
-      Return Not cConfiguration.ShouldSkipImportConfirmation
+    Case Constants.ASKBEFORE_MOVETRASH
+      Return cConfiguration.ShouldAskBeforeMoveTrash
+    Case Constants.ASKBEFORE_IMPORT
+      Return cConfiguration.ShouldAskBeforeImport
+    Case Constants.ASKBEFORE_LOCK
+      Return cConfiguration.ShouldAskBeforeLock
     Case Else
       Return True ' Por defecto preguntamos si no conocemos la clave
   End Select
@@ -37,11 +39,22 @@ Public Sub SaveUserDecision(cConfiguration As Configuration, sConfigKey As Strin
   $LogMessage = New LogMessage($Titulo, "SaveUserDecision", "User decided to not show again for: " & sConfigKey)
   $Logger.Info($LogMessage)
   
+  ' Si el usuario marcó "No volver a mostrar", seteamos el ASKBEFORE en False
   Select Case sConfigKey
-    Case Constants.DONTSHOWAGAIN_MOVETRASH
-      cConfiguration.ShouldSkipMoveTrashConfirmation = True
-    Case Constants.DONTSHOWAGAIN_IMPORT
-      cConfiguration.ShouldSkipImportConfirmation = True
+    Case Constants.ASKBEFORE_MOVETRASH
+      cConfiguration.ShouldAskBeforeMoveTrash = False
+    Case Constants.ASKBEFORE_IMPORT
+      cConfiguration.ShouldAskBeforeImport = False
+    Case Constants.ASKBEFORE_LOCK
+      cConfiguration.ShouldAskBeforeLock = False
   End Select
   
+End
+
+Private Function ShouldNotShowAgain_Read() As Boolean
+  Return $ShouldNotShowAgain
+End
+
+Private Sub ShouldNotShowAgain_Write(Value As Boolean)
+  $ShouldNotShowAgain = Value
 End

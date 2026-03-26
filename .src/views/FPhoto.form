@@ -9,6 +9,11 @@
     Visible = False
     Picture = Picture["icon:/tiny/add"]
   }
+  { ButtonLock Button
+    MoveScaled(5,1,3.4286,3.4286)
+    Visible = False
+    Picture = Picture["icon:/16/unlock"]
+  }
   { PanelPhoto Panel
     MoveScaled(1,5,10,10)
     Expand = True
@@ -17,5 +22,10 @@
       MoveScaled(2,2,6,6)
       Expand = True
     }
+  }
+  { ButtonDelete Button
+    MoveScaled(9,1,3.4286,3.4286)
+    Visible = False
+    Picture = Picture["icon:/16/remove"]
   }
 }

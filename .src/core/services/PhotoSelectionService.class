@@ -3,12 +3,28 @@
 Private $SelectedEntities As PhotoEntity[]
 
 Event SelectionChanged(iCount As Integer, hasSelection As Boolean)        '' Fired when selection count or state changes
+Event LockChanged(oPhoto As PhotoEntity, isLocked As Boolean)            '' Fired when a lock toggle is requested
+Event DeleteRequested(oPhoto As PhotoEntity)                            '' Fired when a permanent delete is requested
 
 Property Read SelectedCount As Integer                                     '' Current number of selected items
 
 Public Sub _new()                                                          '' Initializes a new selection session
   
   $SelectedEntities = New PhotoEntity[]
+  
+End
+
+Public Sub ToggleLock(oPhoto As PhotoEntity)                               '' Requests a lock/unlock toggle for a photo
+  
+  If oPhoto = Null Then Return
+  Raise LockChanged(oPhoto, Not oPhoto.IsLocked)
+  
+End
+
+Public Sub DeletePermanently(oPhoto As PhotoEntity)                         '' Requests a permanent deletion for a photo
+  
+  If oPhoto = Null Then Return
+  Raise DeleteRequested(oPhoto)
   
 End
 

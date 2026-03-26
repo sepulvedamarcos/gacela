@@ -1,4 +1,3 @@
-- al eliminar un album no esta guardando las fecha y usuario
-- creacion de mover a carpeta compartida
-- manejo de paginacion aun tiene un comportamiento extraño
--
+- ✅ actualizar el readme.md => hecho
+- ✅ actualizar el spec.md => hecho
+- ✅ actualizar el agents.md => hecho

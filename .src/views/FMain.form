@@ -76,6 +76,18 @@
       Text = ("Unshare selected images")
       Enabled = False
     }
+    { MenuLockSeparator Menu
+    }
+    { EditMenu_Lock Menu
+      Text = ("Lock selected images")
+      Picture = Picture["icon:/16/lock"]
+      Enabled = False
+    }
+    { EditMenu_Unlock Menu
+      Text = ("Unlock selected images")
+      Picture = Picture["icon:/16/unlock"]
+      Enabled = False
+    }
   }
   { ViewMenu Menu
     Text = ("View")
@@ -200,7 +212,16 @@
     { ToolButtonTrash ToolButton
       MoveScaled(18,0,8,8)
       Enabled = False
+      ToolTip = ("Move selected images to trash")
       Picture = Picture["icon:/32/trash"]
+      Border = True
+    }
+    { ToolButtonDelete ToolButton
+      MoveScaled(26,0,8,8)
+      Visible = False
+      Enabled = False
+      ToolTip = ("Permanent Delete ")
+      Picture = Picture["icon:/32/delete"]
       Border = True
     }
     { SpringToolBar Spring
@@ -256,11 +277,14 @@
           Text = ("Albums")
         }
         { ExpanderTags Expander
-          MoveScaled(2,12,24,4)
+          MoveScaled(2,7,24,4)
           Expand = True
           Arrangement = Arrange.Fill
           Border = False
           Text = ("Tags")
+        }
+        { TreeViewImages TreeView
+          MoveScaled(1,19,23,42)
         }
       }
     }

@@ -568,9 +568,9 @@ Public Function UpdatePhoto(photoE As PhotoEntity) As Boolean '' Updates a photo
   oResult["soft_deleted_by"] = photoE.SoftDeleteBy
   oResult["soft_deleted_auto"] = photoE.SoftDeleteAuto
   oResult["is_locked"] = photoE.IsLocked
-  oResult["locked_by"] = photoE.LockedBy
-  oResult["locked_date"] = photoE.LockedDate
-  oResult["lock_reason"] = photoE.LockedReason
+  oResult["locked_by"] = IIf(photoE.IsLocked, photoE.LockedBy, Null)
+  oResult["locked_date"] = IIf(photoE.IsLocked, photoE.LockedDate, Null)
+  oResult["lock_reason"] = IIf(photoE.IsLocked, photoE.LockedReason, Null)
   oResult.Update()
   
   $DbContext.DBConnection.Commit
@@ -584,7 +584,47 @@ Catch
   
 End
 
+Public Function UpdatePhotoLockStatus(id As Integer, isLocked As Boolean, Optional lockedBy As String = "", Optional lockReason As String = "") As Boolean '' Updates only the lock status of a photo.
+  
+  Dim oResult As Result
+  
+  If id <= 0 Then Return False
+  
+  $DbContext.DBConnection.Begin()
+  
+  oResult = $DbContext.DBConnection.Edit(SQLiteRepositoryAdapter.TABLE_PHOTOS, "photo_id = &1", id)
+  oResult["is_locked"] = isLocked
+  oResult["locked_by"] = IIf(isLocked, lockedBy, Null)
+  oResult["locked_date"] = IIf(isLocked, Now, Null)
+  oResult["lock_reason"] = IIf(isLocked, lockReason, Null)
+  oResult.Update()
+  
+  $DbContext.DBConnection.Commit
+  Return True
+  
+Catch
+  $DbContext.DBConnection.Rollback
+  $LogMessage = New LogMessage($Titulo, "UpdatePhotoLockStatus", "Problems updating photo lock status, rolling back")
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
 Public Function PermanentlyDeletePhoto(id As Integer) As Boolean '' Permanently deletes a photo record and its relations.
+  
+  Dim oResult As Result
+  Dim isLocked As Boolean
+  
+  ' Safety check: do not delete locked photos
+  oResult = $DbContext.DBConnection.Exec("SELECT is_locked FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS & " WHERE photo_id = &1", id)
+  If oResult.Available Then
+    isLocked = oResult["is_locked"]
+    If isLocked Then 
+       $LogMessage = New LogMessage($Titulo, "PermanentlyDeletePhoto", ("Cannot delete a locked photo") & " [" & id & "]")
+       $Logger.Warning($LogMessage)
+       Return False
+    Endif
+  Endif
   
   $DbContext.DBConnection.Begin()
   $DbContext.DBConnection.Exec("DELETE FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " WHERE photo_id = &1", id)

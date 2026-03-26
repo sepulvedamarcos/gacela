@@ -15,6 +15,17 @@ Public Sub _new(oSummary As Summary, oLogger As LoggerPort, oConfiguration As Co
   $Configuration = oConfiguration
   $Action = iAction
   
+  Select Case $Action
+    Case Enumeration.DIALOG_SUMMARY_IMPORT
+      Me.Title = ("Import Summary")
+    Case Enumeration.DIALOG_SUMMARY_TRASH
+      Me.Title = ("Trash Summary")
+    Case Enumeration.DIALOG_SUMMARY_SHARE
+      Me.Title = ("Share Summary")
+    Case Enumeration.DIALOG_SUMMARY_LOCK
+      Me.Title = ("Lock/Unlock Summary")
+  End Select
+  
   If $Summary <> Null Then
     LabelTotalAmount.Text = Str($Summary.Total)
     LabelSuccessful.Text = Str($Summary.OkCount)
@@ -44,8 +55,10 @@ Public Sub btnAccept_Click()
   
   If $Action = Enumeration.DIALOG_SUMMARY_IMPORT Then
     $Configuration.ShouldShowImportSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
-  Else If $Action = Enumeration.DIALOG_SUMMARY_IMPORT Then
+  Else If $Action = Enumeration.DIALOG_SUMMARY_TRASH Then
     $Configuration.ShouldShowMoveToTrashSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
+  Else If $Action = Enumeration.DIALOG_SUMMARY_LOCK Then
+    $Configuration.ShouldShowLockSummary = IIf(CheckBoxNotShowSummary.Value, False, True)
   Endif
   
   Me.Close(Enumeration.DLG_OK)

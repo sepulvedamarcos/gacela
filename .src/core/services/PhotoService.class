@@ -208,6 +208,15 @@ Public Function MoveToTrash(oSelectedImages As PhotoEntity[]) As Summary  '' Mov
     oItem = New SummaryItem(oPhoto.FileName)
     oItem.FilePath = oPhoto.ImagePath
     
+    ' Security check: do not move locked photos to trash
+    If oPhoto.IsLocked Then
+      oItem.Status = Summary.STATUS_FAIL
+      oItem.Reason = ("locked")
+      oItem.Message = ("Cannot move to trash: image is locked")
+      oSummary.AddItem(oItem)
+      Continue
+    Endif
+    
     ' Move physical file but KEEP original ImagePath in DB for restoration
     Try $FileStorage.MoveFile(oPhoto.ImagePath, sTrashPath &/ File.Name(oPhoto.ImagePath))
     
@@ -244,6 +253,53 @@ Public Function MoveToTrash(oSelectedImages As PhotoEntity[]) As Summary  '' Mov
   
 Catch
   $LogMessage = New LogMessage($Titulo, "MoveToTrash", "A critical error occurred: " & Error.Text)
+  $Logger.Error($LogMessage)
+  Error.Propagate
+
+End
+
+Public Function UpdateLockStatus(oSelectedImages As PhotoEntity[], isLocked As Boolean, Optional lockReason As String = "") As Summary '' Updates the lock status for a list of photos.
+  
+  Dim oSummary As New Summary
+  Dim oItem As SummaryItem
+  Dim oPhoto As PhotoEntity
+  Dim iTotal As Integer = oSelectedImages.Count
+  Dim iCount As Integer = 0
+  Dim sAction As String = IIf(isLocked, ("Locking"), ("Unlocking"))
+  
+  $ShouldCancel = False
+  
+  For Each oPhoto In oSelectedImages
+    If $ShouldCancel Then Break
+    
+    iCount += 1
+    Raise Progress(iCount / iTotal, sAction & ": " & oPhoto.FileName)
+    
+    oItem = New SummaryItem(oPhoto.FileName)
+    oItem.FilePath = oPhoto.ImagePath
+    
+    Try $PhotoRepository.UpdatePhotoLockStatus(oPhoto.Id, isLocked, User.Name, lockReason)
+    
+    If Error Then
+      oItem.Status = Summary.STATUS_FAIL
+      oItem.Reason = Error.Text
+      oItem.Message = ("Error updating lock status in database")
+      $LogMessage = New LogMessage($Titulo, "UpdateLockStatus", ("Error updating lock for ") & oPhoto.FileName & ": " & Error.Text)
+      $Logger.Error($LogMessage)
+    Else
+      oPhoto.IsLocked = isLocked
+      oItem.Status = Summary.STATUS_OK
+      oItem.Message = IIf(isLocked, ("Locked successfully"), ("Unlocked successfully"))
+    Endif
+    
+    oSummary.AddItem(oItem)
+    Wait 0.05
+  Next
+  
+  Return oSummary
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "UpdateLockStatus", "A critical error occurred: " & Error.Text)
   $Logger.Error($LogMessage)
   Error.Propagate
 
@@ -533,6 +589,88 @@ Catch
     Try $FileStorage.DeleteFile(sNewPath)
   Endif
   $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Error importing photo: ") & Error.Text)
+  $Logger.Error($LogMessage)
+  Error.Propagate
+  
+End
+
+Public Function PermanentlyDelete(oSelectedImages As PhotoEntity[]) As Summary  '' Deletes photo entities physically from the trash folder and removes their DB records.
+  
+  Dim oSummary As New Summary
+  Dim oItem As SummaryItem
+  Dim oPhoto As PhotoEntity
+  Dim sTrashPath As String = User.Home &/ Constants.GACELA_TRASH_DIRECTORY
+  Dim iTotal As Integer = oSelectedImages.Count
+  Dim iCount As Integer = 0
+  Dim sFileName As String
+  Dim sFullTrashPath As String
+  
+  $ShouldCancel = False
+  
+  For Each oPhoto In oSelectedImages
+    If $ShouldCancel Then Break
+    
+    iCount += 1
+    Raise Progress(iCount / iTotal, ("Deleting permanently: ") & oPhoto.FileName)
+    
+    oItem = New SummaryItem(oPhoto.FileName)
+    oItem.FilePath = oPhoto.ImagePath
+    
+    ' 1. Check if photo is in Trash (soft-deleted)
+    If Not oPhoto.IsSoftDeleted Then
+      oItem.Status = Summary.STATUS_FAIL
+      oItem.Reason = ("not_in_trash")
+      oItem.Message = ("Cannot delete: image is not in trash")
+      oSummary.AddItem(oItem)
+      Continue
+    Endif
+    
+    ' 2. Check Ownership in Shared Gallery
+    If $Configuration.WhichGallery = Enumeration.GalleryType_Shared Then
+      If oPhoto.SoftDeleteBy <> User.Name Then
+         oItem.Status = Summary.STATUS_FAIL
+         oItem.Reason = ("not_owner")
+         oItem.Message = ("Cannot delete: only the user who trashed it can delete it permanently")
+         oSummary.AddItem(oItem)
+         Continue
+      Endif
+    Endif
+    
+    ' 3. Physical File Deletion from Trash
+    sFileName = File.Name(oPhoto.ImagePath)
+    sFullTrashPath = sTrashPath &/ sFileName
+    
+    If $FileStorage.Exists(sFullTrashPath) Then
+       Try $FileStorage.DeleteFile(sFullTrashPath)
+       If Error Then
+          oItem.Status = Summary.STATUS_FAIL
+          oItem.Reason = Error.Text
+          oItem.Message = ("Error deleting file physically from trash")
+          $LogMessage = New LogMessage($Titulo, "PermanentlyDelete", ("Error deleting physical file: ") & sFullTrashPath & ": " & Error.Text)
+          $Logger.Error($LogMessage)
+          oSummary.AddItem(oItem)
+          Continue
+       Endif
+    Endif
+    
+    ' 4. DB Record Deletion
+    If $PhotoRepository.PermanentlyDeletePhoto(oPhoto.Id) Then
+       oItem.Status = Summary.STATUS_OK
+       oItem.Message = ("Deleted permanently")
+    Else
+       oItem.Status = Summary.STATUS_FAIL
+       oItem.Reason = ("db_error")
+       oItem.Message = ("Error deleting record from database")
+    Endif
+    
+    oSummary.AddItem(oItem)
+    Wait 0.05
+  Next
+  
+  Return oSummary
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "PermanentlyDelete", "Error in permanent delete: " & Error.Text)
   $Logger.Error($LogMessage)
   Error.Propagate
   

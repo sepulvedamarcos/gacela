@@ -230,17 +230,19 @@ End
 
 Public Sub ToolButtonViewTrash_Click()
   
-  ' $IsViewingTrash = Not $IsViewingTrash
+  $IsViewingTrash = Not $IsViewingTrash
   
-  ' If $IsViewingTrash Then
-  '   ShowStatus(("Viewing deleted images"), 0)
-  '   ToolButtonViewTrash.Tooltip = ("Return to gallery")
-  '   ReloadTrash()
-  ' Else
-  '   ShowStatus(("Viewing main gallery"), 0)
-  '   ToolButtonViewTrash.Tooltip = ("Open deleted images folder")
-  '   ReloadGallery()
-  ' Endif
+  If $IsViewingTrash Then
+    ShowStatus(("Viewing deleted images"), 0)
+    ToolButtonViewTrash.Tooltip = ("Return to gallery")
+    ToolButtonViewTrash.Picture = Picture["icon:/22/folder-home"]
+    ReloadTrash()
+  Else
+    ShowStatus(("Viewing main gallery"), 0)
+    ToolButtonViewTrash.Tooltip = ("Open deleted images folder")
+    ToolButtonViewTrash.Picture = Picture["icon:/22/trash"]
+    ReloadGallery()
+  Endif
   
 End
 
@@ -269,6 +271,43 @@ End
 Public Sub SelectionService_SelectionChanged(iCount As Integer, hasSelection As Boolean)
   
   UpdateSelectionActions(iCount, hasSelection)
+  
+End
+
+Public Sub SelectionService_LockChanged(oPhoto As PhotoEntity, isLocked As Boolean)
+  
+  Dim aPhotos As New PhotoEntity[]
+  
+  aPhotos.Add(oPhoto)
+  LockSelectedImages(isLocked, aPhotos)
+  
+End
+
+Public Sub SelectionService_DeleteRequested(oPhoto As PhotoEntity)
+  
+  Dim oSummary As Summary
+  Dim iResp As Integer
+  Dim sMsg As String
+  
+  sMsg = ("Are you sure you want to PERMANENTLY delete this photo?")
+  sMsg &= "\n\n" & oPhoto.FileName
+  sMsg &= "\n\n" & ("This action cannot be undone.")
+  
+  If Message.Question(sMsg, ("Delete Permanently"), ("Cancel")) <> 1 Then Return
+  
+  oSummary = $PhotoService.PermanentlyDelete([oPhoto])
+  
+  If oSummary.HasErrors() Then
+    FSummary.ShowSummary(oSummary, ("Permanent Delete Results"))
+  Else
+    ' Just for visual confirmation if it's only one
+    ' Message.Info(("Deleted successfully"))
+  Endif
+  
+  ' Refresh the view to reflect the deletion
+  $PhotoSelectionService.Clear()
+  ClearPhotoGallery()
+  CreatePhotoPanels($PhotoService.LoadFirstPage())
   
 End
 
@@ -491,6 +530,8 @@ Private Sub ReloadTrash()
   
   $IsViewingTrash = True
   $TrashPage = 0
+  ToolButtonDelete.Visible = True
+  ToolButtonTrash.Visible = False
   
   If $PhotoSelectionService <> Null Then
     $PhotoSelectionService.Clear()
@@ -540,7 +581,7 @@ Private Sub CreatePhotoPanels(photos As PhotoEntity[])
   $Logger.Info($LogMessage)
   
   For Each cPhoto As PhotoEntity In photos
-    oFPhoto = New FPhoto($PhotoSelectionService, cPhoto, PanelGalleryContent)
+    oFPhoto = New FPhoto($PhotoSelectionService, cPhoto, $IsViewingTrash, PanelGalleryContent)
     For i = 1 To $Amplifier
       oFPhoto.ResizeScaledForm(1)
     Next
@@ -600,7 +641,6 @@ Private Sub SelectGallery(iGallery As Integer)
   
   Select Case iGallery
     Case Enumeration.GalleryType_Private
-      
       GalleryMenu_PrivateGallery.Value = True
       GalleryMenu_ShareGallery.Value = False
       
@@ -639,6 +679,8 @@ Private Sub ReloadGallery()
   If $PhotoSelectionService <> Null Then
     $PhotoSelectionService.Clear()
   Endif
+  ToolButtonDelete.Visible = False
+  ToolButtonTrash.Visible = True
   
   ClearPhotoGallery()
   CreatePhotoPanels($PhotoService.LoadFirstPage())
@@ -757,6 +799,8 @@ Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional has
     EditMenu_RemoveSelectedFromAlbums.Enabled = hasSelection
     EditMenu_Share.Enabled = hasSelection And $Configuration.WhichGallery = Enumeration.GalleryType_Private
     EditMenu_Unshare.Enabled = hasSelection And $Configuration.WhichGallery = Enumeration.GalleryType_Shared
+    EditMenu_Lock.Enabled = hasSelection
+    EditMenu_Unlock.Enabled = hasSelection
     
     ToolButtonTrash.Enabled = hasSelection
   Endif
@@ -872,7 +916,7 @@ Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash 
   oQuestionService = New QuestionInteractionService($Logger)
   
   ' 1. El SERVICIO decide si la UI debe actuar (Lógica de negocio en el core)
-  If oQuestionService.ShouldAsk($Configuration, Constants.DONTSHOWAGAIN_MOVETRASH) Then
+  If oQuestionService.ShouldAsk($Configuration, Constants.ASKBEFORE_MOVETRASH) Then
     
     sTitle = ("Move images to trash")
     sText = ("Are you sure you want to move the selected photos to trash directory")
@@ -882,7 +926,7 @@ Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash 
     If oFQuestion.ShowModal() = Enumeration.DLG_OK Then
       
       ' 3. El SERVICIO guarda la decisión capturada por la UI (DRY/Persistencia)
-      oQuestionService.SaveUserDecision($Configuration, Constants.DONTSHOWAGAIN_MOVETRASH, oQuestionService.ShouldNotShowAgain)
+      oQuestionService.SaveUserDecision($Configuration, Constants.ASKBEFORE_MOVETRASH, oQuestionService.ShouldNotShowAgain)
       isConfirmed = True
     Else
       isConfirmed = False
@@ -965,21 +1009,21 @@ Private Sub ZoomOut()
 End
 
 Public Sub SliderZoomer_Drag()
-
+  
   ApplyZoom()
-
+  
 End
 
 Public Sub SliderZoomer_Change()
-
+  
   ApplyZoom()
-
+  
 End
 
 Public Sub SliderZoomer_MouseDrag()
-
+  
   ApplyZoom()
-
+  
 End
 
 Private Sub ApplyZoom()
@@ -1004,14 +1048,94 @@ Private Sub ApplyZoom()
 End
 
 Public Sub EditMenu_Share_Click()
+  
   ExecuteSharing(True)
+  
 End
 
 Public Sub EditMenu_Unshare_Click()
+  
   ExecuteSharing(False)
+  
+End
+
+Public Sub EditMenu_Lock_Click()
+  
+  LockSelectedImages(True)
+  
+End
+
+Public Sub EditMenu_Unlock_Click()
+  
+  LockSelectedImages(False)
+  
+End
+
+Private Sub LockSelectedImages(isLocked As Boolean, Optional oManualSelected As PhotoEntity[]) '' Orchestrates the lock/unlock process
+  
+  Dim oSelected As PhotoEntity[]
+  Dim oSummary As FSummary
+  Dim eSummary As Summary
+  Dim oProgress As FProgressBar
+  Dim oFQuestion As FQuestion
+  Dim sTitle, sText As String
+  Dim isConfirmed As Boolean = True
+  Dim oQuestionService As QuestionInteractionService
+  
+  $LogMessage = New LogMessage($Titulo, "LockSelectedImages", "Updating lock status: " & isLocked)
+  $Logger.Info($LogMessage)
+  
+  oQuestionService = New QuestionInteractionService($Logger)
+  
+  ' 1. Check if we should ask for confirmation
+  If oQuestionService.ShouldAsk($Configuration, Constants.ASKBEFORE_LOCK) Then
+    
+    sTitle = IIf(isLocked, ("Lock images"), ("Unlock images"))
+    sText = IIf(isLocked, ("Are you sure you want to LOCK the selected photos? They cannot be permanently deleted while locked."), ("Are you sure you want to UNLOCK the selected photos?"))
+    
+    oFQuestion = New FQuestion(oQuestionService, $Logger, sTitle, sText)
+    If oFQuestion.ShowModal() = Enumeration.DLG_OK Then
+      oQuestionService.SaveUserDecision($Configuration, Constants.ASKBEFORE_LOCK, oQuestionService.ShouldNotShowAgain)
+      isConfirmed = True
+    Else
+      isConfirmed = False
+    Endif
+  Endif
+  
+  If isConfirmed Then
+    If oManualSelected <> Null Then
+      oSelected = oManualSelected
+    Else
+      oSelected = $PhotoSelectionService.GetSelectedEntities()
+    Endif
+    
+    If oSelected.Count = 0 Then
+      Message.Warning(("No images selected"))
+      Return
+    Endif
+    
+    oProgress = New FProgressBar($PhotoService, IIf(isLocked, ("Locking images"), ("Unlocking images")))
+    oProgress.Show()
+    Wait 0.05
+    
+    eSummary = $PhotoService.UpdateLockStatus(oSelected, isLocked)
+    
+    oProgress.Close()
+    
+    ReloadGallery()
+    
+    ShowStatus(IIf(isLocked, ("Locking finished. OK: "), ("Unlocking finished. OK: ")) & eSummary.OkCount & (" and NOK: ") & eSummary.FailCount, 5000)
+    
+    If $Configuration.ShouldShowLockSummary And If(oManualSelected <> Null, oManualSelected.Count > 1, $PhotoSelectionService.SelectedCount > 1) Then
+      oSummary = New FSummary(eSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_LOCK)
+      oSummary.ShowModal()
+    Endif
+  Endif
+  
 End
 
 Private Sub ExecuteSharing(bToShared As Boolean)
+  
   Dim oSharingService As PhotoSharingService
   Dim oProgress As FProgressBar
   Dim oSummary As Summary
@@ -1027,10 +1151,11 @@ Private Sub ExecuteSharing(bToShared As Boolean)
   oProgress.Close()
   
   If oSummary <> Null Then
-       Dim oSummaryDialog As New FSummary(oSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_SHARE)
-     oSummaryDialog.ShowModal()
+    Dim oSummaryDialog As New FSummary(oSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_SHARE)
+    oSummaryDialog.ShowModal()
   Endif
   
   $PhotoSelectionService.Clear()
   ReloadGallery()
+  
 End

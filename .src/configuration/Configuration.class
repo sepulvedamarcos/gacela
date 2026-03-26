@@ -26,8 +26,10 @@ Private $ShouldShowImportSummary As Boolean
 Private $ShouldShowMoveToTrashSummary As Boolean
 Private $ShouldShowMainToolbar As Boolean
 Private $ShouldShowMainStatusBar As Boolean
-Private $ShouldSkipMoveTrashConfirmation As Boolean
-Private $ShouldSkipImportConfirmation As Boolean
+Private $ShouldAskBeforeMoveTrash As Boolean
+Private $ShouldAskBeforeImport As Boolean
+Private $ShouldAskBeforeLock As Boolean
+Private $ShouldShowLockSummary As Boolean
 
 Property WhichGallery As Integer                                         '' Which gallery is active
 Property Read IsFirstRun As Boolean                                           '' First execution indicator
@@ -47,8 +49,10 @@ Property ShouldShowImportSummary As Boolean
 Property ShouldShowMoveToTrashSummary As Boolean                                      '' Indicate dialog summary is show it
 Property ShouldShowMainToolbar As Boolean
 Property ShouldShowMainStatusBar As Boolean
-Property ShouldSkipMoveTrashConfirmation As Boolean
-Property ShouldSkipImportConfirmation As Boolean
+Property ShouldAskBeforeMoveTrash As Boolean
+Property ShouldAskBeforeImport As Boolean
+Property ShouldAskBeforeLock As Boolean
+Property ShouldShowLockSummary As Boolean
 
 '============================================
 '
@@ -136,12 +140,21 @@ Public Sub InitializeEnvironment()
     $Settings[Constants.GLOBAL_STORAGE_PROVIDER] = Constants.STORAGE_PROVIDER_LOCAL
   Endif
   
-  If $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, Null] = Null Then
-    $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = True
+  ' Default values for confirmation prompts
+  If $Settings[Constants.ASKBEFORE_MOVETRASH, Null] = Null Then
+    $Settings[Constants.ASKBEFORE_MOVETRASH] = True
   Endif
   
-  If $Settings[Constants.DONTSHOWAGAIN_IMPORT, Null] = Null Then
-    $Settings[Constants.DONTSHOWAGAIN_IMPORT] = True
+  If $Settings[Constants.ASKBEFORE_IMPORT, Null] = Null Then
+    $Settings[Constants.ASKBEFORE_IMPORT] = True
+  Endif
+
+  If $Settings[Constants.ASKBEFORE_LOCK, Null] = Null Then
+    $Settings[Constants.ASKBEFORE_LOCK] = True
+  Endif
+
+  If $Settings[Constants.LOCK_SHOW_SUMMARY, Null] = Null Then
+    $Settings[Constants.LOCK_SHOW_SUMMARY] = True
   Endif
   
   $WhichGallery = $Settings[Constants.GLOBAL_GALLERY_TYPE]
@@ -152,8 +165,10 @@ Public Sub InitializeEnvironment()
   $ShouldShowMoveToTrashSummary = $Settings[Constants.MOVETRASH_SHOW_SUMMARY, True]
   $ShouldShowMainToolbar = $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR, True]
   $ShouldShowMainStatusBar = $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR, True]
-  $ShouldSkipMoveTrashConfirmation = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
-  $ShouldSkipImportConfirmation = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
+  $ShouldAskBeforeMoveTrash = $Settings[Constants.ASKBEFORE_MOVETRASH, True]
+  $ShouldAskBeforeImport = $Settings[Constants.ASKBEFORE_IMPORT, True]
+  $ShouldAskBeforeLock = $Settings[Constants.ASKBEFORE_LOCK, True]
+  $ShouldShowLockSummary = $Settings[Constants.LOCK_SHOW_SUMMARY, True]
   
   $Settings.Save()
   
@@ -226,8 +241,9 @@ Private Sub FirstInitializeSettings() '' Initial configuration setup
   $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = True
   $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = True
   $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = True
-  $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = True
-  $Settings[Constants.DONTSHOWAGAIN_IMPORT] = True
+  $Settings[Constants.ASKBEFORE_MOVETRASH] = True
+  $Settings[Constants.ASKBEFORE_IMPORT] = True
+  $Settings[Constants.ASKBEFORE_LOCK] = True
   
   $Settings.Save()
   
@@ -577,36 +593,65 @@ Private Sub ShouldShowMainStatusBar_Write(shouldShowMainStatusBar As Boolean)
   
 End
 
-Private Function ShouldSkipMoveTrashConfirmation_Read() As Boolean
+Private Function ShouldAskBeforeMoveTrash_Read() As Boolean
   
-  $ShouldSkipMoveTrashConfirmation = $Settings[Constants.DONTSHOWAGAIN_MOVETRASH, True]
-  Return $ShouldSkipMoveTrashConfirmation
+  $ShouldAskBeforeMoveTrash = $Settings[Constants.ASKBEFORE_MOVETRASH, True]
+  Return $ShouldAskBeforeMoveTrash
   
 End
 
-Private Sub ShouldSkipMoveTrashConfirmation_Write(shouldSkipMoveTrashConfirmation As Boolean)
+Private Sub ShouldAskBeforeMoveTrash_Write(shouldAskBeforeMoveTrash As Boolean)
   
-  $ShouldSkipMoveTrashConfirmation = shouldSkipMoveTrashConfirmation
-  $Settings[Constants.DONTSHOWAGAIN_MOVETRASH] = shouldSkipMoveTrashConfirmation
+  $ShouldAskBeforeMoveTrash = shouldAskBeforeMoveTrash
+  $Settings[Constants.ASKBEFORE_MOVETRASH] = shouldAskBeforeMoveTrash
   $Settings.Save()
   
 End
 
-Private Function ShouldSkipImportConfirmation_Read() As Boolean
+Private Function ShouldAskBeforeImport_Read() As Boolean
   
-  $ShouldSkipImportConfirmation = $Settings[Constants.DONTSHOWAGAIN_IMPORT, True]
-  Return $ShouldSkipImportConfirmation
+  $ShouldAskBeforeImport = $Settings[Constants.ASKBEFORE_IMPORT, True]
+  Return $ShouldAskBeforeImport
   
 End
 
-Private Sub ShouldSkipImportConfirmation_Write(shouldSkipImportConfirmation As Boolean)
-  
-  $ShouldSkipImportConfirmation = shouldSkipImportConfirmation
-  $Settings[Constants.DONTSHOWAGAIN_IMPORT] = shouldSkipImportConfirmation
+Private Sub ShouldAskBeforeImport_Write(shouldAskBeforeImport As Boolean)
+
+  $ShouldAskBeforeImport = shouldAskBeforeImport
+  $Settings[Constants.ASKBEFORE_IMPORT] = shouldAskBeforeImport
   $Settings.Save()
-  
+
 End
 
+Private Function ShouldAskBeforeLock_Read() As Boolean
+
+  $ShouldAskBeforeLock = $Settings[Constants.ASKBEFORE_LOCK, True]
+  Return $ShouldAskBeforeLock
+
+End
+
+Private Sub ShouldAskBeforeLock_Write(shouldAskBeforeLock As Boolean)
+
+  $ShouldAskBeforeLock = shouldAskBeforeLock
+  $Settings[Constants.ASKBEFORE_LOCK] = shouldAskBeforeLock
+  $Settings.Save()
+
+End
+
+Private Function ShouldShowLockSummary_Read() As Boolean
+
+  $ShouldShowLockSummary = $Settings[Constants.LOCK_SHOW_SUMMARY, True]
+  Return $ShouldShowLockSummary
+
+End
+
+Private Sub ShouldShowLockSummary_Write(shouldShowLockSummary As Boolean)
+
+  $ShouldShowLockSummary = shouldShowLockSummary
+  $Settings[Constants.LOCK_SHOW_SUMMARY] = shouldShowLockSummary
+  $Settings.Save()
+
+End
 Sub WhichGallery_Write(Value As Integer)
   $WhichGallery = Value
 End

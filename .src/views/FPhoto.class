@@ -4,15 +4,18 @@ Private $IsSelected As Boolean
 Private $PhotoId As Integer
 Private $SelectionService As PhotoSelectionService
 Private $PhotoEntity As PhotoEntity
+Private $IsTrashView As Boolean
 
 Property Read PhotoId As Integer
 Property Read IsSelected As Boolean
+Property Read PhotoEntity As PhotoEntity
 
-Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntity) '' Initializes the photo component with its entity and selection service.
+Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntity, IsTrashView As Boolean) '' Initializes the photo component with its entity and selection service.
   
   $SelectionService = oSelectionService
   $PhotoEntity = cPhoto
   $PhotoId = cPhoto.Id
+  $IsTrashView = IsTrashView
   
   Me.Width = 160
   Me.Height = 100
@@ -40,11 +43,7 @@ Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntit
   PictureBoxPhoto.y = 2
   PictureBoxPhoto.Padding = 8
   
-  ' If $SelectionService <> Null Then
-  '   SetSelected($SelectionService.IsSelected($PhotoId), False)
-  ' Else
-  '   SetSelected(False, False)
-  ' Endif
+  If cPhoto.IsLocked Then ButtonLock.Picture = Picture["icon:/16/lock"]
   
 End
 
@@ -55,6 +54,16 @@ Public Sub Form_Enter() '' Handles mouse hover entry.
   
   PictureBoxPhoto.Border = Border.Styled
   
+  If $IsTrashView Then
+    ButtonDelete.Visible = True
+    ButtonDelete.Raise()
+    ButtonLock.Visible = False
+  Else
+    ButtonLock.Visible = True
+    ButtonLock.Raise()
+    ButtonDelete.Visible = False
+  Endif
+
 End
 
 Public Sub Form_Leave() '' Handles mouse hover exit.
@@ -62,6 +71,17 @@ Public Sub Form_Leave() '' Handles mouse hover exit.
   ButtonSeleccionar.Visible = False
   PictureBoxPhoto.Border = Border.None
   
+  ButtonLock.Visible = False
+  ButtonDelete.Visible = False
+
+End
+
+Public Sub ButtonDelete_Click()
+
+  If $SelectionService <> Null Then
+    $SelectionService.DeletePermanently($PhotoEntity)
+  Endif
+
 End
 
 Public Sub ButtonSeleccionar_Click() '' Handles selection button click.
@@ -131,12 +151,32 @@ Private Function IsSelected_Read() As Boolean
   
 End
 
+Private Function PhotoEntity_Read() As PhotoEntity
+  
+  Return $PhotoEntity
+  
+End
+
 Private Sub RefreshSelectionVisual()
   
   If $IsSelected Then
     PictureBoxPhoto.Background = Color.LightGray
   Else
     PictureBoxPhoto.Background = Color.Transparent
+  Endif
+  
+End
+
+Public Sub Form_Open()
+
+  
+
+End
+
+Public Sub ButtonLock_Click()
+
+  If $SelectionService <> Null Then
+    $SelectionService.ToggleLock($PhotoEntity)
   Endif
   
 End
