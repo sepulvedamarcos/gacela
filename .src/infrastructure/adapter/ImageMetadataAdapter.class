@@ -6,36 +6,38 @@
 '
 '
 
-Private $Logger As LoggerPort
-Private $Titulo As String = "ImageMetadataAdapter"
-
+Private $Logger As Log4GambasAdapter
 Private $LogMessage As LogMessage
+Private $Titulo As String = "ImageMetadataAdapter"
 ' ==================================================
 '
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(oLogger As LoggerPort)
 
+Public Sub _new(oLogger As Log4GambasAdapter)
+  
   $Logger = oLogger
-
+  
 End
 
-Public Function GetExifDateTimeOriginal(imagenPath As String) As String
-
+Public Function GetExifDateTimeOriginal(sImagenPath As String) As Date
+  
   Dim sCommandText As String
   Dim sExifData As String
-
-  $LogMessage = New LogMessage($Titulo, "GetExifDateTimeOriginal", "Extracting metadata with identify")
+  Dim sMethod As String = "GetExifDateTimeOriginal"
+  Dim sMessage As String = ("Extracting metadata with identify")
+  
+  $LogMessage = New LogMessage($Titulo, sMethod, sMessage)
   $Logger.Info($LogMessage)
-  sCommandText = "identify -format \"%[EXIF:DateTimeOriginal]\" -- " & ShellQuote(imagenPath)
+  sCommandText = "identify -format \"%[EXIF:DateTimeOriginal]\" -- " & ShellQuote(sImagenPath)
   sExifData = ExecShellCommand(sCommandText)
-
+  
   Return NormalizeExifDate(Trim(sExifData))
-
+  
 Catch
   Error.Propagate
-
+  
 End
 
 ' ==================================================
@@ -45,91 +47,62 @@ End
 ' ==================================================
 
 Private Function ExecShellCommand(sCommandText As String) As String
-
+  
   Dim sOutputCommand As String
-
+  
   $LogMessage = New LogMessage($Titulo, "ExecShellCommand", "Shell execution [" & sCommandText & "]")
   $Logger.Debug($LogMessage)
   Shell sCommandText To sOutputCommand
-
+  
   $LogMessage = New LogMessage($Titulo, "ExecShellCommand", "Shell response [" & sOutputCommand & "]")
   $Logger.Debug($LogMessage)
-
+  
   Return sOutputCommand
-
+  
 Catch
   $LogMessage = New LogMessage($Titulo, "ExecShellCommand", ("Error extracting image metadata: ") & Error.Text)
   $Logger.Error($LogMessage)
   Error.Propagate
-
+  
 End
 
-Private Function NormalizeExifDate(sExifText As String) As String
-
+Private Function NormalizeExifDate(sExifText As String) As Date
+  
   Dim sText As String
-  Dim sParts As String[]
-  Dim sDateParts As String[]
-  Dim sTimeParts As String[]
-  Dim iYear As Integer
-  Dim iMonth As Integer
-  Dim iDay As Integer
-  Dim iHour As Integer
-  Dim iMinute As Integer
-  Dim iSecond As Integer
-
+  Dim aParts As String[]
+  Dim aDateParts As String[]
+  Dim aTimeParts As String[]
+  Dim dExifDate As Date 
+  
+  '' This function must return the date format dd/mm/yyyy HH:mm:ss
+  
   sText = Trim(sExifText)
   If sText = "" Then Return ""
-
-  ' EXIF format: YYYY:MM:DD HH:MM:SS (or date only)
-  If sText Like "****:**:** **:**:**" Or sText Like "****:**:**" Then
-    sParts = Split(sText, " ")
-    sDateParts = Split(sParts[0], ":")
-    If sDateParts.Count <> 3 Then Return ""
-
-    iYear = Val(sDateParts[0])
-    iMonth = Val(sDateParts[1])
-    iDay = Val(sDateParts[2])
-
-    If Len(sDateParts[0]) <> 4 Then Return ""
-    If Len(sDateParts[1]) <> 2 Then Return ""
-    If Len(sDateParts[2]) <> 2 Then Return ""
-    If iYear < 1 Then Return ""
-    If iMonth < 1 Or iMonth > 12 Then Return ""
-    If iDay < 1 Or iDay > 31 Then Return ""
-
-    sParts[0] = sDateParts[1] & "/" & sDateParts[2] & "/" & sDateParts[0]
-
-    If sParts.Count > 1 Then
-      sTimeParts = Split(sParts[1], ":")
-      If sTimeParts.Count <> 3 Then Return ""
-
-      iHour = Val(sTimeParts[0])
-      iMinute = Val(sTimeParts[1])
-      iSecond = Val(sTimeParts[2])
-
-      If Len(sTimeParts[0]) <> 2 Then Return ""
-      If Len(sTimeParts[1]) <> 2 Then Return ""
-      If Len(sTimeParts[2]) <> 2 Then Return ""
-      If iHour < 0 Or iHour > 23 Then Return ""
-      If iMinute < 0 Or iMinute > 59 Then Return ""
-      If iSecond < 0 Or iSecond > 59 Then Return ""
-
-      Return sParts[0] & " " & sParts[1]
+  ' EXIF format often uses ":" instead of "-" or "/" for dates (YYYY:MM:DD)
+  ' We try to detect and convert it so Gambas CDate can handle it.
+  If sText Like "****:**:** *" Or sText Like "****:**:**" Then
+    aParts = Split(sText, " ")
+    aDateParts = Split(aParts[0], ":")
+    aTimeParts = Split(aParts[1], ":")
+    
+    If aDateParts.Count = 3 Then
+      ' Convert YYYY:MM:DD to YYYY-MM-DD
+      ' Return sDateParts[0] & "-" & sDateParts[1] & "-" & sDateParts[2] & If(sParts.Count > 1, " " & sParts[1], "")
+      ' Return sDateParts[2] & "/" & sDateParts[1] & "/" & sDateParts[0] & If(sParts.Count > 1, " " & sParts[1], "")
+      dExifDate = Date(aDateParts[0], aDateParts[1], aDateParts[2], aTimeParts[0], aTimeParts[1], aTimeParts[2])
+      Return dExifDate
     Endif
-
-    Return sParts[0]
   Endif
-
-  ' If no ":" but valid date, return as-is. Otherwise, reject.
+  
   If IsDate(sText) Then Return sText
-
+  
   Return ""
-
+  
 End
 
 Private Function ShellQuote(sValue As String) As String
-
+  
   ' Protects spaces and special characters for shell execution.
   Return "'" & Replace(sValue, "'", "'\\''") & "'"
-
+  
 End

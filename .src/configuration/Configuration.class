@@ -8,18 +8,18 @@ Private $Settings As Settings                                                 ''
 Private $SettingPath As String                                                '' Settings file path
 Private $IsFirstRun As Boolean = False                                        '' First run indicator
 Private $WhichGallery As Integer = Enumeration.GalleryType_Private            '' Active gallery type
-Private $AppPath As String                                                    '' Application files path
-Private $Logger As LoggerPort                                                 '' Logger instance
+' Private $AppPath As String                                                    '' Application files path
+Private $Logger As LoggerPort '' Logger instance
 Private $OsTheme As Integer                                                   '' Current OS theme
 Private $AppTheme As Integer                                                  '' Application theme
 Private $IsSharedEnabled As Boolean                                           '' Shared gallery directory enabled
 Private $Titulo As String = "Configuration"
 Private $LogMessage As LogMessage
-Private $LogLevel As Integer
-Private $LogOutput As Integer
+' Private $LogLevel As Integer
+' Private $LogOutput As Integer
 Private $LogPath As String                                                    '' Log file path
-Private $LogSize As Integer
-Private $LogFiles As Integer
+' Private $LogSize As Integer
+' Private $LogFiles As Integer
 Private $DeletedMaxSizeMB As Integer
 Private $DeletedMaxCount As Integer
 Private $ShouldShowImportSummary As Boolean
@@ -421,9 +421,9 @@ Function ShouldDeleteOriginals_Read() As Boolean
   
 End
 
-Sub ShouldDeleteOriginals_Write(shouldDeleteOriginals As Boolean)
+Sub ShouldDeleteOriginals_Write(Value As Boolean)
   
-  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = shouldDeleteOriginals
+  $Settings[Constants.IMPORT_DELETE_ORIGINALS] = Value
   $Settings.Save()
   
 End
@@ -450,8 +450,8 @@ Private Function LogOutput_Read() As Integer
 End
 
 Private Sub LogOutput_Write(Value As Integer)
-  
   $Settings[Constants.LOGGER_OUTPUT] = Value
+
   $Settings.Save()
   
   $Logger.SetOutput($Settings[Constants.LOGGER_OUTPUT, $Logger.GetDefaultOutputBoth()])
@@ -540,10 +540,10 @@ Private Function ShouldShowImportSummary_Read() As Boolean
   
 End
 
-Private Sub ShouldShowImportSummary_Write(shouldShowImportSummary As Boolean)
+Private Sub ShouldShowImportSummary_Write(Value As Boolean)
   
-  $ShouldShowImportSummary = shouldShowImportSummary
-  $Settings[Constants.IMPORT_SHOW_SUMMARY] = shouldShowImportSummary
+  $ShouldShowImportSummary = Value
+  $Settings[Constants.IMPORT_SHOW_SUMMARY] = Value
   $Settings.Save()
   
 End
@@ -555,10 +555,10 @@ Private Function ShouldShowMoveToTrashSummary_Read() As Boolean
   
 End
 
-Private Sub ShouldShowMoveToTrashSummary_Write(shouldShowMoveToTrashSummary As Boolean)
+Private Sub ShouldShowMoveToTrashSummary_Write(Value As Boolean)
   
-  $ShouldShowMoveToTrashSummary = shouldShowMoveToTrashSummary
-  $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = shouldShowMoveToTrashSummary
+  $ShouldShowMoveToTrashSummary = Value
+  $Settings[Constants.MOVETRASH_SHOW_SUMMARY] = Value
   $Settings.Save()
   
 End
@@ -570,10 +570,10 @@ Private Function ShouldShowMainToolbar_Read() As Boolean
   
 End
 
-Private Sub ShouldShowMainToolbar_Write(shouldShowMainToolbar As Boolean)
+Private Sub ShouldShowMainToolbar_Write(Value As Boolean)
   
-  $ShouldShowMainToolbar = shouldShowMainToolbar
-  $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = shouldShowMainToolbar
+  $ShouldShowMainToolbar = Value
+  $Settings[Constants.GLOBAL_SHOWMAINTOOLBAR] = Value
   $Settings.Save()
   
 End
@@ -585,10 +585,10 @@ Private Function ShouldShowMainStatusBar_Read() As Boolean
   
 End
 
-Private Sub ShouldShowMainStatusBar_Write(shouldShowMainStatusBar As Boolean)
+Private Sub ShouldShowMainStatusBar_Write(Value As Boolean)
   
-  $ShouldShowMainStatusBar = shouldShowMainStatusBar
-  $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = shouldShowMainStatusBar
+  $ShouldShowMainStatusBar = Value
+  $Settings[Constants.GLOBAL_SHOWMAINSTATUSBAR] = Value
   $Settings.Save()
   
 End
@@ -600,10 +600,10 @@ Private Function ShouldAskBeforeMoveTrash_Read() As Boolean
   
 End
 
-Private Sub ShouldAskBeforeMoveTrash_Write(shouldAskBeforeMoveTrash As Boolean)
+Private Sub ShouldAskBeforeMoveTrash_Write(Value As Boolean)
   
-  $ShouldAskBeforeMoveTrash = shouldAskBeforeMoveTrash
-  $Settings[Constants.ASKBEFORE_MOVETRASH] = shouldAskBeforeMoveTrash
+  $ShouldAskBeforeMoveTrash = Value
+  $Settings[Constants.ASKBEFORE_MOVETRASH] = Value
   $Settings.Save()
   
 End
@@ -615,10 +615,10 @@ Private Function ShouldAskBeforeImport_Read() As Boolean
   
 End
 
-Private Sub ShouldAskBeforeImport_Write(shouldAskBeforeImport As Boolean)
+Private Sub ShouldAskBeforeImport_Write(Value As Boolean)
 
-  $ShouldAskBeforeImport = shouldAskBeforeImport
-  $Settings[Constants.ASKBEFORE_IMPORT] = shouldAskBeforeImport
+  $ShouldAskBeforeImport = Value
+  $Settings[Constants.ASKBEFORE_IMPORT] = Value
   $Settings.Save()
 
 End
@@ -630,10 +630,10 @@ Private Function ShouldAskBeforeLock_Read() As Boolean
 
 End
 
-Private Sub ShouldAskBeforeLock_Write(shouldAskBeforeLock As Boolean)
+Private Sub ShouldAskBeforeLock_Write(Value As Boolean)
 
-  $ShouldAskBeforeLock = shouldAskBeforeLock
-  $Settings[Constants.ASKBEFORE_LOCK] = shouldAskBeforeLock
+  $ShouldAskBeforeLock = Value
+  $Settings[Constants.ASKBEFORE_LOCK] = Value
   $Settings.Save()
 
 End
@@ -645,13 +645,15 @@ Private Function ShouldShowLockSummary_Read() As Boolean
 
 End
 
-Private Sub ShouldShowLockSummary_Write(shouldShowLockSummary As Boolean)
+Private Sub ShouldShowLockSummary_Write(Value As Boolean)
 
-  $ShouldShowLockSummary = shouldShowLockSummary
-  $Settings[Constants.LOCK_SHOW_SUMMARY] = shouldShowLockSummary
+  $ShouldShowLockSummary = Value
+  $Settings[Constants.LOCK_SHOW_SUMMARY] = Value
   $Settings.Save()
 
 End
-Sub WhichGallery_Write(Value As Integer)
+
+Private Sub WhichGallery_Write(Value As Integer)
   $WhichGallery = Value
 End
+

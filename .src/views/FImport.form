@@ -55,6 +55,7 @@
       Padding = 4
       { LabelMessageDeleteOriginals Label
         MoveScaled(1,1,58,3)
+        Visible = False
         Background = &H0DED1F34
         Foreground = Color.ButtonBackground
         Alignment = Align.Center

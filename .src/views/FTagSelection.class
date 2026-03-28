@@ -152,7 +152,7 @@ Public Sub ButtonEdit_Click() '' Loads the selected tag into the edit form.
   
   TextBoxTag.Text = $EditCode.Name
   TextAreaTagDescription.Text = $EditCode.Description
-  ColorButtonTag.Value = CInt($EditCode.Color)
+  If $EditCode.Color <> "" Then ColorButtonTag.Value = CInt($EditCode.Color)
   TextBoxTag.SetFocus()
 
 End
@@ -207,22 +207,22 @@ Private Sub InitializeGrid() '' Configures the tag list table columns.
 
 End
 
-Private Sub BindGrid(oTags As TagEntity[]) '' Binds tags to the table and caches entities in Tag.
+Private Sub BindGrid(aTags As TagEntity[]) '' Binds tags to the table and caches entities in Tag.
 
   Dim iRow As Integer = 0
   
   TableViewTags.Rows.Count = 0
-  For Each oTag As TagEntity In oTags
+  For Each oTag As TagEntity In aTags
     iRow = TableViewTags.Rows.Count
     TableViewTags.Rows.Count += 1
     TableViewTags[iRow, 0].Text = Trim(oTag.Name)
     TableViewTags[iRow, 1].Text = Trim(oTag.Description)
     TableViewTags[iRow, 2].Text = Trim(oTag.Color)
      ' TableViewTags[iRow, 2].Background = 65280
-    TableViewTags[iRow, 2].Background = CInt(oTag.Color)
+    ' TableViewTags[iRow, 2].Background = CInt(oTag.Color)
     TableViewTags[iRow, 3].Text = Trim(CStr(oTag.PhotoCount)) & " "
   Next
-  TableViewTags.Tag = oTags
+  TableViewTags.Tag = aTags
 
 End
 
@@ -242,12 +242,12 @@ End
 
 Private Sub FindTags() '' Loads current tags into the list.
 
-  Dim oTags As TagEntity[]
+  Dim aTags As TagEntity[]
   
-  oTags = $TagService.FindTags("")
-  BindGrid(oTags)
+  aTags = $TagService.FindTags("")
+  BindGrid(aTags)
   
-  If oTags.Count = 0 Then
+  If aTags.Count = 0 Then
     LabelTitle.Text = ("No tags available")
     ButtonAccept.Enabled = False
   Else
@@ -257,9 +257,9 @@ Private Sub FindTags() '' Loads current tags into the list.
 
 End
 
-Private Sub ChangePanels(shouldShowManagePanel As Boolean) '' Switches between list mode and manage mode.
+Private Sub ChangePanels(bShouldShowManagePanel As Boolean) '' Switches between list mode and manage mode.
 
-  If shouldShowManagePanel Then
+  If bShouldShowManagePanel Then
     VBoxListTags.Visible = False
     VBoxManageTag.Visible = True
     TextBoxTag.SetFocus()

@@ -10,56 +10,56 @@ Public Function IsNewDatabase() As Boolean '' Checks if the database has been ne
   Error.Raise("PhotoRepositoryPort.IsNewDatabase not implemented")
 End
 
-Public Function FindWithFilters(whereClause As String, sortBy As String, sortOrder As String, limit As Integer, offset As Integer) As PhotoEntity[] '' Retrieves photo entities matching the specified filters.
-  Error.Raise("PhotoRepositoryPort.FindWithFilters not implemented")
+Public Function FindWithFilters(oSpec As PhotoSpecification, sortBy As String, sortOrder As String, limit As Integer, offset As Integer) As PhotoEntity[] '' Retrieves photo entities matching the specified filters.
+  Error.Raise("PhotoRepositoryPort.FindWithFilters not implemented" & oSpec & sortBy & sortOrder & limit & offset)
 End
 
-Public Function CountWithFilters(whereClause As String) As Integer '' Returns the total count of photos matching the where clause.
-  Error.Raise("PhotoRepositoryPort.CountWithFilters not implemented")
+Public Function CountWithFilters(oSpec As PhotoSpecification) As Integer '' Returns the total count of photos matching the specification.
+  Error.Raise("PhotoRepositoryPort.CountWithFilters not implemented" & oSpec)
 End
 
 Public Function CreateAlbum(cAlbum As AlbumEntity) As Integer '' Creates a new album record and returns its ID.
-  Error.Raise("PhotoRepositoryPort.CreateAlbum not implemented")
+  Error.Raise("PhotoRepositoryPort.CreateAlbum not implemented" & cAlbum)
 End
 
 Public Function EditAlbum(cAlbum As AlbumEntity) As Boolean '' Updates an existing album record.
-  Error.Raise("PhotoRepositoryPort.EditAlbum not implemented")
+  Error.Raise("PhotoRepositoryPort.EditAlbum not implemented" & cAlbum)
 End
 
 Public Function DeleteAlbum(id As Integer) As Integer '' Deletes an album record by its ID.
-  Error.Raise("PhotoRepositoryPort.DeleteAlbum not implemented")
+  Error.Raise("PhotoRepositoryPort.DeleteAlbum not implemented" & id)
 End
 
 Public Function CreateTag(cTag As TagEntity) As Integer '' Creates a new tag record and returns its ID.
-  Error.Raise("PhotoRepositoryPort.CreateTag not implemented")
+  Error.Raise("PhotoRepositoryPort.CreateTag not implemented" & cTag)
 End
 
 Public Function EditTag(cTag As TagEntity) As Boolean '' Updates an existing tag record.
-  Error.Raise("PhotoRepositoryPort.EditTag not implemented")
+  Error.Raise("PhotoRepositoryPort.EditTag not implemented" & cTag)
 End
 
 Public Function DeleteTag(id As Integer) As Integer '' Removes a tag record and its relations.
-  Error.Raise("PhotoRepositoryPort.DeleteTag not implemented")
+  Error.Raise("PhotoRepositoryPort.DeleteTag not implemented" & id)
 End
 
 Public Function CreatePhoto(photoE As PhotoEntity, Optional photoAlbumE As PhotoAlbumEntity) As Boolean '' Creates a new photo record and optionally adds it to an album.
-  Error.Raise("PhotoRepositoryPort.CreatePhoto not implemented")
+  Error.Raise("PhotoRepositoryPort.CreatePhoto not implemented" & photoE & photoAlbumE)
 End
 
 Public Function AddPhotoToAlbum(photoId As Integer, albumId As Integer, Optional orderInAlbum As Integer = 0, Optional addedUser As String = "") As Boolean '' Adds a photo to a specific album.
-  Error.Raise("PhotoRepositoryPort.AddPhotoToAlbum not implemented")
+  Error.Raise("PhotoRepositoryPort.AddPhotoToAlbum not implemented" & photoId & albumId & orderInAlbum & addedUser)
 End
 
 Public Function RemovePhotoFromAlbum(photoId As Integer, albumId As Integer) As Boolean '' Removes a photo from a specific album.
-  Error.Raise("PhotoRepositoryPort.RemovePhotoFromAlbum not implemented")
+  Error.Raise("PhotoRepositoryPort.RemovePhotoFromAlbum not implemented" & photoId & albumId)
 End
 
 Public Function AddPhotoToTag(photoId As Integer, tagId As Integer, Optional addedUser As String = "") As Boolean '' Creates a photo-tag relation.
-  Error.Raise("PhotoRepositoryPort.AddPhotoToTag not implemented")
+  Error.Raise("PhotoRepositoryPort.AddPhotoToTag not implemented" & photoId & tagId & addedUser)
 End
 
 Public Function GetPhotosInTrash(limit As Integer, offset As Integer) As PhotoEntity[] '' Retrieves photos that are currently in the trash (soft-deleted).
-  Error.Raise("PhotoRepositoryPort.GetPhotosInTrash not implemented")
+  Error.Raise("PhotoRepositoryPort.GetPhotosInTrash not implemented" & limit & offset)
 End
 
 Public Function CountPhotosInTrash() As Integer '' Returns the total number of photos in the trash.
@@ -67,15 +67,15 @@ Public Function CountPhotosInTrash() As Integer '' Returns the total number of p
 End
 
 Public Function UpdatePhoto(photoE As PhotoEntity) As Boolean '' Updates an existing photo record in the database.
-  Error.Raise("PhotoRepositoryPort.UpdatePhoto not implemented")
+  Error.Raise("PhotoRepositoryPort.UpdatePhoto not implemented" & photoE)
 End
 
 Public Function RemovePhotoFromTag(photoId As Integer, tagId As Integer) As Boolean '' Removes a photo-tag relation.
-  Error.Raise("PhotoRepositoryPort.RemovePhotoFromTag not implemented")
+  Error.Raise("PhotoRepositoryPort.RemovePhotoFromTag not implemented" & photoId & tagId)
 End
 
 Public Function PermanentlyDeletePhoto(id As Integer) As Boolean '' Permanently deletes a photo record and its relations.
-  Error.Raise("PhotoRepositoryPort.PermanentlyDeletePhoto not implemented")
+  Error.Raise("PhotoRepositoryPort.PermanentlyDeletePhoto not implemented" & id)
 End
 
 Public Function UpdatePhotoLockStatus(id As Integer, isLocked As Boolean, Optional lockedBy As String = "", Optional lockReason As String = "") As Boolean '' Updates only the lock status of a photo.
@@ -83,13 +83,17 @@ Public Function UpdatePhotoLockStatus(id As Integer, isLocked As Boolean, Option
 End
 
 Public Function ValidateHash256Exist(sHash256 As String) As Boolean '' Checks if a photo with the given hash already exists.
-  Error.Raise("PhotoRepositoryPort.ValidateHash256Exist not implemented")
+  Error.Raise("PhotoRepositoryPort.ValidateHash256Exist not implemented" & sHash256)
 End
 
 Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[] '' Retrieves album records with optional filters.
-  Error.Raise("PhotoRepositoryPort.FindAlbums not implemented")
+  Error.Raise("PhotoRepositoryPort.FindAlbums not implemented" & text & id & useSoftDelete)
 End
 
 Public Function FindTags(Optional text As String, Optional id As Integer = 0) As TagEntity[] '' Retrieves tag records with optional filters.
-  Error.Raise("PhotoRepositoryPort.FindTags not implemented")
+  Error.Raise("PhotoRepositoryPort.FindTags not implemented" & text & id)
+End
+
+Public Function GetAvailableDates() As String[] '' Returns a list of unique photo creation dates (YYYY-MM-DD).
+  Error.Raise("PhotoRepositoryPort.GetAvailableDates not implemented")
 End

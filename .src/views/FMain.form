@@ -263,29 +263,10 @@
     { PanelIzquierdo Panel
       MoveScaled(0,0,27,70)
       Arrangement = Arrange.Vertical
-      { Panel3 Panel
-        MoveScaled(0,3,26,63)
+      { TreeViewFilters TreeView
+        MoveScaled(1,1,25,68)
         Expand = True
-        Arrangement = Arrange.Row
-        Margin = True
-        Padding = 4
-        { ExpanderAlbum Expander
-          MoveScaled(2,2,21,4)
-          Expand = True
-          Arrangement = Arrange.Fill
-          Border = False
-          Text = ("Albums")
-        }
-        { ExpanderTags Expander
-          MoveScaled(2,7,24,4)
-          Expand = True
-          Arrangement = Arrange.Fill
-          Border = False
-          Text = ("Tags")
-        }
-        { TreeViewImages TreeView
-          MoveScaled(1,19,23,42)
-        }
+        Mode = Select.Single
       }
     }
     { PanelDerecho Panel

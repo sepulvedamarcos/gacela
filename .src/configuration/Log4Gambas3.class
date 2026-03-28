@@ -1,0 +1,287 @@
+' Gambas class file
+
+Export
+'
+'======================================================================================================
+'  Clase      : Log4Gambas3
+'  Creador    : Marcos Sepúlveda
+'  Mail       : sepulvedamarcos@gmail.com
+'  Telegram   : @sepulvedamarcos
+'
+'  Esta clase tiene por objetivo permitir la generación de trazas para el
+'  seguimiento de los sucesos de un aplicativo.
+'
+'======================================================================================================
+'
+Private $logLevel As Integer = 5
+Private $logOutput As Integer = 2
+Private $maxFiles As Integer = 5
+Private $maxFileSize As Long = 5 * 1020 * 1024  ' 5MB por defecto
+Private $pathFiles As String = ""
+Private $appName As String = "app"
+
+Private $levels As String[] = ["None", "Fatal", "Error", "Warning", "Info", "Debug"] ''Arreglo con todas las opciones de nivel
+Private $outputs As String[] = ["None", "File", "Console", "Both"]                        ''Arreglo con todas las opciones de salida
+
+Public Enum LEVEL_NONE = 0                        ''Enum para definir nivel salida None
+Public Enum LEVEL_FATAL = 1                       ''Enum para definir nivel salida Fatal
+Public Enum LEVEL_ERROR = 2                       ''Enum para definir nivel salida Error
+Public Enum LEVEL_WARNING = 3                     ''Enum para definir nivel salida Warning
+Public Enum LEVEL_INFO = 4                        ''Enum para definir nivel salida Info
+Public Enum LEVEL_DEBUG = 5                       ''Enum para definir nivel salida Debug
+
+Public Enum OUTPUT_NONE = 0                       ''Enum para sin salida
+Public Enum OUTPUT_FILE = 1                       ''Enum para escribir en archivo
+Public Enum OUTPUT_CONSOLE = 2                    ''Enum para salida por consola
+Public Enum OUTPUT_BOTH = 3                       ''Enum para salida dual (archivo + consola)
+
+Property Read Levels As String[]                  ''Acceso al arreglo con descriptores de nivel
+Property Read Outputs As String[]                 ''Acceso al arrelgo con descriptores de salida
+
+' =============================================
+' === Métodos públicos de envío de mensajes ===
+' =============================================
+
+Public Sub Debug(m As String) ''Información detallada para depuración
+
+  SendMessage(LEVEL_DEBUG, m)
+
+End
+
+Public Sub Info(m As String)  ''Eventos generales e informativos
+
+  SendMessage(LEVEL_INFO, m)
+
+End
+
+Public Sub Warning(m As String) ''Situaciones inesperadas pero manejables
+
+  SendMessage(LEVEL_WARNING, m)
+
+End
+
+Public Sub Error(m As String) ''Errores que permiten continuar la ejecución
+
+  SendMessage(LEVEL_ERROR, m)
+
+End
+
+Public Sub Fatal(m As String) ''Errores críticos que impiden continuar
+
+  SendMessage(LEVEL_FATAL, m)
+
+End
+
+Private Sub SendMessage(typeMess As Integer, m As String)
+
+  Dim messa As String
+
+  ' Formatear el mensaje con timestamp, nombre de app, nivel y contenido
+  messa = "[" & Format(Now(), "dd-mm-yyyy hh:nn:ss") & "]"
+  messa = "[" & $appName & "]"
+  messa &= "[" & $levels[typeMess] & "]"
+  messa &= " " & m
+
+  ' Verificar si el nivel del mensaje cumple con el nivel mínimo configurado
+  If $logLevel >= typeMess Then
+
+    Select Case $logOutput
+
+      Case OUTPUT_CONSOLE
+        Print messa
+
+      Case OUTPUT_FILE
+        WriteToFile(messa)
+
+      Case OUTPUT_BOTH
+        Print messa
+        WriteToFile(messa)
+
+      Case OUTPUT_NONE
+        ' No hacer nada
+
+    End Select
+
+  Endif
+
+Catch
+  Print "Log4Gambas3 Error: " & Error.Text
+
+End
+
+Private Sub WriteToFile(messa As String)
+
+  Dim arch As File
+  Dim fileName As String
+
+  ' Verificar rotación de archivos
+  CheckFileRotator()
+
+  ' Generar nombre de archivo con fecha
+  fileName = $pathFiles &/ $appName & "-" & Format(Date(Now), "yyyy-mm-dd") & ".log "
+
+  ' Abrir archivo (crear si no existe, o agregar al final)
+  If Not Exist(fileName) Then
+    arch = Open fileName For Write Create
+  Else
+    arch = Open fileName For Append
+  Endif
+
+  ' Escribir mensaje
+  Print #arch, messa
+  Close #arch
+
+Catch
+  Print "Log4Gambas3 Error al escribir archivo: " & Error.Text
+
+End
+
+Private Sub CheckFileRotator()
+
+  Dim filesLog As New String[]
+  Dim olderFile As String
+  Dim i As Integer
+
+  ' Crear directorio si no existe
+  If Not IsDir($pathFiles) Then
+    Try Mkdir $pathFiles
+  Endif
+
+  ' Obtener lista de archivos .log de esta aplicación
+  filesLog = Dir($pathFiles, "*.log")
+
+  ' Si hay más archivos que el máximo permitido, eliminar los más antiguos
+  If filesLog.Count > $maxFiles Then
+    filesLog.Sort(gb.Ascent)
+
+    For i = 0 To filesLog.Count - $maxFiles - 1
+      olderFile = $pathFiles &/ filesLog[i]
+      If Exist(olderFile) Then
+        Try Kill olderFile
+        If Error Then
+          Print "Log4Gambas3: No se pudo eliminar " & olderFile
+        Endif
+      Endif
+    Next
+  Endif
+
+Catch
+  Print "Log4Gambas3 Error en rotación: " & Error.Text
+
+End
+
+' ==================================================
+' === Sección de definición de getters y setters ===
+' ==================================================
+
+Public Function GetMinLevel() As Integer       ''Obtiene el nivel mínimo de logging configurado
+
+  Return $logLevel
+
+End
+
+Public Sub SetMinLevel(level As Integer)     ''Define el nivel mínimo de logging. Solo se registrarán mensajes de este nivel o superiores
+
+  If level >= LEVEL_NONE And level <= LEVEL_DEBUG Then
+    $logLevel = level
+  Else
+    Print "Log4Gambas3: Nivel inválido, usando LEVEL_INFO"
+    $logLevel = LEVEL_INFO
+  Endif
+
+End
+
+Public Function GetOutput() As Integer         ''Obtiene el tipo de salida configurado
+
+  Return $logOutput
+
+End
+
+Public Sub SetOutput(out As Integer)         ''Define el tipo de salida de los mensajes. Puede ser: OUTPUT_NONE, OUTPUT_FILE, OUTPUT_CONSOLE, OUTPUT_BOTH
+
+  If out >= OUTPUT_NONE And out <= OUTPUT_BOTH Then
+    $logOutput = out
+  Else
+    Print "Log4Gambas3: Salida inválida, usando OUTPUT_CONSOLE"
+    $logOutput = OUTPUT_CONSOLE
+  Endif
+
+End
+
+Public Function GetMaxFiles() As Integer       ''Obtiene la cantidad máxima de archivos de log a mantener
+
+  Return $maxFiles
+
+End
+
+Public Sub SetMaxFiles(max As Integer)       ''Define la cantidad máxima de archivos de log a mantener. Los archivos más antiguos se eliminan automáticamente
+
+  If max > 0 Then
+    $maxFiles = max
+  Else
+    Print "Log4Gambas3: Cantidad inválida, usando 5 archivos"
+    $maxFiles = 5
+  Endif
+
+End
+
+Public Function GetMaxFileSize() As Long  ''Obtiene el tamaño máximo definido para los archivos de log
+
+  Return $maxFileSize
+
+End
+
+Public Sub SetMaxFileSize(size As Long)   ''Define el tamaño máximo del archivo de log. Nota: Esta funcionalidad está preparada para futura implementación
+
+  If size > 0 Then
+    $maxFileSize = size
+  Else
+    ' 5 MB por defecto
+    $maxFileSize = 5 * 1024 * 1024
+  Endif
+
+End
+
+Public Function GetLogFile() As String       ''Obtiene la ruta donde se almacenan los archivos de log
+
+  Return $pathFiles
+
+End
+
+Public Sub SetLogFile(path As String)        ''Define la ruta donde se almacenarán los archivos de log. Si no se especifica, usa el directorio home del usuario
+
+  If path = "" Then
+    $pathFiles = User.Home
+  Else
+    $pathFiles = path
+  Endif
+
+End
+
+Public Function GetAppName() As String       ''Obtiene el nombre de la aplicación usado en los logs
+
+  Return $appName
+
+End
+
+Public Sub SetAppName(name As String)        ''Define el nombre de la aplicación que aparecerá en los logs. También se usa como prefijo para los archivos de log
+
+  If name <> "" Then
+    $appName = name
+  Else
+    $appName = "app"
+  Endif
+
+End
+
+Private Function Levels_Read() As String[]
+
+  Return $levels
+
+End
+
+Private Function Outputs_Read() As String[]
+
+  Return $outputs
+
+End

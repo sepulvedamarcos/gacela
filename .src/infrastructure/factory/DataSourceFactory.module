@@ -13,7 +13,7 @@ Public Function CreatePhotoRepository(cConfiguration As Configuration, oLogger A
   
 End
 
-Public Function CreateFileStorage(cConfiguration As Configuration, oLogger As LoggerPort) As FileStoragePort
+Public Function CreateFileStorage(cConfiguration As Configuration) As FileStoragePort
   
   Select Case cConfiguration.StorageProvider
     Case Constants.STORAGE_PROVIDER_LOCAL

@@ -3,21 +3,21 @@
 ' File storage contract for local/cloud interchangeable implementations.
 
 Public Function EnsureDirectory(path As String) As Boolean '' Ensures that the specified directory exists, creating it if necessary.
-  Error.Raise("FileStoragePort.EnsureDirectory not implemented")
+  Error.Raise("FileStoragePort.EnsureDirectory not implemented" & path)
 End
 
 Public Function SaveFile(sourcePath As String, targetPath As String) As Boolean '' Saves a file from a source path to a target path.
-  Error.Raise("FileStoragePort.SaveFile not implemented")
+  Error.Raise("FileStoragePort.SaveFile not implemented" & sourcePath & targetPath)
 End
 
 Public Function DeleteFile(path As String) As Boolean '' Deletes the file at the specified path.
-  Error.Raise("FileStoragePort.DeleteFile not implemented")
+  Error.Raise("FileStoragePort.DeleteFile not implemented" & path)
 End
 
 Public Function MoveFile(sourcePath As String, targetPath As String) As Boolean '' Physically moves a file from source to target path.
-  Error.Raise("FileStoragePort.MoveFile not implemented")
+  Error.Raise("FileStoragePort.MoveFile not implemented" & sourcePath & targetPath)
 End
 
 Public Function Exists(path As String) As Boolean '' Checks if a file or directory exists at the specified path.
-  Error.Raise("FileStoragePort.Exists not implemented")
+  Error.Raise("FileStoragePort.Exists not implemented" & path)
 End

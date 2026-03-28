@@ -4,48 +4,48 @@
 ' it's a contract to imeplemnt like interface
 
 
-Public Sub Debug(message As LogMessage) '' Logs a debug level message.
-  Error.Raise("LoggerPort.Debug not implemented")
+Public Sub Debug(oMessage As LogMessage) '' Logs a debug level message.
+  Error.Raise("LoggerPort.Debug not implemented" & oMessage)
 End
 
-Public Sub Info(message As LogMessage) '' Logs an info level message.
-  Error.Raise("LoggerPort.Info not implemented")
+Public Sub Info(oMessage As LogMessage) '' Logs an info level message.
+  Error.Raise("LoggerPort.Info not implemented" & oMessage)
 End
 
-Public Sub Warning(message As LogMessage) '' Logs a warning level message.
-  Error.Raise("LoggerPort.Warning not implemented")
+Public Sub Warning(oMessage As LogMessage) '' Logs a warning level message.
+  Error.Raise("LoggerPort.Warning not implemented" & oMessage)
 End
 
-Public Sub Error(message As LogMessage) '' Logs an error level message.
-  Error.Raise("LoggerPort.Error not implemented")
+Public Sub Error(oMessage As LogMessage) '' Logs an error level message.
+  Error.Raise("LoggerPort.Error not implemented" & oMessage)
 End
 
-Public Sub Fatal(message As LogMessage) '' Logs a fatal level message.
-  Error.Raise("LoggerPort.Fatal not implemented")
+Public Sub Fatal(oMessage As LogMessage) '' Logs a fatal level message.
+  Error.Raise("LoggerPort.Fatal not implemented" & oMessage)
 End
 
 Public Sub SetAppName(appName As String) '' Sets the application name for logging context.
-  Error.Raise("LoggerPort.SetAppName not implemented")
+  Error.Raise("LoggerPort.SetAppName not implemented" & appName)
 End
 
 Public Sub SetMinLevel(level As Integer) '' Sets the minimum log level to be recorded.
-  Error.Raise("LoggerPort.SetMinLevel not implemented")
+  Error.Raise("LoggerPort.SetMinLevel not implemented" & level)
 End
 
 Public Sub SetOutput(output As Integer) '' Sets the output destination (console, file, both).
-  Error.Raise("LoggerPort.SetOutput not implemented")
+  Error.Raise("LoggerPort.SetOutput not implemented" & output)
 End
 
 Public Sub SetLogFile(logFile As String) '' Sets the path to the log file.
-  Error.Raise("LoggerPort.SetLogFile not implemented")
+  Error.Raise("LoggerPort.SetLogFile not implemented" & logFile)
 End
 
 Public Sub SetMaxFileSize(sizeBytes As Integer) '' Sets the maximum size of the log file before rotation.
-  Error.Raise("LoggerPort.SetMaxFileSize not implemented")
+  Error.Raise("LoggerPort.SetMaxFileSize not implemented" & sizeBytes)
 End
 
 Public Sub SetMaxFiles(maxFiles As Integer) '' Sets the maximum number of rotated log files to keep.
-  Error.Raise("LoggerPort.SetMaxFiles not implemented")
+  Error.Raise("LoggerPort.SetMaxFiles not implemented" & maxFiles)
 End
 
 Public Function GetMinLevel() As Integer '' Returns the current minimum log level.
@@ -80,7 +80,7 @@ Public Function GetOutputs() As String[] '' Returns a list of available output d
   Error.Raise("LoggerPort.GetOutputs not implemented")
 End
 
-Public Function FormatMessage(message As LogMessage) As String '' Formats a log message into a string.
-  If message = Null Then Return ""
-  Return message.ToText()
+Public Function FormatMessage(oMessage As LogMessage) As String '' Formats a log message into a string.
+  If oMessage = Null Then Return ""
+  Return oMessage.ToText()
 End

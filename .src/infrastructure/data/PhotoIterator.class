@@ -1,115 +1,89 @@
 ' Gambas class file
 
-'
-'
-' Data iteration class
-'
-'
+'' Iterator for photo collections with pagination support.
+'' Uses PhotoSpecification to handle complex filtering logic through the repository.
+
 Private $cRepository As PhotoRepositoryPort
-Private $iCurrentIndex As Integer = 0
 Private $iPageSize As Integer = 15
 Private $iCurrentPage As Integer = 0
-Private $aCachedPhotos As PhotoEntity[]
 Private $iTotalCount As Integer = 0
 Private $Logger As LoggerPort
 Private $HasMorePages As Boolean = True
-' Filters
-Private $ShouldFilterGarbage As Boolean = False
-Private $ShouldFilterFavorites As Boolean = False
-Private $sFilterFormat As String = ""
-Private $dFilterDateFrom As Date
-Private $dFilterDateTo As Date
-Private $sFilterUser As String = ""
-Private $sSearchText As String = ""
-Private $iFilterAlbumId As Integer = 0
-Private $sSortBy As String = "import_date"  ' import_date, file_name, creation_date
-Private $sSortOrder As String = "DESC"      ' ASC, DESC
-Private $Titulo As String = "PhotoIterator"
-Private Const TABLE_PHOTOS As String = "photos"
-Private Const TABLE_PHOTOS_ALBUMS As String = "photo_albums"
+Private $Specification As PhotoSpecification
 
+Private $sSortBy As String = "import_date"  '' Column to sort by (import_date, file_name, creation_date).
+Private $sSortOrder As String = "DESC"      '' Sort order (ASC, DESC).
+
+Private $Titulo As String = "PhotoIterator"
 Private $LogMessage As LogMessage
-' ==================================================
+
+' =============================================================================
 '
 '          Public methods
 '
-' ==================================================
-Public Sub _new(cRepository As PhotoRepositoryPort, oLogger As LoggerPort)
-  $cRepository = cRepository
-  $Logger = oLogger
-  $aCachedPhotos = New PhotoEntity[]
+' =============================================================================
 
-  ' Count total with current filters
+Public Sub _new(oRepository As PhotoRepositoryPort, oLogger As LoggerPort)
+  
+  $cRepository = oRepository
+  $Logger = oLogger
+  $Specification = New PhotoSpecification
+  
+  ' Count total with current (empty) filters
   UpdateTotalCount()
 
 End
 
-Public Sub SetFilterAlbum(albumId As Integer)
+Public Sub SetSpecification(oSpec As PhotoSpecification) '' Updates the active specification and resets the iterator.
+  
+  If oSpec = Null Then 
+    $Specification = New PhotoSpecification
+  Else
+    $Specification = oSpec
+  Endif
+  
+  Reset()
+  
+End
 
-  If $iFilterAlbumId = albumId Then Return
+Public Sub SetFilterAlbum(iAlbumId As Integer) '' Shortcut to filter by a specific album.
+  
+  If $Specification.AlbumId = iAlbumId Then Return
 
-  $iFilterAlbumId = albumId
+  $Specification.AlbumId = iAlbumId
   Reset()
 
 End
 
-'Public Function HasNext() As Boolean '' Check if there are more items
-'
-'  If $iCurrentIndex < $aCachedPhotos.Count Then
-'    Return True
-'  Endif
-'
-'  Return $HasMorePages
-'
-'End
-
-'Public Function Next() As PhotoEntity '' Get next item
-'
-'  If $iCurrentIndex >= $aCachedPhotos.Count Then
-'    $Logger.Warning("No more items in cache. Call LoadNextBatch() first")
-'    Return Null
-'  Endif
-'
-'  Dim cPhoto As PhotoEntity = $aCachedPhotos[$iCurrentIndex]
-'  $iCurrentIndex += 1
-'
-'  Return cPhoto
-'
-'End
-
-Public Function LoadNextBatch() As PhotoEntity[] '' Load next batch for infinite scroll
+Public Function LoadNextBatch() As PhotoEntity[] '' Loads the next batch of photos for infinite scroll.
 
   Dim iOffset As Integer
   Dim oNewPhotos As New PhotoEntity[]
 
-  ' If there are no more pages
+  ' If there are no more pages according to our previous count and current page
   If Not $HasMorePages Then
     $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "No more pages to load")
-  $Logger.Debug($LogMessage)
+    $Logger.Debug($LogMessage)
     Return oNewPhotos
   Endif
 
-  $iCurrentPage = $iCurrentPage + 1
+  $iCurrentPage += 1
   iOffset = ($iCurrentPage - 1) * $iPageSize
 
-  $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Loading page " & $iCurrentPage & " (iOffset=" & iOffset & ", limit=" & $iPageSize & ")")
+  $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Loading page " & $iCurrentPage & " (iOffset=" & iOffset & ", limit=" & $iPageSize & ", total=" & $iTotalCount & ")")
   $Logger.Debug($LogMessage)
 
-  ' Load next batch from $cRepository
-  oNewPhotos = $cRepository.FindWithFilters(BuildFilterQuery(), $sSortBy, $sSortOrder, $iPageSize, iOffset)
+  ' Load next batch using the Specification
+  oNewPhotos = $cRepository.FindWithFilters($Specification, $sSortBy, $sSortOrder, $iPageSize, iOffset)
 
-  For Each cPhoto As PhotoEntity In oNewPhotos
-    $aCachedPhotos.Add(cPhoto)
-  Next
-
-  ' If fewer than expected were loaded, there are no more pages
-  If oNewPhotos.Count < $iPageSize Then
+  ' Update HasMorePages based on total count
+  If (iOffset + oNewPhotos.Count) >= $iTotalCount Then
     $HasMorePages = False
-    $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Last page reached")
-  $Logger.Debug($LogMessage)
+    $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Last page reached (total=" & $iTotalCount & ")")
+    $Logger.Debug($LogMessage)
   Endif
 
-  $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Batch loaded: " & oNewPhotos.Count & " photos. Cached total: " & $aCachedPhotos.Count)
+  $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Batch loaded: " & oNewPhotos.Count & " photos.")
   $Logger.Debug($LogMessage)
 
   Return oNewPhotos
@@ -117,14 +91,13 @@ Public Function LoadNextBatch() As PhotoEntity[] '' Load next batch for infinite
 Catch
   $LogMessage = New LogMessage($Titulo, "LoadNextBatch", "Error loading next batch: " & Error.Text)
   $Logger.Error($LogMessage)
+  Return New PhotoEntity[]
 
 End
 
-Public Sub Reset() '' Reset iterator
+Public Sub Reset() '' Resets the iterator to the first page.
 
-  $iCurrentIndex = 0
   $iCurrentPage = 0
-  $aCachedPhotos.Clear()
   $HasMorePages = True
   UpdateTotalCount()
 
@@ -133,253 +106,29 @@ Public Sub Reset() '' Reset iterator
 
 End
 
-'Public Sub SetFilterFavorites(onlyFavorites As Boolean)
-'
-'  If $ShouldFilterFavorites = onlyFavorites Then Return
-'
-'  $ShouldFilterFavorites = onlyFavorites
-'  Reset()
-'
-'End
-
-'Public Sub SetFilterFormat(format As String)
-'
-'  format = LCase(format)
-'  If $sFilterFormat = format Then Return
-'
-'  $sFilterFormat = format
-'  Reset()
-'
-'End
-
-'Public Sub SetFilterDateRange(dateFrom As Date, dateTo As Date)
-'
-'  $dFilterDateFrom = dateFrom
-'  $dFilterDateTo = dateTo
-'  Reset()
-'
-'End
-
-'Public Sub SetFilterUser(userName As String)
-'
-'  $sFilterUser = userName
-'  Reset()
-'
-'End
-
-'Public Sub SetSearchText(searchText As String)
-'
-'  If $sSearchText = searchText Then Return
-'
-'  $sSearchText = searchText
-'  Reset()
-'
-'End
-
-'Public Sub SetSortBy(sortBy As String, Optional sortOrder As String = "DESC")
-'
-'  $sSortBy = sortBy
-'  $sSortOrder = sortOrder
-'  Reset()
-'
-'End
-
-'Public Sub ClearFilters()
-'
-'  $ShouldFilterGarbage = False
-'  $ShouldFilterFavorites = False
-'  $sFilterFormat = ""
-'  $dFilterDateFrom = Null
-'  $dFilterDateTo = Null
-'  $sFilterUser = ""
-'  $sSearchText = ""
-'  Reset()
-'
-'End
-
-'Public Sub SetPageSize(pageSize As Integer)
-'
-'  If pageSize > 0 And pageSize <= 500 Then
-'    $iPageSize = pageSize
-'    Reset()
-'  Endif
-'
-'End
-
-'Public Function GetCurrentPage() As Integer
-'
-'  Return $iCurrentPage
-'
-'End
-
-'Public Function GetTotalPages() As Integer
-'
-'  Return Ceil($iTotalCount / $iPageSize)
-'
-'End
-
-'Public Function GetTotalCount() As Integer
-'
-'  Return $iTotalCount
-'
-'End
-
-'Public Function GetPageSize() As Integer
-'
-'  Return $iPageSize
-'
-'End
-
-' Load a specific page
-'Public Sub LoadPage(pageNumber As Integer)
-'
-'  If pageNumber < 0 Or pageNumber >= GetTotalPages() Then
-'    $Logger.Warning("Page out of range: " & pageNumber)
-'    Return
-'  Endif
-'
-'  $iCurrentPage = pageNumber
-'  $iCurrentIndex = 0
-'  LoadCurrentPage()
-'
-'End
-' ==================================================
+' =============================================================================
 '
 '          Private methods
 '
-' ==================================================
-
-' Private Sub LoadNextPage()
-'
-'   $iCurrentPage += 1
-'   $iCurrentIndex = 0
-'   LoadCurrentPage()
-'
-' End
-
-'Private Sub LoadCurrentPage()
-'
-'  Dim iOffset As Integer = $iCurrentPage * $iPageSize
-'
-'  $Logger.Debug("Loading page " & $iCurrentPage & ", iOffset=" & iOffset & ", limit=" & $iPageSize)
-'
-'  $aCachedPhotos = $cRepository.FindWithFilters(BuildFilterQuery(), BuildFilterParams(), $sSortBy, $sSortOrder, $iPageSize, iOffset)
-'
-'  $Logger.Debug("Page loaded: " & $aCachedPhotos.Count & " photos")
-'
-'Catch
-'  $Logger.Error("Error loading page: " & Error.Text)
-'  $aCachedPhotos = New PhotoEntity[]
-'
-'End
+' =============================================================================
 
 Private Sub UpdateTotalCount()
 
-  $iTotalCount = $cRepository.CountWithFilters(BuildFilterQuery())
+  $iTotalCount = $cRepository.CountWithFilters($Specification)
+  
+  ' If total is 0, no more pages from the start
+  If $iTotalCount = 0 Then
+    $HasMorePages = False
+  Endif
 
-  $LogMessage = New LogMessage($Titulo, "UpdateTotalCount", "Total photos with filters: " & $iTotalCount)
+  $LogMessage = New LogMessage($Titulo, "UpdateTotalCount", "Total photos with specification: " & $iTotalCount)
   $Logger.Debug($LogMessage)
 
 Catch
   $LogMessage = New LogMessage($Titulo, "UpdateTotalCount", "Error counting photos: " & Error.Text)
   $Logger.Error($LogMessage)
   $iTotalCount = 0
+  $HasMorePages = False
   Error.Propagate
-
-End
-
-' Build WHERE query with active filters
-Private Function BuildFilterQuery() As String
-
-  Dim aConditions As String[] = New String[]
-
-  aConditions.Add("soft_delete = " & If($ShouldFilterGarbage, "true", "false"))
-
-  ' Filter: favorites only
-  If $ShouldFilterFavorites Then
-    aConditions.Add("is_favorite = &2")
-  Endif
-
-  ' Filter: by format
-  If $sFilterFormat <> "" Then
-    aConditions.Add("LOWER(original_format) = &3")
-  Endif
-
-  ' Filter: date range
-  If $dFilterDateFrom Then
-    aConditions.Add("creation_date >= &4")
-  Endif
-
-  If $dFilterDateTo Then
-    aConditions.Add("creation_date <= &5")
-  Endif
-
-  ' Filter: by user
-  If $sFilterUser <> "" Then
-    aConditions.Add("import_user = &6")
-  Endif
-
-  ' Filter: search by name
-  If $sSearchText <> "" Then
-    aConditions.Add("LOWER(file_name) LIKE &7")
-  Endif
-
-  ' Filter: by album
-  If $iFilterAlbumId > 0 Then
-    aConditions.Add("EXISTS (SELECT 1 FROM " & TABLE_PHOTOS_ALBUMS & " pa WHERE pa.photo_id = " & TABLE_PHOTOS & ".photo_id AND pa.album_id = " & $iFilterAlbumId & ")")
-  Endif
-
-  Return aConditions.Join(" AND ")
-
-End
-
-' Build parameters for the query
-'Private Function BuildFilterParams() As Variant[]
-'
-'  Dim oParams As New Variant[]
-'
-  ' Parameter 1: soft_delete
-'  oParams.Add(False)
-'
-  ' Parameter 2: is_favorite
-'  If $ShouldFilterFavorites Then
-'    oParams.Add(True)
-'  Endif
-'
-  ' Parameter 3: format
-'  If $sFilterFormat <> "" Then
-'    oParams.Add($sFilterFormat)
-'  Endif
-'
-  ' Parameter 4: date from
-'  If $dFilterDateFrom Then
-'    oParams.Add($dFilterDateFrom)
-'  Endif
-'
-  ' Parameter 5: date to
-'  If $dFilterDateTo Then
-'    oParams.Add($dFilterDateTo)
-'  Endif
-'
-  ' Parameter 6: user
-'  If $sFilterUser <> "" Then
-'    oParams.Add($sFilterUser)
-'  Endif
-'
-  ' Parameter 7: search text
-'  If $sSearchText <> "" Then
-'    oParams.Add("%" & LCase($sSearchText) & "%")
-'  Endif
-'
-'  Return oParams
-'
-'End
-
-' Read-only properties
-Property Read IsFiltered As Boolean
-
-Function IsFiltered_Read() As Boolean
-
-  Return $ShouldFilterFavorites Or $sFilterFormat <> "" Or $dFilterDateFrom <> Null Or $dFilterDateTo <> Null Or $sFilterUser <> "" Or $sSearchText <> "" Or $iFilterAlbumId > 0
 
 End

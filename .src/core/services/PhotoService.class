@@ -20,12 +20,12 @@ Event Progress(fValue As Float, sMessage As String) '' Signals progress during p
 Property Read ShouldCancel As Boolean '' Flag to request early termination of current process.
 Property Read Repository As SQLiteRepositoryAdapter '' Exposed repository for sharing service usage.
 
-Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort, cConfiguration As Configuration, cFileStorage As FileStoragePort) '' Initializes the photo service with its dependencies.
-
+Public Sub _new(oLogger As LoggerPort, oPhotoRepository As PhotoRepositoryPort, oConfiguration As Configuration, oFileStorage As FileStoragePort) '' Initializes the photo service with its dependencies.
+  
   $Logger = oLogger
-  $PhotoRepository = cPhotoRepository
-  $Configuration = cConfiguration
-  $FileStorage = cFileStorage
+  $PhotoRepository = oPhotoRepository
+  $Configuration = oConfiguration
+  $FileStorage = oFileStorage
   $Iterator = New PhotoIterator($PhotoRepository, $Logger)
   $ImageMetadata = New ImageMetadataAdapter($Logger)
   
@@ -38,20 +38,22 @@ Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort, 
 End
 
 Private Function Repository_Read() As SQLiteRepositoryAdapter
+  
   Return $PhotoRepository
+  
 End
 
 Private Function ShouldCancel_Read() As Boolean
-
+  
   Return $ShouldCancel
-
+  
 End
 
-Private Sub ShouldCancel_Write(shouldCancel As Boolean)
-
-  $ShouldCancel = shouldCancel
-
-End
+' Private Sub ShouldCancel_Write(shouldCancel As Boolean)
+'   
+'   $ShouldCancel = shouldCancel
+'   
+' End
 
 Public Function LoadFirstPage() As PhotoEntity[] '' Resets the iterator and returns the first batch of photos.
   
@@ -67,9 +69,15 @@ Public Function LoadNextPage() As PhotoEntity[] '' Returns the next batch of pho
   
 End
 
-Public Sub SetAlbumFilter(albumId As Integer) '' Filters the photo iterator by a specific album.
+Public Sub ApplyFilters(oSpec As PhotoSpecification) '' Applies the specified filters to the photo collection.
   
-  $Iterator.SetFilterAlbum(albumId)
+  $Iterator.SetSpecification(oSpec)
+  
+End
+
+Public Sub SetAlbumFilter(iAlbumId As Integer) '' Filters the photo iterator by a specific album.
+  
+  $Iterator.SetFilterAlbum(iAlbumId)
   
 End
 
@@ -118,7 +126,7 @@ Catch
   
 End
 
-Public Function ImportPhotos(imagesPath As String[], Optional albumId As Integer = 0) As Summary '' Imports multiple photos from a list of paths.
+Public Function ImportPhotos(aImagesPath As String[], Optional iAlbumId As Integer = 0) As Summary '' Imports multiple photos from a list of paths.
   
   Dim sPhoto As String
   Dim iI As Integer
@@ -129,12 +137,12 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumId As Integer
   Dim sFileName As String
   Dim sReason As String
   Dim sMessage As String
-  Dim iTotal As Integer = imagesPath.Count
+  Dim iTotal As Integer = aImagesPath.Count
   
   shouldDeleteOriginals = $Configuration.ShouldDeleteOriginals
   $ShouldCancel = False
   
-  For Each sPhoto In imagesPath
+  For Each sPhoto In aImagesPath
     If $ShouldCancel Then Break
     
     iI += 1
@@ -142,7 +150,7 @@ Public Function ImportPhotos(imagesPath As String[], Optional albumId As Integer
     
     $LogMessage = New LogMessage($Titulo, "ImportPhotos", "File to process" & ": " & sPhoto)
     $Logger.Debug($LogMessage)
-    iResp = SavePhoto(sPhoto, "", albumId, iI, shouldDeleteOriginals)
+    iResp = SavePhoto(sPhoto, "", iAlbumId, iI, shouldDeleteOriginals)
     sFileName = File.Name(sPhoto)
     oItem = New SummaryItem(sFileName)
     oItem.FilePath = sPhoto
@@ -184,13 +192,13 @@ Catch
   
 End
 
-Public Function MoveToTrash(oSelectedImages As PhotoEntity[]) As Summary  '' Moves a list of photo entities to the trash folder and updates their soft-delete state.
+Public Function MoveToTrash(aSelectedImages As PhotoEntity[]) As Summary  '' Moves a list of photo entities to the trash folder and updates their soft-delete state.
   
   Dim oSummary As New Summary
   Dim oItem As SummaryItem
   Dim oPhoto As PhotoEntity
   Dim sTrashPath As String = User.Home &/ Constants.GACELA_TRASH_DIRECTORY
-  Dim iTotal As Integer = oSelectedImages.Count
+  Dim iTotal As Integer = aSelectedImages.Count
   Dim iCount As Integer = 0
   
   $ShouldCancel = False
@@ -199,7 +207,7 @@ Public Function MoveToTrash(oSelectedImages As PhotoEntity[]) As Summary  '' Mov
     $FileStorage.EnsureDirectory(sTrashPath)
   Endif
   
-  For Each oPhoto In oSelectedImages
+  For Each oPhoto In aSelectedImages
     If $ShouldCancel Then Break
     
     iCount += 1
@@ -255,21 +263,21 @@ Catch
   $LogMessage = New LogMessage($Titulo, "MoveToTrash", "A critical error occurred: " & Error.Text)
   $Logger.Error($LogMessage)
   Error.Propagate
-
+  
 End
 
-Public Function UpdateLockStatus(oSelectedImages As PhotoEntity[], isLocked As Boolean, Optional lockReason As String = "") As Summary '' Updates the lock status for a list of photos.
+Public Function UpdateLockStatus(aSelectedImages As PhotoEntity[], bIsLocked As Boolean, Optional sLockReason As String = "") As Summary '' Updates the lock status for a list of photos.
   
   Dim oSummary As New Summary
   Dim oItem As SummaryItem
   Dim oPhoto As PhotoEntity
-  Dim iTotal As Integer = oSelectedImages.Count
+  Dim iTotal As Integer = aSelectedImages.Count
   Dim iCount As Integer = 0
-  Dim sAction As String = IIf(isLocked, ("Locking"), ("Unlocking"))
+  Dim sAction As String = IIf(bIsLocked, ("Locking"), ("Unlocking"))
   
   $ShouldCancel = False
   
-  For Each oPhoto In oSelectedImages
+  For Each oPhoto In aSelectedImages
     If $ShouldCancel Then Break
     
     iCount += 1
@@ -278,7 +286,7 @@ Public Function UpdateLockStatus(oSelectedImages As PhotoEntity[], isLocked As B
     oItem = New SummaryItem(oPhoto.FileName)
     oItem.FilePath = oPhoto.ImagePath
     
-    Try $PhotoRepository.UpdatePhotoLockStatus(oPhoto.Id, isLocked, User.Name, lockReason)
+    Try $PhotoRepository.UpdatePhotoLockStatus(oPhoto.Id, bIsLocked, User.Name, sLockReason)
     
     If Error Then
       oItem.Status = Summary.STATUS_FAIL
@@ -287,9 +295,9 @@ Public Function UpdateLockStatus(oSelectedImages As PhotoEntity[], isLocked As B
       $LogMessage = New LogMessage($Titulo, "UpdateLockStatus", ("Error updating lock for ") & oPhoto.FileName & ": " & Error.Text)
       $Logger.Error($LogMessage)
     Else
-      oPhoto.IsLocked = isLocked
+      oPhoto.IsLocked = bIsLocked
       oItem.Status = Summary.STATUS_OK
-      oItem.Message = IIf(isLocked, ("Locked successfully"), ("Unlocked successfully"))
+      oItem.Message = IIf(bIsLocked, ("Locked successfully"), ("Unlocked successfully"))
     Endif
     
     oSummary.AddItem(oItem)
@@ -302,22 +310,22 @@ Catch
   $LogMessage = New LogMessage($Titulo, "UpdateLockStatus", "A critical error occurred: " & Error.Text)
   $Logger.Error($LogMessage)
   Error.Propagate
-
+  
 End
 
-Public Function RestoreFromTrash(oSelectedImages As PhotoEntity[]) As Summary '' Restores soft-deleted photos from the trash.
+Public Function RestoreFromTrash(aSelectedImages As PhotoEntity[]) As Summary '' Restores soft-deleted photos from the trash.
   
   Dim oSummary As New Summary
   Dim oItem As SummaryItem
   Dim oPhoto As PhotoEntity
   Dim sTrashPath As String = User.Home &/ Constants.GACELA_TRASH_DIRECTORY
-  Dim iTotal As Integer = oSelectedImages.Count
+  Dim iTotal As Integer = aSelectedImages.Count
   Dim iCount As Integer = 0
   Dim sCurrentTrashPath As String
   
   $ShouldCancel = False
   
-  For Each oPhoto In oSelectedImages
+  For Each oPhoto In aSelectedImages
     If $ShouldCancel Then Break
     
     iCount += 1
@@ -362,24 +370,6 @@ Catch
   $LogMessage = New LogMessage($Titulo, "RestoreFromTrash", "Error restoring photo: " & Error.Text)
   $Logger.Error($LogMessage)
   Error.Propagate
-End
-
-Public Function LoadTrashPage(Optional iPage As Integer = 0) As PhotoEntity[] '' Loads a page of photos from the trash.
-  
-  Dim iLimit As Integer = 50
-  Dim iOffset As Integer = iPage * iLimit
-  Dim aPhotos As PhotoEntity[]
-  Dim oPhoto As PhotoEntity
-  Dim sTrashPath As String = User.Home &/ Constants.GACELA_TRASH_DIRECTORY
-  
-  aPhotos = $PhotoRepository.GetPhotosInTrash(iLimit, iOffset)
-  
-  ' Adjust ImagePath on-the-fly for correct display in FPhoto while in trash
-  ' For Each oPhoto In aPhotos
-  '   oPhoto.ImagePath = sTrashPath &/ File.Name(oPhoto.ImagePath)
-  ' Next
-  
-  Return aPhotos
   
 End
 
@@ -395,90 +385,107 @@ End
 '
 ' ==================================================
 
-Private Function SaveImageIO(originalImage As String, sNewPath As String, sFilename As String) As String
+Private Function SaveImageIO(sOriginalImage As String, sNewPath As String, sFilename As String) As String[] ' Return type changed to String[]
+  
+  Dim sFullNewPath As String = sNewPath &/ sFilename
   
   $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Validating image existence and destination directory"))
   $Logger.Debug($LogMessage)
-  If Not $FileStorage.Exists(sNewPath) Then
-    $FileStorage.EnsureDirectory(sNewPath)
+  
+  ' Ensure destination directory exists
+  If Not $FileStorage.Exists(sNewPath) Then 
+    Try $FileStorage.EnsureDirectory(sNewPath)
+    If Error Then
+      $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Problem creating directory ") & sNewPath & ": " & Error.Text)
+      $Logger.Error($LogMessage)
+      Return ["ERROR", "Could not create destination directory: " & Error.Text]
+    Endif
   Endif
   
-  $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Attempting to copy image into directory"))
-  $Logger.Debug($LogMessage)
-  $FileStorage.SaveFile(originalImage, sNewPath &/ sFilename)
-  $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Image copy completed successfully in directory"))
+  ' Check if physical file already exists at destination
+  If $FileStorage.Exists(sFullNewPath) Then
+    $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Physical file already exists at destination: ") & sFullNewPath)
+    $Logger.Debug($LogMessage)
+    ' Return SKIPPED status and the existing path
+    Return ["SKIPPED_PHYSICAL_EXISTS", sFullNewPath]
+  Endif
+  
+  $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Attempting to copy image from ") & sOriginalImage & " to " & sFullNewPath)
   $Logger.Debug($LogMessage)
   
-  Return sNewPath &/ sFilename
+  Try $FileStorage.SaveFile(sOriginalImage, sFullNewPath)
   
-Catch
-  $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Problem while saving image") & " [" & sFilename & "] : " & Error.Text)
-  $Logger.Error($LogMessage)
-  Error.Propagate
+  If Error Then
+    $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Problem while saving image") & " [" & sFullNewPath & "] : " & Error.Text)
+    $Logger.Error($LogMessage)
+    Return ["ERROR", "Problem while saving image: " & Error.Text]
+  Else
+    $LogMessage = New LogMessage($Titulo, "SaveImageIO", ("Image copy completed successfully to ") & sFullNewPath)
+    $Logger.Debug($LogMessage)
+    Return ["SUCCESS", sFullNewPath]
+  Endif
   
 End
 
-Private Function DeleteImageIO(originalImage As String) As Boolean
+Private Function DeleteImageIO(sOriginalImage As String) As Boolean
   
   $LogMessage = New LogMessage($Titulo, "DeleteImageIO", ("Attempting to delete image in directory"))
   $Logger.Debug($LogMessage)
-  $FileStorage.DeleteFile(originalImage)
+  $FileStorage.DeleteFile(sOriginalImage)
   $LogMessage = New LogMessage($Titulo, "DeleteImageIO", ("Image deletion completed successfully in directory"))
   $Logger.Debug($LogMessage)
   
 Catch
-  $LogMessage = New LogMessage($Titulo, "DeleteImageIO", ("Problem deleting original image") & " [" & originalImage & "] : " & Error.Text)
+  $LogMessage = New LogMessage($Titulo, "DeleteImageIO", ("Problem deleting original image") & " [" & sOriginalImage & "] : " & Error.Text)
   $Logger.Error($LogMessage)
   Error.Propagate
   
 End
 
-Private Function Hash256Calculate(originalImage As String) As String
+Private Function Hash256Calculate(sOriginalImage As String) As String
   
   Dim sHash256 As String
   
   $LogMessage = New LogMessage($Titulo, "Hash256Calculate", "Calculating Hash256")
   $Logger.Debug($LogMessage)
-  sHash256 = Hash.Sha256(originalImage)
+  sHash256 = Hash.Sha256(sOriginalImage)
   
   Return sHash256
   
 Catch
-  $LogMessage = New LogMessage($Titulo, "Hash256Calculate", "Problem calculating Hash256 for photo " & originalImage)
+  $LogMessage = New LogMessage($Titulo, "Hash256Calculate", "Problem calculating Hash256 for photo " & sOriginalImage)
   $Logger.Error($LogMessage)
   Error.Propagate
   
 End
+' 
+' Private Function ValidateFileExist(sPath As String, sFilename As String) As Boolean
+'   
+'   $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Validating physical file existence during import ") & sPath &/ sFilename)
+'   $Logger.Debug($LogMessage)
+'   If $FileStorage.Exists(sPath &/ sFilename) Then
+'     $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Physical file exists during import") & sPath &/ sFilename)
+'     $Logger.Debug($LogMessage)
+'     Return True
+'     
+'   Endif
+'   
+'   $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Physical file does not exist during import") & sPath &/ sFilename)
+'   $Logger.Debug($LogMessage)
+'   Return False
+'   
+' Catch
+'   $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Problem validating file existence") & "[" & sFilename & "] : " & Error.Text)
+'   $Logger.Error($LogMessage)
+'   Error.Propagate
+'   
+' End
 
-Private Function ValidateFileExist(sPath As String, sFilename As String) As Boolean
-  
-  $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Validating physical file existence during import ") & sPath &/ sFilename)
-  $Logger.Debug($LogMessage)
-  If $FileStorage.Exists(sPath &/ sFilename) Then
-    $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Physical file exists during import") & sPath &/ sFilename)
-    $Logger.Debug($LogMessage)
-    Return True
-    
-  Endif
-  
-  $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Physical file does not exist during import") & sPath &/ sFilename)
-  $Logger.Debug($LogMessage)
-  Return False
-  
-Catch
-  $LogMessage = New LogMessage($Titulo, "ValidateFileExist", ("Problem validating file existence") & "[" & sFilename & "] : " & Error.Text)
-  $Logger.Error($LogMessage)
-  Error.Propagate
-  
-End
-
-Private Function CreateThumbnail(oOriginalPhoto As Image, imagenPath As String) As String
+Private Function CreateThumbnail(oOriginalPhoto As Image, sImagenPath As String) As String
   
   Dim oThumbnailImage As Image
   Dim sTempThumbFile As String
   Dim sThumbnailString As String = ""
-  ' Dim THUMBNAIL_MIN_BENEFIT As Float = 1.5      ' Generar si reduce al menos 50%
-  ' TODO: Create a calculation to decide when to generate a thumbnail
   
   $LogMessage = New LogMessage($Titulo, "CreateThumbnail", "Image size " & oOriginalPhoto.Width & " x " & oOriginalPhoto.Height)
   $Logger.Debug($LogMessage)
@@ -488,8 +495,8 @@ Private Function CreateThumbnail(oOriginalPhoto As Image, imagenPath As String) 
     $Logger.Debug($LogMessage)
   Else
     oThumbnailImage = oOriginalPhoto.Stretch(320, -1)
-    sTempThumbFile = Temp() & "." & File.Ext(imagenPath)
-    sThumbnailString = oThumbnailImage.ToString(File.Ext(imagenPath), 100)
+    sTempThumbFile = Temp() & "." & File.Ext(sImagenPath)
+    sThumbnailString = oThumbnailImage.ToString(File.Ext(sImagenPath), 100)
     File.Save(sTempThumbFile, sThumbnailString)
     sThumbnailString = File.Load(sTempThumbFile)
   Endif
@@ -498,13 +505,13 @@ Private Function CreateThumbnail(oOriginalPhoto As Image, imagenPath As String) 
   Return sThumbnailString
   
 Catch
-  $LogMessage = New LogMessage($Titulo, "CreateThumbnail", "Problem creating thumbnail for " & File.BaseName(imagenPath) & "." & File.Ext(imagenPath))
+  $LogMessage = New LogMessage($Titulo, "CreateThumbnail", "Problem creating thumbnail for " & File.BaseName(sImagenPath) & "." & File.Ext(sImagenPath))
   $Logger.Error($LogMessage)
   Error.Propagate
   
 End
 
-Private Function SavePhoto(sImagenPath As String, sDescription As String, Optional iAlbumId As Integer, Optional iIndex As Integer, Optional shouldDeletePhoto As Boolean = False) As Integer
+Private Function SavePhoto(sImagenPath As String, sDescription As String, Optional iAlbumId As Integer, Optional iIndex As Integer, Optional bShouldDeletePhoto As Boolean = False) As Integer
   
   Dim oPhotoE As New PhotoEntity
   Dim oPhotoAlbumE As PhotoAlbumEntity
@@ -514,40 +521,84 @@ Private Function SavePhoto(sImagenPath As String, sDescription As String, Option
   Dim sFilename As String
   Dim sInternalFileName As String
   Dim sNewPath As String
-  Dim sResp As String
-  Dim sDate As String
+  Dim aResult As String[] ' Added to hold the result from SaveImageIO
   Dim dDate As Date
   Dim sExt As String
   
-  oOriginalPhoto = Image.Load(sImagenPath)
-  sImageString = File.Load(sImagenPath)
+  ' --- Load original image and get hash ---
+  Try oOriginalPhoto = Image.Load(sImagenPath)
+  If Error Then
+    $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Error loading original image: ") & sImagenPath & ": " & Error.Text)
+    $Logger.Error($LogMessage)
+    Return Enumeration.RESPONSE_ERROR
+  Endif
+  
+  Try sImageString = File.Load(sImagenPath)
+  If Error Then
+    $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Error reading original image file: ") & sImagenPath & ": " & Error.Text)
+    $Logger.Error($LogMessage)
+    Return Enumeration.RESPONSE_ERROR
+  Endif
   
   sExt = Lower(File.Ext(sImagenPath))
   sFilename = File.Name(sImagenPath)
   
   sHash256 = Hash256Calculate(sImageString)
-  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Checking file existence by Hash256 in the DB"))
+  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Checking file existence by Hash256 in the DB For image: ") & sFilename)
   $Logger.Debug($LogMessage)
   If $PhotoRepository.ValidateHash256Exist(sHash256) Then
-    Return Enumeration.RESPONSE_FILEEXIST
+    $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Image hash already exists in DB: ") & sFilename)
+    $Logger.Debug($LogMessage)
+    Return Enumeration.RESPONSE_FILEEXIST ' Hash already exists in DB
   End If
   
+  ' --- Prepare destination path ---
   sInternalFileName = sHash256 & "." & sExt
   sNewPath = $Configuration.GalleryPath &/ Format(Now, "yyyymmdd")
   
-  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Saving image to the import directory"))
-  $Logger.Debug($LogMessage)
-  sNewPath = SaveImageIO(sImagenPath, sNewPath, sInternalFileName)
+  ' --- Call SaveImageIO to handle physical file operation ---
+  aResult = SaveImageIO(sImagenPath, sNewPath, sInternalFileName)
   
-  sDate = $ImageMetadata.GetExifDateTimeOriginal(sImagenPath)
-  If sDate <> "" Then
-    dDate = CDate(sDate)
-  Else
-    dDate = Now()
+  ' --- Interpret the result from SaveImageIO ---
+  Select Case aResult[0]
+    Case "SUCCESS" ' File was copied successfully
+      sNewPath = aResult[1] ' Get the new path
+      $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Image file copied successfully: ") & sNewPath)
+      $Logger.Debug($LogMessage)
+      ' Proceed to create DB record
+      
+    Case "SKIPPED_PHYSICAL_EXISTS" ' Physical file already exists, but hash was not in DB
+      sNewPath = aResult[1] ' Get the existing path
+      $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Image file already existed physically: ") & sNewPath & ".Proceeding To Create DB record.")
+      $Logger.Debug($LogMessage)
+      ' Proceed to create DB record, as file is in place and hash is new
+      
+    Case "ERROR" ' Error during file copy
+      $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Error during file copy: ") & aResult[1])
+      $Logger.Error($LogMessage)
+      Return Enumeration.RESPONSE_ERROR ' Propagate the error
+      
+    Case Else ' Unexpected status
+      $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Unexpected status from SaveImageIO:") & aResult[0])
+      $Logger.Error($LogMessage)
+      Return Enumeration.RESPONSE_ERROR
+  End Select
+  
+  ' --- Extract EXIF date or fallback ---
+  dDate = $ImageMetadata.GetExifDateTimeOriginal(sImagenPath)
+  $LogMessage = New LogMessage($Titulo, "SavePhoto", "EXIF Date: " & CFloat(dDate))
+  $Logger.Debug($LogMessage)
+  If CFloat(dDate) = 0 Then
+    dDate = Stat(sImagenPath).LastModified
   Endif
   
-  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Photo creation date from EXIF or fallback ") & ": " & Format(dDate, "yyyy-mm-dd hh:nn:ss"))
+  ' Ultimate fallback if Stat fails
+  If dDate = 0 Then dDate = Now()
+  
+  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Photo creation date from EXIF or fallback") & ": " & Format(dDate, " yyyy - mm - dd hh:nn: ss "))
   $Logger.Debug($LogMessage)
+  
+  ' --- Populate PhotoEntity ---
   With oPhotoE
     .FileName = sFilename
     .WidthPixels = oOriginalPhoto.Width
@@ -557,12 +608,13 @@ Private Function SavePhoto(sImagenPath As String, sDescription As String, Option
     .Description = sDescription
     .Stars = 0
     .ImportUser = User.Name
-    .ImagePath = sNewPath
+    .ImagePath = sNewPath ' Use the path returned by SaveImageIO (either new or existing)
     .OriginalPath = sImagenPath
     .Hash256 = sHash256
     .Thumbnail = CreateThumbnail(oOriginalPhoto, sImagenPath)
   End With
   
+  ' --- Link to Album if specified ---
   If iAlbumId <> 0 Then
     oPhotoAlbumE = New PhotoAlbumEntity
     oPhotoAlbumE.AlbumId = iAlbumId
@@ -570,44 +622,52 @@ Private Function SavePhoto(sImagenPath As String, sDescription As String, Option
     oPhotoAlbumE.AddedUser = User.Name
   Endif
   
+  ' --- Create DB record ---
   If Not $PhotoRepository.CreatePhoto(oPhotoE, oPhotoAlbumE) Then
+    ' If DB creation fails, and the file was newly copied (not skipped), we have an orphaned file.
+    ' This logic needs to be robust. For now, we log the DB error.
+    $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Failed to create DB record for image:") & sFilename & ".File might be orphaned.")
+    $Logger.Error($LogMessage)
     Return Enumeration.RESPONSE_DBERROR
   Endif
   
-  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Evaluating condition to delete original image"))
+  ' --- Delete original image if requested and copy was successful ---
+  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Evaluating condition to delete original image "))
   $Logger.Debug($LogMessage)
-  If shouldDeletePhoto Then
-    $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Condition true, delete original image"))
+  If bShouldDeletePhoto Then
+    $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Condition true, delete original image "))
     $Logger.Debug($LogMessage)
-    DeleteImageIO(sImagenPath)
+    ' Delete original image only if copy was successful (SUCCESS or SKIPPED) and delete originals Is Enabled
+    If aResult[0] = "SUCCESS" Or aResult[0] = "SKIPPED_PHYSICAL_EXISTS" Then
+      DeleteImageIO(sImagenPath)
+    Endif
   Endif
   
   Return Enumeration.RESPONSE_OK
   
 Catch
-  If $FileStorage.Exists(sNewPath) Then
-    Try $FileStorage.DeleteFile(sNewPath)
-  Endif
-  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Error importing photo: ") & Error.Text)
+  
+  $LogMessage = New LogMessage($Titulo, "SavePhoto", ("Unexpected error during photo import process: ") & Error.Text)
   $Logger.Error($LogMessage)
-  Error.Propagate
+  Error.Propagate ' Propagate error to caller (e.g. ImportPhotos)
+  Return Enumeration.RESPONSE_ERROR ' Ensure a return value in case of no propagation
   
 End
 
-Public Function PermanentlyDelete(oSelectedImages As PhotoEntity[]) As Summary  '' Deletes photo entities physically from the trash folder and removes their DB records.
+Public Function PermanentlyDelete(aSelectedImages As PhotoEntity[]) As Summary  '' Deletes photo entities physically from the trash folder and removes their DB records.
   
   Dim oSummary As New Summary
   Dim oItem As SummaryItem
   Dim oPhoto As PhotoEntity
   Dim sTrashPath As String = User.Home &/ Constants.GACELA_TRASH_DIRECTORY
-  Dim iTotal As Integer = oSelectedImages.Count
+  Dim iTotal As Integer = aSelectedImages.Count
   Dim iCount As Integer = 0
   Dim sFileName As String
   Dim sFullTrashPath As String
   
   $ShouldCancel = False
   
-  For Each oPhoto In oSelectedImages
+  For Each oPhoto In aSelectedImages
     If $ShouldCancel Then Break
     
     iCount += 1
@@ -628,11 +688,11 @@ Public Function PermanentlyDelete(oSelectedImages As PhotoEntity[]) As Summary  
     ' 2. Check Ownership in Shared Gallery
     If $Configuration.WhichGallery = Enumeration.GalleryType_Shared Then
       If oPhoto.SoftDeleteBy <> User.Name Then
-         oItem.Status = Summary.STATUS_FAIL
-         oItem.Reason = ("not_owner")
-         oItem.Message = ("Cannot delete: only the user who trashed it can delete it permanently")
-         oSummary.AddItem(oItem)
-         Continue
+        oItem.Status = Summary.STATUS_FAIL
+        oItem.Reason = ("not_owner")
+        oItem.Message = ("Cannot delete: only the user who trashed it can delete it permanently")
+        oSummary.AddItem(oItem)
+        Continue
       Endif
     Endif
     
@@ -641,26 +701,26 @@ Public Function PermanentlyDelete(oSelectedImages As PhotoEntity[]) As Summary  
     sFullTrashPath = sTrashPath &/ sFileName
     
     If $FileStorage.Exists(sFullTrashPath) Then
-       Try $FileStorage.DeleteFile(sFullTrashPath)
-       If Error Then
-          oItem.Status = Summary.STATUS_FAIL
-          oItem.Reason = Error.Text
-          oItem.Message = ("Error deleting file physically from trash")
-          $LogMessage = New LogMessage($Titulo, "PermanentlyDelete", ("Error deleting physical file: ") & sFullTrashPath & ": " & Error.Text)
-          $Logger.Error($LogMessage)
-          oSummary.AddItem(oItem)
-          Continue
-       Endif
+      Try $FileStorage.DeleteFile(sFullTrashPath)
+      If Error Then
+        oItem.Status = Summary.STATUS_FAIL
+        oItem.Reason = Error.Text
+        oItem.Message = ("Error deleting file physically from trash")
+        $LogMessage = New LogMessage($Titulo, "PermanentlyDelete", ("Error deleting physical file: ") & sFullTrashPath & ": " & Error.Text)
+        $Logger.Error($LogMessage)
+        oSummary.AddItem(oItem)
+        Continue
+      Endif
     Endif
     
     ' 4. DB Record Deletion
     If $PhotoRepository.PermanentlyDeletePhoto(oPhoto.Id) Then
-       oItem.Status = Summary.STATUS_OK
-       oItem.Message = ("Deleted permanently")
+      oItem.Status = Summary.STATUS_OK
+      oItem.Message = ("Deleted permanently")
     Else
-       oItem.Status = Summary.STATUS_FAIL
-       oItem.Reason = ("db_error")
-       oItem.Message = ("Error deleting record from database")
+      oItem.Status = Summary.STATUS_FAIL
+      oItem.Reason = ("db_error")
+      oItem.Message = ("Error deleting record from database")
     Endif
     
     oSummary.AddItem(oItem)

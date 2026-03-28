@@ -10,12 +10,12 @@ Property Read PhotoId As Integer
 Property Read IsSelected As Boolean
 Property Read PhotoEntity As PhotoEntity
 
-Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntity, IsTrashView As Boolean) '' Initializes the photo component with its entity and selection service.
+Public Sub _new(oSelectionService As PhotoSelectionService, oPhoto As PhotoEntity, bIsTrashView As Boolean) '' Initializes the photo component with its entity and selection service.
   
   $SelectionService = oSelectionService
-  $PhotoEntity = cPhoto
-  $PhotoId = cPhoto.Id
-  $IsTrashView = IsTrashView
+  $PhotoEntity = oPhoto
+  $PhotoId = oPhoto.Id
+  $IsTrashView = bIsTrashView
   
   Me.Width = 160
   Me.Height = 100
@@ -25,13 +25,13 @@ Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntit
   PanelPhoto.Width = Me.Width
   PanelPhoto.Height = Me.Height
   
-  If cPhoto.HasThumbnail Then
-    PictureBoxPhoto.Image = Image.FromString(cPhoto.Thumbnail)
+  If oPhoto.HasThumbnail Then
+    PictureBoxPhoto.Image = Image.FromString(oPhoto.Thumbnail)
   Else
-    If IsDir(cPhoto.ImagePath) Then
-      PictureBoxPhoto.Image = Image.Load(cPhoto.ImagePath &/ cPhoto.FileName)
+    If IsDir(oPhoto.ImagePath) Then
+      PictureBoxPhoto.Image = Image.Load(oPhoto.ImagePath &/ oPhoto.FileName)
     Else
-      PictureBoxPhoto.Image = Image.Load(cPhoto.ImagePath)
+      PictureBoxPhoto.Image = Image.Load(oPhoto.ImagePath)
     Endif
   Endif
   
@@ -43,7 +43,7 @@ Public Sub _new(oSelectionService As PhotoSelectionService, cPhoto As PhotoEntit
   PictureBoxPhoto.y = 2
   PictureBoxPhoto.Padding = 8
   
-  If cPhoto.IsLocked Then ButtonLock.Picture = Picture["icon:/16/lock"]
+  If oPhoto.IsLocked Then ButtonLock.Picture = Picture["icon:/16/lock"]
   
 End
 
@@ -90,17 +90,17 @@ Public Sub ButtonSeleccionar_Click() '' Handles selection button click.
   
 End
 
-Public Sub SetSelected(isSelected As Boolean, Optional shouldNotify As Boolean = True) '' Updates the selection state and visual feedback.
+Public Sub SetSelected(bIsSelected As Boolean, Optional bShouldNotify As Boolean = True) '' Updates the selection state and visual feedback.
   
-  If $IsSelected = isSelected Then
+  If $IsSelected = bIsSelected Then
     RefreshSelectionVisual()
     Return
   Endif
   
-  $IsSelected = isSelected
+  $IsSelected = bIsSelected
   RefreshSelectionVisual()
   
-  If Not shouldNotify Then Return
+  If Not bShouldNotify Then Return
   If $SelectionService = Null Then Return
   
   If $IsSelected Then
@@ -113,7 +113,10 @@ End
 
 Public Sub PictureBoxPhoto_DblClick() '' Handles double click on the photo.
   
-  Message.Info("ejale")
+  Dim FV As FPhotoViewer
+  
+  FV = New FPhotoViewer
+  FV.ShowModal()
   
 End
 
@@ -132,6 +135,15 @@ Public Sub ResizeScaledForm(iSize As Integer) '' Scales the photo component visu
   Endif
   
 End
+
+Public Sub ButtonLock_Click()
+
+  If $SelectionService <> Null Then
+    $SelectionService.ToggleLock($PhotoEntity)
+  Endif
+  
+End
+
 
 ' =============================================================================
 '
@@ -167,16 +179,3 @@ Private Sub RefreshSelectionVisual()
   
 End
 
-Public Sub Form_Open()
-
-  
-
-End
-
-Public Sub ButtonLock_Click()
-
-  If $SelectionService <> Null Then
-    $SelectionService.ToggleLock($PhotoEntity)
-  Endif
-  
-End

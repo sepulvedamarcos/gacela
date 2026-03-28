@@ -20,13 +20,13 @@ Private $ImportSelection As PhotoImportSelectionService
 '          Public methods
 '
 ' ==================================================
-Public Sub _new(cFmain As Fmain, cPhotoService As PhotoService, cAlbumService As AlbumService, oLogger As LoggerPort, cImportSelection As PhotoImportSelectionService, oConfiguration As Configuration) '' Creates a new import dialog linked to the main window and selection service.
+Public Sub _new(oFmain As Fmain, oPhotoService As PhotoService, oAlbumService As AlbumService, oLogger As LoggerPort, oImportSelection As PhotoImportSelectionService, oConfiguration As Configuration) '' Creates a new import dialog linked to the main window and selection service.
   
-  $PhotoService = cPhotoService
-  $AlbumService = cAlbumService
+  $PhotoService = oPhotoService
+  $AlbumService = oAlbumService
   $Logger = oLogger
-  $ImportSelection = cImportSelection
-  $Fmain = cFmain
+  $ImportSelection = oImportSelection
+  $Fmain = oFmain
   $Configuration = oConfiguration
   
   $LogMessage = New LogMessage($Titulo, "_new", ("Creating dialog window and album list"))
@@ -68,7 +68,7 @@ Public Sub CheckBoxEnableAlbum_Click()
   
   Dim oDialog As FAlbumSelection
   Dim oAlbumSelection As AlbumSelectionService
-  Dim oLabel As Label
+  ' Dim oLabel As Label
   Dim iResponse As Integer
   
   $LogMessage = New LogMessage($Titulo, "CheckBoxEnableAlbum_Click", ("Checkbox click to associate album ") & "[" & Str(CheckBoxEnableAlbum.Value) & "]")
@@ -144,6 +144,7 @@ End
 Public Sub Form_Show()
 
   If $Configuration.ShouldDeleteOriginals Then
+    LabelMessageDeleteOriginals.Visible = True
     LabelMessageDeleteOriginals.Text = ("Warning!, All images are delete from original position")
   End If
 End

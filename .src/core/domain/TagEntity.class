@@ -2,15 +2,15 @@
 
 ' Domain model for representing a tag in Gacela.
 
-Private $iId As Integer = 0
-Private $sName As String = ""
-Private $sDescription As String = ""
-Private $sColor As String = ""
-Private $dCreationDate As Date
-Private $sCreationUser As String = ""
-Private $dModificationDate As Date
-Private $sModificationUser As String = ""
-Private $iPhotoCount As Integer = 0
+Private $Id As Integer = 0
+Private $Name As String = ""
+Private $Description As String = ""
+Private $Color As String = ""
+Private $CreationDate As Date
+Private $CreationUser As String = ""
+Private $ModificationDate As Date
+Private $ModificationUser As String = ""
+Private $PhotoCount As Integer = 0
 
 Property Id As Integer                '' Unique tag identifier.
 Property Name As String               '' Tag display name.
@@ -24,108 +24,108 @@ Property PhotoCount As Integer        '' Number of related photos.
 
 Private Function Id_Read() As Integer
 
-  Return $iId
+  Return $Id
 
 End
 
-Private Sub Id_Write(Value As Integer)
+Private Sub Id_Write(iValue As Integer)
 
-  $iId = Value
+  $Id = iValue
 
 End
 
 Private Function Name_Read() As String
 
-  Return $sName
+  Return $Name
 
 End
 
-Private Sub Name_Write(Value As String)
+Private Sub Name_Write(sValue As String)
 
-  $sName = Value
+  $Name = sValue
 
 End
 
 Private Function Description_Read() As String
 
-  Return $sDescription
+  Return $Description
 
 End
 
-Private Sub Description_Write(Value As String)
+Private Sub Description_Write(sValue As String)
 
-  $sDescription = Value
+  $Description = sValue
 
 End
 
 Private Function Color_Read() As String
 
-  Return $sColor
+  Return $Color
 
 End
 
-Private Sub Color_Write(Value As String)
+Private Sub Color_Write(sValue As String)
 
-  $sColor = Value
+  $Color = sValue
 
 End
 
 Private Function CreationDate_Read() As Date
 
-  Return $dCreationDate
+  Return $CreationDate
 
 End
 
 Private Sub CreationDate_Write(Value As Date)
 
-  $dCreationDate = Value
+  $CreationDate = Value
 
 End
 
 Private Function CreationUser_Read() As String
 
-  Return $sCreationUser
+  Return $CreationUser
 
 End
 
-Private Sub CreationUser_Write(Value As String)
+Private Sub CreationUser_Write(sValue As String)
 
-  $sCreationUser = Value
+  $CreationUser = sValue
 
 End
 
 Private Function ModificationDate_Read() As Date
 
-  Return $dModificationDate
+  Return $ModificationDate
 
 End
 
 Private Sub ModificationDate_Write(Value As Date)
 
-  $dModificationDate = Value
+  $ModificationDate = Value
 
 End
 
 Private Function ModificationUser_Read() As String
 
-  Return $sModificationUser
+  Return $ModificationUser
 
 End
 
-Private Sub ModificationUser_Write(Value As String)
+Private Sub ModificationUser_Write(sValue As String)
 
-  $sModificationUser = Value
+  $ModificationUser = sValue
 
 End
 
 Private Function PhotoCount_Read() As Integer
 
-  Return $iPhotoCount
+  Return $PhotoCount
 
 End
 
-Private Sub PhotoCount_Write(Value As Integer)
+Private Sub PhotoCount_Write(iValue As Integer)
 
-  $iPhotoCount = Value
+  $PhotoCount = iValue
 
 End

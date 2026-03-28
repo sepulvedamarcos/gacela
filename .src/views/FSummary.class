@@ -96,7 +96,7 @@ End
 Private Sub BindGrid()
   
   Dim oSummaryItem As SummaryItem[]
-  Dim oISI As SummaryItem
+  ' Dim oISI As SummaryItem
   Dim iRow As Integer = 0
   
   If $Summary <> Null Then

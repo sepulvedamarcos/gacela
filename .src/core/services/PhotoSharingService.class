@@ -23,10 +23,10 @@ Event Progress(fValue As Float, sMessage As String)
 
 Property ShouldCancel As Boolean
 
-Public Sub _new(oPhotoService As PhotoService, cConfiguration As Configuration, oLogger As LoggerPort)
+Public Sub _new(oPhotoService As PhotoService, oConfiguration As Configuration, oLogger As LoggerPort)
   
   $PhotoService = oPhotoService
-  $Configuration = cConfiguration
+  $Configuration = oConfiguration
   $Logger = oLogger
   $Summary = New Summary
   $Storage = New FileSystemStorageAdapter
@@ -170,6 +170,6 @@ Private Function ShouldCancel_Read() As Boolean
   Return $ShouldCancel
 End
 
-Private Sub ShouldCancel_Write(Value As Boolean)
-  $ShouldCancel = Value
+Private Sub ShouldCancel_Write(bValue As Boolean)
+  $ShouldCancel = bValue
 End
