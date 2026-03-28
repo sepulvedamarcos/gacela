@@ -1,0 +1,159 @@
+' Gambas class file
+
+'' Specification object for photo filtering and searching.
+'' Decouples the business rules for filtering from the persistence implementation.
+
+Property AlbumId As Integer
+Property TagId As Integer
+Property StartDate As Date
+Property EndDate As Date
+Property SearchText As String
+Property IsSoftDeleted As Boolean
+Property IsLocked As Boolean
+
+Private $AlbumId As Integer = 0
+Private $TagId As Integer = 0
+Private $StartDate As Date
+Private $EndDate As Date
+Private $SearchText As String = ""
+Private $IsSoftDeleted As Boolean = False
+Private $IsLocked As Boolean = False
+
+' =============================================================================
+'
+'          Properties
+'
+' =============================================================================
+
+Private Function AlbumId_Read() As Integer
+  
+  Return $AlbumId
+  
+End
+
+Private Sub AlbumId_Write(iValue As Integer)
+  
+  $AlbumId = iValue
+  
+End
+
+Private Function TagId_Read() As Integer
+  
+  Return $TagId
+  
+End
+
+Private Sub TagId_Write(iValue As Integer)
+  
+  $TagId = iValue
+  
+End
+
+Private Function StartDate_Read() As Date
+  
+  Return $StartDate
+  
+End
+
+Private Sub StartDate_Write(Value As Date)
+  
+  $StartDate = Value
+  
+End
+
+Private Function EndDate_Read() As Date
+  
+  Return $EndDate
+  
+End
+
+Private Sub EndDate_Write(Value As Date)
+  
+  $EndDate = Value
+  
+End
+
+Private Function SearchText_Read() As String
+  
+  Return $SearchText
+  
+End
+
+Private Sub SearchText_Write(sValue As String)
+  
+  $SearchText = sValue
+  
+End
+
+Private Function IsSoftDeleted_Read() As Boolean
+  
+  Return $IsSoftDeleted
+  
+End
+
+Private Sub IsSoftDeleted_Write(bValue As Boolean)
+  
+  $IsSoftDeleted = bValue
+  
+End
+
+Private Function IsLocked_Read() As Boolean
+  
+  Return $IsLocked
+  
+End
+
+Private Sub IsLocked_Write(bValue As Boolean)
+  
+  $IsLocked = bValue
+  
+End
+
+' =============================================================================
+'
+'          Helper Methods (Checking for active filters)
+'
+' =============================================================================
+
+Public Function HasAlbum() As Boolean '' Returns True if an album filter is active.
+  
+  Return $AlbumId > 0
+  
+End
+
+Public Function HasTag() As Boolean '' Returns True if a tag filter is active.
+  
+  Return $TagId > 0
+  
+End
+
+Public Function HasDateRange() As Boolean '' Returns True if a date range filter is active.
+  
+  Return ($StartDate <> 0) Or ($EndDate <> 0)
+  
+End
+
+Public Function HasTextSearch() As Boolean '' Returns True if a text search filter is active.
+  
+  Return $SearchText <> ""
+  
+End
+
+Public Function StringFormatStartDate() As String
+  
+  Return "\"" & Format($StartDate, "yyyy-mm-ddThhnnss") & "\"" 
+  
+End
+
+Public Function StringFormatEndDate() As String
+  
+  Return "\"" & Format($EndDate, "yyyy-mm-ddThhnnss") & "\"" 
+  
+End
+
+Public Sub Clear()
+  
+  
+  
+End
+

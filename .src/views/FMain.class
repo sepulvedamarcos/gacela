@@ -14,7 +14,6 @@ Private $LogMessage As LogMessage
 Private $StatusDefaultText As String
 Private StatusTimer As Timer
 Private $LastImportSummary As Summary
-Private $AlbumPanel As Panel
 Private $IsViewingTrash As Boolean = False
 Private $TrashPage As Integer = 0
 Private $SelectedGallery As Integer = 0
@@ -25,13 +24,13 @@ Private $IsZooming As Boolean = False
 
 Property LastImportSummary As Summary
 
-Public Sub _new(cConfiguration As Configuration, oLogger As LoggerPort, cPhotoService As PhotoService, cAlbumService As AlbumService, cTagService As TagService) '' Initializes main form dependencies.
+Public Sub _new(oConfiguration As Configuration, oLogger As LoggerPort, oPhotoService As PhotoService, oAlbumService As AlbumService, oTagService As TagService) '' Initializes main form dependencies.
   
-  $Configuration = cConfiguration
+  $Configuration = oConfiguration
   $Logger = oLogger
-  $PhotoService = cPhotoService
-  $AlbumService = cAlbumService
-  $TagService = cTagService
+  $PhotoService = oPhotoService
+  $AlbumService = oAlbumService
+  $TagService = oTagService
   
 End
 
@@ -49,13 +48,117 @@ Public Sub Form_Open()
   StatusTimer = New Timer
   StatusTimer.Enabled = False
   
-  AddAlbumExpander()
+  PopulateFilterTreeView()
   UpdateSelectionActions()
   UpdateTrashCount()
   
 End
 
-Public Sub Form_Drop()
+Public Sub TreeViewFilters_Select() '' Handles filter selection from the tree view.
+  
+  Dim oSpec As New PhotoSpecification
+  Dim sKey As String = TreeViewFilters.Current.Key
+  Dim aKeyParts As String[]
+  Dim sDate As String
+  
+  $LogMessage = New LogMessage($Titulo, "TreeViewFilters_Select", "Filter selected: " & sKey)
+  $Logger.Debug($LogMessage)
+  
+  ' Always sync the soft delete state with the current view
+  oSpec.IsSoftDeleted = $IsViewingTrash
+  
+  If sKey Begins "ROOT:" Then
+   oSpec = New PhotoSpecification
+  Else If sKey Begins "ALB:" Then
+    aKeyParts = Split(sKey, ":")
+    oSpec.AlbumId = CInt(aKeyParts[1])
+  Else If sKey Begins "TAG:" Then
+    aKeyParts = Split(sKey, ":")
+    oSpec.TagId = CInt(aKeyParts[1])
+  Else If sKey Begins "YEAR:" Then
+    sDate = Split(sKey, ":")[1]
+    oSpec.StartDate = Date(Val(sDate), 1, 1)
+    oSpec.EndDate = Date(Val(sDate), 12, 31, 23, 59, 59)
+  Else If sKey Begins "MONTH:" Then
+    sDate = Split(sKey, ":")[1]
+    aKeyParts = Split(sDate, "-")
+    oSpec.StartDate = Date(Val(aKeyParts[0]), Val(aKeyParts[1]), 1)
+    oSpec.EndDate = Date(Val(aKeyParts[0]), Val(aKeyParts[1]), Day(Date(Val(aKeyParts[0]), Val(aKeyParts[1]) + 1, 1) - 1), 23, 59, 59)
+  Else If sKey Begins "DATE:" Then
+    sDate = Split(sKey, ":")[1]
+    aKeyParts = Split(sDate, "-")
+    oSpec.StartDate = Date(Val(aKeyParts[0]), Val(aKeyParts[1]), Val(aKeyParts[2]))
+    oSpec.EndDate = Date(Val(aKeyParts[0]), Val(aKeyParts[1]), Val(aKeyParts[2]), 23, 59, 59)
+  Else
+    ' Root nodes or unimplemented filters
+    Return
+  Endif
+  
+  $PhotoService.ApplyFilters(oSpec)
+  ReloadGallery()
+  
+End
+
+Private Sub PopulateFilterTreeView() '' Fills the tree view with albums, tags, and date filters.
+  
+  Dim oAlbums As AlbumEntity[]
+  Dim oTags As TagEntity[]
+  Dim aDates As String[]
+  Dim sDate, sYear, sMonth, sDay As String
+  Dim sYearKey, sMonthKey As String
+  
+  TreeViewFilters.Clear()
+  
+  ' Root: All Photos
+  TreeViewFilters.Add("ROOT:ALL", ("All Photos"), Picture["icon:/16/home"])
+  
+  ' Root: Albums
+  TreeViewFilters.Add("ROOT:ALBUMS", ("Albums"), Picture["icon:/16/directory"])
+  oAlbums = $AlbumService.FindAlbums()
+  For Each oAlbum As AlbumEntity In oAlbums
+    TreeViewFilters.Add("ALB:" & oAlbum.Id, oAlbum.Name, Picture["icon:/16/book"], "ROOT:ALBUMS")
+  Next
+  TreeViewFilters["ROOT:ALBUMS"].Expanded = True
+  
+  ' Root: Tags
+  TreeViewFilters.Add("ROOT:TAGS", ("Tags"), Picture["icon:/16/tag"])
+  oTags = $TagService.FindTags()
+  For Each oTag As TagEntity In oTags
+    TreeViewFilters.Add("TAG:" & oTag.Id, oTag.Name, Picture["icon:/16/bookmark"], "ROOT:TAGS")
+  Next
+  TreeViewFilters["ROOT:TAGS"].Expanded = True
+  
+  ' Root: Dates
+  TreeViewFilters.Add("ROOT:DATES", ("Dates"), Picture["icon:/16/calendar"])
+  aDates = $PhotoService.Repository.GetAvailableDates()
+  
+  If aDates <> Null Then
+    For Each sDate In aDates
+      sYear = Left(sDate, 4)
+      sMonth = Mid(sDate, 6, 2)
+      sDay = Right(sDate, 2)
+      
+      sYearKey = "YEAR:" & sYear
+      sMonthKey = "MONTH:" & sYear & "-" & sMonth
+      
+      ' Add Year
+      If Not TreeViewFilters.Exist(sYearKey) Then
+        TreeViewFilters.Add(sYearKey, sYear, Picture["icon:/16/calendar"], "ROOT:DATES")
+      Endif
+      
+      ' Add Month
+      If Not TreeViewFilters.Exist(sMonthKey) Then
+        TreeViewFilters.Add(sMonthKey, Format(Date(Val(sYear), Val(sMonth), 1), "mmmm"), Picture["icon:/16/calendar"], sYearKey)
+      Endif
+      
+      ' Add Day
+      TreeViewFilters.Add("DATE:" & sDate, sDay, Picture["icon:/16/calendar"], sMonthKey)
+    Next
+  Endif
+  
+End
+
+Public Sub Form_Drop() '' Handles dragging and dropping files into the form.
   
   Dim aFilesDrop As String[]
   Dim sFileDrop As String
@@ -64,8 +167,10 @@ Public Sub Form_Drop()
   $LogMessage = New LogMessage($Titulo, "Form_Drop", "Drag and drop files")
   $Logger.Debug($LogMessage)
   
+  ' aFilesDrop = Split(Drag.Paste("text/uri-list"), "\n")
   aFilesDrop = Drag.Paste("text/uri-list")
   For Each sFileDrop In aFilesDrop
+    If sFileDrop = "" Then Continue
     $LogMessage = New LogMessage($Titulo, "Form_Drop", "file: [" & File.BaseName(sFileDrop) & "." & File.Ext(sFileDrop) & "]")
     $Logger.Debug($LogMessage)
     If LCase(File.Ext(sFileDrop)) = "jpg" Or LCase(File.Ext(sFileDrop)) = "png" Then
@@ -110,12 +215,7 @@ Public Sub PanelGalleryContent_Scroll()
   
   ' If it reached 80% and not loading, load more
   If fScrollPos >= fThreshold Then
-    If $IsViewingTrash Then
-      $TrashPage += 1
-      aNewPhotos = $PhotoService.LoadTrashPage($TrashPage)
-    Else
-      aNewPhotos = $PhotoService.LoadNextPage()
-    Endif
+    aNewPhotos = $PhotoService.LoadNextPage()
     
     If aNewPhotos.Count > 0 Then
       CreatePhotoPanels(aNewPhotos)
@@ -230,17 +330,19 @@ End
 
 Public Sub ToolButtonViewTrash_Click()
   
-  ' $IsViewingTrash = Not $IsViewingTrash
+  $IsViewingTrash = Not $IsViewingTrash
   
-  ' If $IsViewingTrash Then
-  '   ShowStatus(("Viewing deleted images"), 0)
-  '   ToolButtonViewTrash.Tooltip = ("Return to gallery")
-  '   ReloadTrash()
-  ' Else
-  '   ShowStatus(("Viewing main gallery"), 0)
-  '   ToolButtonViewTrash.Tooltip = ("Open deleted images folder")
-  '   ReloadGallery()
-  ' Endif
+  If $IsViewingTrash Then
+    ShowStatus(("Viewing deleted images"), 0)
+    ToolButtonViewTrash.Tooltip = ("Return to gallery")
+    ToolButtonViewTrash.Picture = Picture["icon:/22/folder-home"]
+    ReloadTrash()
+  Else
+    ShowStatus(("Viewing main gallery"), 0)
+    ToolButtonViewTrash.Tooltip = ("Open deleted images folder")
+    ToolButtonViewTrash.Picture = Picture["icon:/22/trash"]
+    ReloadGallery()
+  Endif
   
 End
 
@@ -250,25 +352,46 @@ Public Sub EditMenu_TrashOut_Click()
   
 End
 
-Public Sub AlbumRadio_Click()
+Public Sub SelectionService_SelectionChanged(iCount As Integer, bHasSelection As Boolean)
   
-  Dim oRadio As RadioButton
-  Dim iAlbumId As Integer
-  
-  For Each oRadio In $AlbumPanel.Children
-    If oRadio.Value = True Then
-      iAlbumId = oRadio.Tag
-      $PhotoService.SetAlbumFilter(iAlbumId)
-      ReloadGallery()
-      Return
-    Endif
-  Next
+  UpdateSelectionActions(iCount, bHasSelection)
   
 End
 
-Public Sub SelectionService_SelectionChanged(iCount As Integer, hasSelection As Boolean)
+Public Sub SelectionService_LockChanged(oPhoto As PhotoEntity, bIsLocked As Boolean)
   
-  UpdateSelectionActions(iCount, hasSelection)
+  Dim aPhotos As New PhotoEntity[]
+  
+  aPhotos.Add(oPhoto)
+  LockSelectedImages(bIsLocked, aPhotos)
+  
+End
+
+Public Sub SelectionService_DeleteRequested(oPhoto As PhotoEntity)
+  
+  Dim oSummary As Summary
+  Dim iResp As Integer
+  Dim sMsg As String
+  
+  sMsg = ("Are you sure you want to PERMANENTLY delete this photo?")
+  sMsg &= "\n\n" & oPhoto.FileName
+  sMsg &= "\n\n" & ("This action cannot be undone.")
+  
+  If Message.Question(sMsg, ("Delete Permanently"), ("Cancel")) <> 1 Then Return
+  
+  oSummary = $PhotoService.PermanentlyDelete([oPhoto])
+  
+  If oSummary.HasErrors() Then
+    FSummary.ShowSummary(oSummary, ("Permanent Delete Results"))
+  Else
+    ' Just for visual confirmation if it's only one
+    ' Message.Info(("Deleted successfully"))
+  Endif
+  
+  ' Refresh the view to reflect the deletion
+  $PhotoSelectionService.Clear()
+  ClearPhotoGallery()
+  CreatePhotoPanels($PhotoService.LoadFirstPage())
   
 End
 
@@ -356,7 +479,7 @@ End
 
 Public Sub PanelGalleryContent_MouseDown()
   
-  Dim oPanel As FPhoto
+  ' Dim oPanel As FPhoto
   
   If $PhotoSelectionService.HasSelection() Then
     $PhotoSelectionService.Clear()
@@ -489,15 +612,21 @@ End
 
 Private Sub ReloadTrash()
   
+  Dim oSpec As New PhotoSpecification
+  
   $IsViewingTrash = True
-  $TrashPage = 0
+  ToolButtonDelete.Visible = True
+  ToolButtonTrash.Visible = False
   
   If $PhotoSelectionService <> Null Then
     $PhotoSelectionService.Clear()
   Endif
   
+  oSpec.IsSoftDeleted = True
+  $PhotoService.ApplyFilters(oSpec)
+  
   ClearPhotoGallery()
-  CreatePhotoPanels($PhotoService.LoadTrashPage($TrashPage))
+  CreatePhotoPanels($PhotoService.LoadFirstPage())
   
 End
 
@@ -531,7 +660,7 @@ Private Sub RestoreSelectedImagesFromTrash() '' Method to restore images from tr
   
 End
 
-Private Sub CreatePhotoPanels(photos As PhotoEntity[])
+Private Sub CreatePhotoPanels(aPhotos As PhotoEntity[])
   
   Dim oFPhoto As FPhoto
   Dim i As Integer
@@ -539,8 +668,8 @@ Private Sub CreatePhotoPanels(photos As PhotoEntity[])
   $LogMessage = New LogMessage($Titulo, "CreatePhotoPanels", "Creating initial panels")
   $Logger.Info($LogMessage)
   
-  For Each cPhoto As PhotoEntity In photos
-    oFPhoto = New FPhoto($PhotoSelectionService, cPhoto, PanelGalleryContent)
+  For Each cPhoto As PhotoEntity In aPhotos
+    oFPhoto = New FPhoto($PhotoSelectionService, cPhoto, $IsViewingTrash, PanelGalleryContent)
     For i = 1 To $Amplifier
       oFPhoto.ResizeScaledForm(1)
     Next
@@ -558,7 +687,7 @@ Private Sub ClearPhotoGallery()
   
 End
 
-Private Sub ImportProcess(Optional listFiles As String[]) '' Import images process
+Private Sub ImportProcess(Optional aListFiles As String[]) '' Import images process
   
   Dim iResp As Integer
   Dim oSelector As FImport
@@ -566,8 +695,8 @@ Private Sub ImportProcess(Optional listFiles As String[]) '' Import images proce
   Dim oProgress As FProgressBar
   Dim oImportSelection As New PhotoImportSelectionService
   
-  If listFiles <> Null Then
-    oImportSelection.SetPaths(listFiles)
+  If aListFiles <> Null Then
+    oImportSelection.SetPaths(aListFiles)
   Endif
   
   oSelector = New FImport(Me, $PhotoService, $AlbumService, $Logger, oImportSelection, $Configuration)
@@ -600,7 +729,6 @@ Private Sub SelectGallery(iGallery As Integer)
   
   Select Case iGallery
     Case Enumeration.GalleryType_Private
-      
       GalleryMenu_PrivateGallery.Value = True
       GalleryMenu_ShareGallery.Value = False
       
@@ -636,9 +764,16 @@ End
 
 Private Sub ReloadGallery()
   
+  Dim oSpec As New PhotoSpecification
+  
   If $PhotoSelectionService <> Null Then
     $PhotoSelectionService.Clear()
   Endif
+  ToolButtonDelete.Visible = False
+  ToolButtonTrash.Visible = True
+  
+  oSpec.IsSoftDeleted = False
+  $PhotoService.ApplyFilters(oSpec)
   
   ClearPhotoGallery()
   CreatePhotoPanels($PhotoService.LoadFirstPage())
@@ -648,8 +783,7 @@ End
 
 Private Sub ReloadAlbums()
   
-  ClearAlbumExpander()
-  AddAlbumExpander()
+  PopulateFilterTreeView()
   
 End
 
@@ -662,12 +796,12 @@ Private Sub ShowConfigurationPanel()
   
 End
 
-Private Sub StatusTimer_Timer()
-  
-  StatusTimer.Stop()
-  LabelStatusBar.Text = $StatusDefaultText
-  
-End
+' Private Sub StatusTimer_Timer()
+'   
+'   StatusTimer.Stop()
+'   LabelStatusBar.Text = $StatusDefaultText
+'   
+' End
 
 Private Function LastImportSummary_Read() As Summary
   
@@ -681,89 +815,35 @@ Private Sub LastImportSummary_Write(Value As Summary)
   
 End
 
-Private Sub AddAlbumExpander()
-  
-  Dim oCKAlbum As RadioButton
-  Dim iHeight As Integer = 28
-  Dim oAlbums As AlbumEntity[]
-  
-  ExpanderAlbum.Hidden = False
-  Wait 0.5
-  
-  $AlbumPanel = New Panel(ExpanderAlbum)
-  $AlbumPanel.Arrangement = Arrange.Vertical
-  $AlbumPanel.Width = ExpanderAlbum.Width
-  $AlbumPanel.Background = Color.Royal
-  
-  oCKAlbum = New RadioButton($AlbumPanel) As "AlbumRadio"
-  oCKAlbum.Text = ("Todos")
-  oCKAlbum.Tag = 0
-  oCKAlbum.Height = 28
-  oCKAlbum.Width = $AlbumPanel.Width
-  oCKAlbum.Value = True
-  
-  $AlbumPanel.Height = $AlbumPanel.Height + iHeight
-  iHeight = iHeight + 28
-  
-  oAlbums = $AlbumService.FindAlbums()
-  For Each oAlbum As AlbumEntity In oAlbums
-    
-    oCKAlbum = New RadioButton($AlbumPanel) As "AlbumRadio"
-    oCKAlbum.Text = oAlbum.Name
-    oCKAlbum.Tag = oAlbum.Id
-    ' oCKAlbum.Background = Color.Red
-    oCKAlbum.Height = 28
-    oCKAlbum.Width = $AlbumPanel.Width
-    
-    $AlbumPanel.Height = $AlbumPanel.Height + iHeight
-    iHeight = iHeight + 28
-  Next
-  
-  ExpanderAlbum.Arrangement = Arrange.Fill
-  ExpanderAlbum.Height = iHeight
-  ExpanderAlbum.Hidden = True
-  
-End
-
-Private Sub ClearAlbumExpander()
-  
-  If $AlbumPanel = Null Then Return
-  
-  For Each ctrl As Control In $AlbumPanel.Children
-    ctrl.Delete()
-  Next
-  $AlbumPanel.Delete()
-  $AlbumPanel = Null
-  
-End
-
-Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional hasSelection As Boolean = False)
+Private Sub UpdateSelectionActions(Optional iCount As Integer = -1, Optional bHasSelection As Boolean = False)
   
   If iCount < 0 Then
     If $PhotoSelectionService = Null Then
       iCount = 0
-      hasSelection = False
+      bHasSelection = False
     Else
       iCount = $PhotoSelectionService.SelectedCount
-      hasSelection = $PhotoSelectionService.HasSelection()
+      bHasSelection = $PhotoSelectionService.HasSelection()
     Endif
   Endif
   
   If $IsViewingTrash Then
-    EditMenu_TrashOut.Enabled = hasSelection
+    EditMenu_TrashOut.Enabled = bHasSelection
   Else
-    EditMenu_Trash.Enabled = hasSelection
-    EditMenu_AddSelectedToAlbums.Enabled = hasSelection
-    EditMenu_RemoveSelectedFromAlbums.Enabled = hasSelection
-    EditMenu_Share.Enabled = hasSelection And $Configuration.WhichGallery = Enumeration.GalleryType_Private
-    EditMenu_Unshare.Enabled = hasSelection And $Configuration.WhichGallery = Enumeration.GalleryType_Shared
+    EditMenu_Trash.Enabled = bHasSelection
+    EditMenu_AddSelectedToAlbums.Enabled = bHasSelection
+    EditMenu_RemoveSelectedFromAlbums.Enabled = bHasSelection
+    EditMenu_Share.Enabled = bHasSelection And $Configuration.WhichGallery = Enumeration.GalleryType_Private
+    EditMenu_Unshare.Enabled = bHasSelection And $Configuration.WhichGallery = Enumeration.GalleryType_Shared
+    EditMenu_Lock.Enabled = bHasSelection
+    EditMenu_Unlock.Enabled = bHasSelection
     
-    ToolButtonTrash.Enabled = hasSelection
+    ToolButtonTrash.Enabled = bHasSelection
   Endif
   
 End
 
-Private Sub AssignSelectedPhotosToAlbums(isAddOperation As Boolean)
+Private Sub AssignSelectedPhotosToAlbums(bIsAddOperation As Boolean)
   
   Dim oDialog As FAlbumSelection
   Dim oSelectionAlbum As AlbumSelectionService
@@ -779,7 +859,7 @@ Private Sub AssignSelectedPhotosToAlbums(isAddOperation As Boolean)
   
   oSelectionAlbum = New AlbumSelectionService
   
-  If isAddOperation Then
+  If bIsAddOperation Then
     oDialog = New FAlbumSelection($AlbumService, $Logger, oSelectionAlbum, Enumeration.ALBUM_ADD_ACTION)
   Else
     oDialog = New FAlbumSelection($AlbumService, $Logger, oSelectionAlbum, Enumeration.ALBUM_REMOVE_ACTION)
@@ -795,7 +875,7 @@ Private Sub AssignSelectedPhotosToAlbums(isAddOperation As Boolean)
     aAlbumIds.Add(oAlbum.Id)
   Next
   
-  If isAddOperation Then
+  If bIsAddOperation Then
     iAffected = $AlbumService.AddPhotosToAlbums(aPhotoIds, aAlbumIds)
     ShowStatus(("Relations created: ") & iAffected, 3500)
   Else
@@ -837,19 +917,24 @@ Private Sub FindPhotoFilterActive()
   $Logger.Info($LogMessage)
   
   If SearchByMenu_Album.Value Then
-    Print "no implemented yet SearchByMenu_Album.Value"
+    $LogMessage = New LogMessage($Titulo, "FindPhotoFilterActive()", ("no implemented yet SearchByMenu_Album.Value"))
+    $Logger.Warning($LogMessage)
     
   Else If SearchByMenu_PhotoName.Value Then
-    Print "no implemented yet SearchByMenu_PhotoName.Value"
+    $LogMessage = New LogMessage($Titulo, "FindPhotoFilterActive()", ("no implemented yet SearchByMenu_PhotoName.Value"))
+    $Logger.Warning($LogMessage)
     
   Else If SearchByMenu_Description.Value Then
-    Print "no implemented yet SearchByMenu_Description.Value"
+    $LogMessage = New LogMessage($Titulo, "FindPhotoFilterActive()", ("no implemented yet SearchByMenu_Description.Value"))
+    $Logger.Warning($LogMessage)
     
   Else If SearchByMenu_Date.value Then
-    Print "no implemented yet SearchByMenu_Date.value"
+    $LogMessage = New LogMessage($Titulo, "FindPhotoFilterActive()", ("no implemented yet SearchByMenu_Date.value"))
+    $Logger.Warning($LogMessage)
     
   Else If SearchByMenu_Tag.value Then
-    Print "no implemented yet SearchByMenu_Tag.value"
+    $LogMessage = New LogMessage($Titulo, "FindPhotoFilterActive()", ("no implemented yet SearchByMenu_Tag.value"))
+    $Logger.Warning($LogMessage)
     
   Endif
   
@@ -872,7 +957,7 @@ Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash 
   oQuestionService = New QuestionInteractionService($Logger)
   
   ' 1. El SERVICIO decide si la UI debe actuar (Lógica de negocio en el core)
-  If oQuestionService.ShouldAsk($Configuration, Constants.DONTSHOWAGAIN_MOVETRASH) Then
+  If oQuestionService.ShouldAsk($Configuration, Constants.ASKBEFORE_MOVETRASH) Then
     
     sTitle = ("Move images to trash")
     sText = ("Are you sure you want to move the selected photos to trash directory")
@@ -882,7 +967,7 @@ Private Sub MoveSelectedImagesToTrashDirectory() '' Method move images to trash 
     If oFQuestion.ShowModal() = Enumeration.DLG_OK Then
       
       ' 3. El SERVICIO guarda la decisión capturada por la UI (DRY/Persistencia)
-      oQuestionService.SaveUserDecision($Configuration, Constants.DONTSHOWAGAIN_MOVETRASH, oQuestionService.ShouldNotShowAgain)
+      oQuestionService.SaveUserDecision($Configuration, Constants.ASKBEFORE_MOVETRASH, oQuestionService.ShouldNotShowAgain)
       isConfirmed = True
     Else
       isConfirmed = False
@@ -965,21 +1050,21 @@ Private Sub ZoomOut()
 End
 
 Public Sub SliderZoomer_Drag()
-
+  
   ApplyZoom()
-
+  
 End
 
 Public Sub SliderZoomer_Change()
-
+  
   ApplyZoom()
-
+  
 End
 
 Public Sub SliderZoomer_MouseDrag()
-
+  
   ApplyZoom()
-
+  
 End
 
 Private Sub ApplyZoom()
@@ -1004,14 +1089,94 @@ Private Sub ApplyZoom()
 End
 
 Public Sub EditMenu_Share_Click()
+  
   ExecuteSharing(True)
+  
 End
 
 Public Sub EditMenu_Unshare_Click()
+  
   ExecuteSharing(False)
+  
+End
+
+Public Sub EditMenu_Lock_Click()
+  
+  LockSelectedImages(True)
+  
+End
+
+Public Sub EditMenu_Unlock_Click()
+  
+  LockSelectedImages(False)
+  
+End
+
+Private Sub LockSelectedImages(bIsLocked As Boolean, Optional aManualSelected As PhotoEntity[]) '' Orchestrates the lock/unlock process
+  
+  Dim oSelected As PhotoEntity[]
+  Dim oSummary As FSummary
+  Dim eSummary As Summary
+  Dim oProgress As FProgressBar
+  Dim oFQuestion As FQuestion
+  Dim sTitle, sText As String
+  Dim isConfirmed As Boolean = True
+  Dim oQuestionService As QuestionInteractionService
+  
+  $LogMessage = New LogMessage($Titulo, "LockSelectedImages", "Updating lock status: " & bIsLocked)
+  $Logger.Info($LogMessage)
+  
+  oQuestionService = New QuestionInteractionService($Logger)
+  
+  ' 1. Check if we should ask for confirmation
+  If oQuestionService.ShouldAsk($Configuration, Constants.ASKBEFORE_LOCK) Then
+    
+    sTitle = IIf(bIsLocked, ("Lock images"), ("Unlock images"))
+    sText = IIf(bIsLocked, ("Are you sure you want to LOCK the selected photos? They cannot be permanently deleted while locked."), ("Are you sure you want to UNLOCK the selected photos?"))
+    
+    oFQuestion = New FQuestion(oQuestionService, $Logger, sTitle, sText)
+    if oFQuestion.ShowModal() = Enumeration.DLG_OK Then
+      oQuestionService.SaveUserDecision($Configuration, Constants.ASKBEFORE_LOCK, oQuestionService.ShouldNotShowAgain)
+      isConfirmed = True
+    Else
+      isConfirmed = False
+    Endif
+  Endif
+  
+  If isConfirmed Then
+    If aManualSelected <> Null Then
+      oSelected = aManualSelected
+    Else
+      oSelected = $PhotoSelectionService.GetSelectedEntities()
+    Endif
+    
+    If oSelected.Count = 0 Then
+      Message.Warning(("No images selected"))
+      Return
+    Endif
+    
+    oProgress = New FProgressBar($PhotoService, IIf(bIsLocked, ("Locking images"), ("Unlocking images")))
+    oProgress.Show()
+    Wait 0.05
+    
+    eSummary = $PhotoService.UpdateLockStatus(oSelected, bIsLocked)
+    
+    oProgress.Close()
+    
+    ReloadGallery()
+    
+    ShowStatus(IIf(bIsLocked, ("Locking finished. OK: "), ("Unlocking finished. OK: ")) & eSummary.OkCount & (" and NOK: ") & eSummary.FailCount, 5000)
+    
+    If $Configuration.ShouldShowLockSummary And If(aManualSelected <> Null, aManualSelected.Count > 1, $PhotoSelectionService.SelectedCount > 1) Then
+      oSummary = New FSummary(eSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_LOCK)
+      oSummary.ShowModal()
+    Endif
+  Endif
+  
 End
 
 Private Sub ExecuteSharing(bToShared As Boolean)
+  
   Dim oSharingService As PhotoSharingService
   Dim oProgress As FProgressBar
   Dim oSummary As Summary
@@ -1027,10 +1192,12 @@ Private Sub ExecuteSharing(bToShared As Boolean)
   oProgress.Close()
   
   If oSummary <> Null Then
-       Dim oSummaryDialog As New FSummary(oSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_SHARE)
-     oSummaryDialog.ShowModal()
+    Dim oSummaryDialog As New FSummary(oSummary, $Logger, $Configuration, Enumeration.DIALOG_SUMMARY_SHARE)
+    oSummaryDialog.ShowModal()
   Endif
   
   $PhotoSelectionService.Clear()
   ReloadGallery()
+  
 End
+

@@ -25,6 +25,12 @@ Public Sub AddItem(oItem As SummaryItem)                                   '' Ad
   
 End
 
+Public Function HasErrors() As Boolean '' Returns true if any operation in the summary failed.
+  
+  Return $FailCount > 0
+  
+End
+
 Private Function Items_Read() As SummaryItem[]
   
   Return $Items

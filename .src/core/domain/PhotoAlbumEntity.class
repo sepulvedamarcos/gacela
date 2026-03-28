@@ -34,9 +34,9 @@ Private Function Id_Read() As Integer
 
 End
 
-Private Sub Id_Write(Value As Integer)
+Private Sub Id_Write(iValue As Integer)
 
-  $iId = value
+  $iId = iValue
 
 End
 
@@ -46,9 +46,9 @@ Private Function PhotoId_Read() As Integer
 
 End
 
-Private Sub PhotoId_Write(Value As Integer)
+Private Sub PhotoId_Write(iValue As Integer)
 
-  $iPhotoId = value
+  $iPhotoId = iValue
 
 End
 
@@ -58,9 +58,9 @@ Private Function AlbumId_Read() As Integer
 
 End
 
-Private Sub AlbumId_Write(Value As Integer)
+Private Sub AlbumId_Write(iValue As Integer)
 
-  $iAlbumId = value
+  $iAlbumId = iValue
 
 End
 
@@ -70,9 +70,9 @@ Private Function OrderInAlbum_Read() As Integer
 
 End
 
-Private Sub OrderInAlbum_Write(Value As Integer)
+Private Sub OrderInAlbum_Write(iValue As Integer)
 
-  $iOrderInAlbum = value
+  $iOrderInAlbum = iValue
 
 End
 
@@ -93,9 +93,9 @@ Private Function AddedUser_Read() As String
   Return $sAddedUser
 End
 
-Private Sub AddedUser_Write(Value As String)
+Private Sub AddedUser_Write(sValue As String)
 
-  $sAddedUser = value
+  $sAddedUser = sValue
 
 End
 
@@ -105,8 +105,8 @@ Private Function IsSoftDeleted_Read() As Boolean
 
 End
 
-Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
+Private Sub IsSoftDeleted_Write(bIsSoftDeleted As Boolean)
 
-  $IsSoftDeleted = isSoftDeleted
+  $IsSoftDeleted = bIsSoftDeleted
 
 End

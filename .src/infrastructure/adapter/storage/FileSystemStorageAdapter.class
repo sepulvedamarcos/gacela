@@ -3,10 +3,10 @@
 ' Local filesystem implementation for FileStoragePort.
 Inherits FileStoragePort
 
-Public Function EnsureDirectory(path As String) As Boolean
+Public Function EnsureDirectory(sPath As String) As Boolean
 
-  If path = "" Then Return False
-  If Not Exist(path) Then Mkdir path
+  If sPath = "" Then Return False
+  If Not Exist(sPath) Then Mkdir sPath
   Return True
 
 Catch
@@ -14,9 +14,9 @@ Catch
 
 End
 
-Public Function SaveFile(sourcePath As String, targetPath As String) As Boolean
+Public Function SaveFile(sSourcePath As String, sTargetPath As String) As Boolean
 
-  Copy sourcePath To targetPath
+  Copy sSourcePath To sTargetPath
   Return True
 
 Catch
@@ -24,9 +24,9 @@ Catch
 
 End
 
-Public Function DeleteFile(path As String) As Boolean
+Public Function DeleteFile(sPath As String) As Boolean
 
-  Kill path
+  Kill sPath
   Return True
 
 Catch
@@ -34,9 +34,9 @@ Catch
 
 End
 
-Public Function MoveFile(sourcePath As String, targetPath As String) As Boolean '' Implements filesystem-level file moving.
+Public Function MoveFile(sSourcePath As String, sTargetPath As String) As Boolean '' Implements filesystem-level file moving.
 
-  Move sourcePath To targetPath
+  Move sSourcePath To sTargetPath
   Return True
 
 Catch
@@ -44,8 +44,8 @@ Catch
 
 End
 
-Public Function Exists(path As String) As Boolean
+Public Function Exists(sPath As String) As Boolean
 
-  Return Exist(path)
+  Return Exist(sPath)
 
 End

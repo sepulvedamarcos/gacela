@@ -4,7 +4,7 @@
   MoveScaled(0,0,83,48)
   Text = ("About Gacela")
   Centered = True
-  { PictureBox1 PictureBox
+  { PictureBoxGacela PictureBox
     MoveScaled(29,3,26,26)
     Background = Color.Transparent
     Picture = Picture.Load("images/Gemini_Generated_Image_87c8qc87c8qc87c8 (1).png")
@@ -24,7 +24,7 @@
   { LabelVersion Label
     MoveScaled(42,32,8,3)
   }
-  { URLLabel URLLabel
+  { URLLabelGitHub URLLabel
     MoveScaled(24,42,41,3)
     Text = ("https://github.com/sepulvedamarcos/gacela")
   }

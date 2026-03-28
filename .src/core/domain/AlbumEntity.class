@@ -1,10 +1,6 @@
 ' Gambas class file
 
-'
-' Gambas class file - AlbumEntity
-' Domain model for representing an album in Gacela
-'
-'  Remember that variable names should not match class names, even in lowercase, because Gambas treats them as the same.
+'' NOTE: Class File for album / Clase de transporte de datos de albums
 
 ' Private model properties
 Private $iId As Integer = 0
@@ -40,9 +36,9 @@ Private Function Id_Read() As Integer
 
 End
 
-Private Sub Id_Write(Value As Integer)
+Private Sub Id_Write(iValue As Integer)
 
-  $iId = value
+  $iId = iValue
 
 End
 
@@ -52,9 +48,9 @@ Private Function Name_Read() As String
 
 End
 
-Private Sub Name_Write(Value As String)
+Private Sub Name_Write(sValue As String)
 
-  $sName = value
+  $sName = sValue
 
 End
 
@@ -64,9 +60,9 @@ Private Function Description_Read() As String
 
 End
 
-Private Sub Description_Write(Value As String)
+Private Sub Description_Write(sValue As String)
 
-  $sDescription = value
+  $sDescription = sValue
 
 End
 
@@ -88,9 +84,9 @@ Private Function CreationUser_Read() As String
 
 End
 
-Private Sub CreationUser_Write(Value As String)
+Private Sub CreationUser_Write(sValue As String)
 
-  $sCreationUser = value
+  $sCreationUser = sValue
 
 End
 
@@ -112,9 +108,9 @@ Private Function ModificationUser_Read() As String
 
 End
 
-Private Sub ModificationUser_Write(Value As String)
+Private Sub ModificationUser_Write(sValue As String)
 
-  $sModificationUser = Value
+  $sModificationUser = sValue
 
 End
 
@@ -124,9 +120,9 @@ Private Function Thumbnail_Read() As String
 
 End
 
-Private Sub Thumbnail_Write(Value As String)
+Private Sub Thumbnail_Write(sValue As String)
 
-  $sThumbnail = value
+  $sThumbnail = sValue
 
 End
 
@@ -136,9 +132,9 @@ Private Function IsSoftDeleted_Read() As Boolean
 
 End
 
-Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
+Private Sub IsSoftDeleted_Write(bIsSoftDeleted As Boolean)
 
-  $IsSoftDeleted = isSoftDeleted
+  $IsSoftDeleted = bIsSoftDeleted
 
 End
 
@@ -148,8 +144,8 @@ Private Function PhotoCount_Read() As Integer
 
 End
 
-Private Sub PhotoCount_Write(Value As Integer)
+Private Sub PhotoCount_Write(iValue As Integer)
 
-  $iPhotoCount = Value
+  $iPhotoCount = iValue
 
 End

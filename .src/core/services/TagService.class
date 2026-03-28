@@ -7,30 +7,30 @@ Private $PhotoRepository As PhotoRepositoryPort
 Private $Titulo As String = "TagService"
 Private $LogMessage As LogMessage
 
-Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort) '' Initializes tag service dependencies.
+Public Sub _new(oLogger As LoggerPort, oPhotoRepository As PhotoRepositoryPort) '' Initializes tag service dependencies.
 
   $Logger = oLogger
-  $PhotoRepository = cPhotoRepository
+  $PhotoRepository = oPhotoRepository
 
 End
 
-Public Function FindTags(Optional text As String, Optional id As Integer = 0) As TagEntity[] '' Retrieves tags using repository filters.
+Public Function FindTags(Optional sText As String, Optional iId As Integer = 0) As TagEntity[] '' Retrieves tags using repository filters.
 
-  $LogMessage = New LogMessage($Titulo, "FindTags", "Search tags: [" & text & "]")
+  $LogMessage = New LogMessage($Titulo, "FindTags", "Search tags: [" & sText & "]")
   $Logger.Debug($LogMessage)
   
-  Return $PhotoRepository.FindTags(text, id)
+  Return $PhotoRepository.FindTags(sText, iId)
 
 End
 
-Public Function AddTag(name As String, description As String, color As String) As Boolean '' Creates a new tag from primitive values.
+Public Function AddTag(sName As String, sDescription As String, sColor As String) As Boolean '' Creates a new tag from primitive values.
 
   Dim oTag As New TagEntity
   Dim iKey As Integer
 
-  oTag.Name = name
-  oTag.Description = description
-  oTag.Color = color
+  oTag.Name = sName
+  oTag.Description = sDescription
+  oTag.Color = sColor
   oTag.CreationUser = User.Name
 
   $LogMessage = New LogMessage($Titulo, "AddTag", "Creating tag entity to persist")
@@ -63,13 +63,13 @@ Catch
 
 End
 
-Public Function RemoveTag(id As Integer) As Boolean '' Removes a tag and its current relations.
+Public Function RemoveTag(iId As Integer) As Boolean '' Removes a tag and its current relations.
 
   Dim iKey As Integer
 
-  $LogMessage = New LogMessage($Titulo, "RemoveTag", "Deleting tag entity [" & id & "]")
+  $LogMessage = New LogMessage($Titulo, "RemoveTag", "Deleting tag entity [" & iId & "]")
   $Logger.Debug($LogMessage)
-  iKey = $PhotoRepository.DeleteTag(id)
+  iKey = $PhotoRepository.DeleteTag(iId)
 
   Return iKey > 0
 
@@ -80,16 +80,16 @@ Catch
 
 End
 
-Public Function AddPhotosToTags(photoIds As Integer[], tagIds As Integer[]) As Integer '' Creates relations between photos and tags.
+Public Function AddPhotosToTags(aPhotoIds As Integer[], aTagIds As Integer[]) As Integer '' Creates relations between photos and tags.
 
   Dim iPhotoId As Integer
   Dim iTagId As Integer
   Dim iCount As Integer
 
-  If photoIds = Null Or tagIds = Null Then Return 0
+  If aPhotoIds = Null Or aTagIds = Null Then Return 0
 
-  For Each iPhotoId In photoIds
-    For Each iTagId In tagIds
+  For Each iPhotoId In aPhotoIds
+    For Each iTagId In aTagIds
       If $PhotoRepository.AddPhotoToTag(iPhotoId, iTagId, User.Name) Then
         iCount += 1
       Endif
@@ -105,16 +105,16 @@ Catch
 
 End
 
-Public Function RemovePhotosFromTags(photoIds As Integer[], tagIds As Integer[]) As Integer '' Removes relations between photos and tags.
+Public Function RemovePhotosFromTags(aPhotoIds As Integer[], aTagIds As Integer[]) As Integer '' Removes relations between photos and tags.
 
   Dim iPhotoId As Integer
   Dim iTagId As Integer
   Dim iCount As Integer
 
-  If photoIds = Null Or tagIds = Null Then Return 0
+  If aPhotoIds = Null Or aTagIds = Null Then Return 0
 
-  For Each iPhotoId In photoIds
-    For Each iTagId In tagIds
+  For Each iPhotoId In aPhotoIds
+    For Each iTagId In aTagIds
       If $PhotoRepository.RemovePhotoFromTag(iPhotoId, iTagId) Then
         iCount += 1
       Endif

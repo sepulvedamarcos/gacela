@@ -10,10 +10,10 @@ Property Component As String
 Property Method As String
 Property Text As String
 
-Public Sub _new(component As String, methodName As String, message As String)
-  $Component = component
-  $Method = methodName
-  $Text = message
+Public Sub _new(oComponent As String, oMethodName As String, oMessage As String)
+  $Component = oComponent
+  $Method = oMethodName
+  $Text = oMessage
 End
 
 Public Function ToText() As String

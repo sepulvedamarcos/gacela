@@ -10,29 +10,29 @@ Private $PhotoRepository As PhotoRepositoryPort
 Private $Titulo As String = "AlbumService"
 Private $LogMessage As LogMessage
 
-Public Sub _new(oLogger As LoggerPort, cPhotoRepository As PhotoRepositoryPort) '' Initializes album service dependencies.
+Public Sub _new(oLogger As LoggerPort, oPhotoRepository As PhotoRepositoryPort) '' Initializes album service dependencies.
   
   $Logger = oLogger
-  $PhotoRepository = cPhotoRepository
+  $PhotoRepository = oPhotoRepository
   
 End
 
-Public Function FindAlbums(Optional text As String, Optional id As Integer = 0, Optional useSoftDelete As Integer = -1) As AlbumEntity[] '' Retrieves albums using repository filters.
+Public Function FindAlbums(Optional sText As String, Optional iId As Integer = 0, Optional iUseSoftDelete As Integer = -1) As AlbumEntity[] '' Retrieves albums using repository filters.
   
-  $LogMessage = New LogMessage($Titulo, "FindAlbums", "Search albums: [" & text & "] use softdelete [" & useSoftDelete & "]")
+  $LogMessage = New LogMessage($Titulo, "FindAlbums", "Search albums: [" & sText & "] use softdelete [" & iUseSoftDelete & "]")
   $Logger.Debug($LogMessage)
   
-  Return $PhotoRepository.FindAlbums(text, id, useSoftDelete)
+  Return $PhotoRepository.FindAlbums(sText, iId, iUseSoftDelete)
   
 End
 
-Public Function AddAlbum(name As String, description As String) As Boolean ''Method to add a new album
+Public Function AddAlbum(sName As String, sDescription As String) As Boolean ''Method to add a new album
   
   Dim oAlbum As New AlbumEntity
   Dim iKey As Integer
   
-  oAlbum.Name = name
-  oAlbum.Description = description
+  oAlbum.Name = sName
+  oAlbum.Description = sDescription
   oAlbum.CreationUser = User.Name
   
   $LogMessage = New LogMessage($Titulo, "AddAlbum", ("Creating album entity to persist"))
@@ -68,13 +68,13 @@ Catch
   
 End
 
-Public Function RemoveAlbum(id As Integer) As Boolean '' Soft-deletes an album and its current relations.
+Public Function RemoveAlbum(iId As Integer) As Boolean '' Soft-deletes an album and its current relations.
   
   Dim iKey As Integer
   
-  $LogMessage = New LogMessage($Titulo, "RemoveAlbum", ("Deleting album entity") & Str(id))
+  $LogMessage = New LogMessage($Titulo, "RemoveAlbum", ("Deleting album entity") & Str(iId))
   $Logger.Debug($LogMessage)
-  iKey = $PhotoRepository.DeleteAlbum(id)
+  iKey = $PhotoRepository.DeleteAlbum(iId)
   
   If iKey Then
     Return True
@@ -89,16 +89,16 @@ Catch
   
 End
 
-Public Function AddPhotosToAlbums(photoIds As Integer[], albumIds As Integer[]) As Integer '' Creates relations between photos and albums.
+Public Function AddPhotosToAlbums(aPhotoIds As Integer[], aAlbumIds As Integer[]) As Integer '' Creates relations between photos and albums.
   
   Dim iPhotoId As Integer
   Dim iAlbumId As Integer
   Dim iCount As Integer
   
-  If photoIds = Null Or albumIds = Null Then Return 0
+  If aPhotoIds = Null Or aAlbumIds = Null Then Return 0
   
-  For Each iPhotoId In photoIds
-    For Each iAlbumId In albumIds
+  For Each iPhotoId In aPhotoIds
+    For Each iAlbumId In aAlbumIds
       If $PhotoRepository.AddPhotoToAlbum(iPhotoId, iAlbumId, 0, User.Name) Then
         iCount += 1
       Endif
@@ -114,16 +114,16 @@ Catch
   
 End
 
-Public Function RemovePhotosFromAlbums(photoIds As Integer[], albumIds As Integer[]) As Integer '' Removes relations between photos and albums.
+Public Function RemovePhotosFromAlbums(aPhotoIds As Integer[], aAlbumIds As Integer[]) As Integer '' Removes relations between photos and albums.
   
   Dim iPhotoId As Integer
   Dim iAlbumId As Integer
   Dim iCount As Integer
   
-  If photoIds = Null Or albumIds = Null Then Return 0
+  If aPhotoIds = Null Or aAlbumIds = Null Then Return 0
   
-  For Each iPhotoId In photoIds
-    For Each iAlbumId In albumIds
+  For Each iPhotoId In aPhotoIds
+    For Each iAlbumId In aAlbumIds
       If $PhotoRepository.RemovePhotoFromAlbum(iPhotoId, iAlbumId) Then
         iCount += 1
       Endif

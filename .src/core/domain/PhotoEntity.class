@@ -21,7 +21,7 @@ Private $OriginalPath As String = ""
 Private $Hash256 As String = ""
 Private $Thumbnail As String
 Private $LastSyncDate As Date
-Private $SyncStatus As String = "pending"
+Private $SyncStatus As Integer = "0"
 Private $IsSoftDeleted As Boolean = False
 Private $SoftDeleteDate As Date
 Private $SoftDeleteBy As String = ""
@@ -49,7 +49,7 @@ Property OriginalPath As String           '' Original source path
 Property Hash256 As String                '' Hash of the image used for uniqueness
 Property Thumbnail As String              '' Thumbnail
 Property LastSyncDate As Date             '' Last sync date
-Property SyncStatus As String             '' Sync status
+Property SyncStatus As Integer             '' Sync status
 Property IsSoftDeleted As Boolean            '' Indicates if it was deleted
 Property SoftDeleteDate As Date           '' Deletion date
 Property SoftDeleteBy As String           '' User who performed the deletion
@@ -71,9 +71,9 @@ Private Function Id_Read() As Integer
 
 End
 
-Private Sub Id_Write(value As Integer)
+Private Sub Id_Write(iValue As Integer)
 
-  $Id = value
+  $Id = iValue
 
 End
 
@@ -83,9 +83,9 @@ Private Function FileName_Read() As String
 
 End
 
-Private Sub FileName_Write(value As String)
+Private Sub FileName_Write(sValue As String)
 
-  $FileName = value
+  $FileName = sValue
 
 End
 
@@ -95,9 +95,9 @@ Private Function WidthPixels_Read() As Integer
 
 End
 
-Private Sub WidthPixels_Write(value As Integer)
+Private Sub WidthPixels_Write(iValue As Integer)
 
-  $WidthPixels = value
+  $WidthPixels = iValue
 
 End
 
@@ -107,9 +107,9 @@ Private Function HeightPixels_Read() As Integer
 
 End
 
-Private Sub HeightPixels_Write(value As Integer)
+Private Sub HeightPixels_Write(iValue As Integer)
 
-  $HeightPixels = value
+  $HeightPixels = iValue
 
 End
 
@@ -155,9 +155,9 @@ Private Function Description_Read() As String
 
 End
 
-Private Sub Description_Write(value As String)
+Private Sub Description_Write(sValue As String)
 
-  $Description = value
+  $Description = sValue
 
 End
 
@@ -173,15 +173,15 @@ Private Function OriginalPath_Read() As String
   
 End
 
-Private Sub OriginalPath_Write(value As String)
+Private Sub OriginalPath_Write(sValue As String)
   
-  $OriginalPath = value
+  $OriginalPath = sValue
   
 End
 
-Private Sub ImportUser_Write(value As String)
+Private Sub ImportUser_Write(sValue As String)
 
-  $ImportUser = value
+  $ImportUser = sValue
 
 End
 
@@ -191,9 +191,9 @@ Private Function IsSoftDeleted_Read() As Boolean
 
 End
 
-Private Sub IsSoftDeleted_Write(isSoftDeleted As Boolean)
+Private Sub IsSoftDeleted_Write(bIsSoftDeleted As Boolean)
 
-  $IsSoftDeleted = isSoftDeleted
+  $IsSoftDeleted = bIsSoftDeleted
 
 End
 
@@ -203,9 +203,9 @@ Private Function Thumbnail_Read() As String
 
 End
 
-Private Sub Thumbnail_Write(value As String)
+Private Sub Thumbnail_Write(sValue As String)
 
-  $Thumbnail = value
+  $Thumbnail = sValue
 
 End
 
@@ -221,9 +221,9 @@ Private Function Stars_Read() As Integer
 
 End
 
-Private Sub Stars_Write(Value As Integer)
+Private Sub Stars_Write(iValue As Integer)
 
-  $Stars = value
+  $Stars = iValue
 
 End
 
@@ -233,9 +233,9 @@ Private Function ImagePath_Read() As String
 
 End
 
-Private Sub ImagePath_Write(Value As String)
+Private Sub ImagePath_Write(sValue As String)
 
-  $ImagePath = value
+  $ImagePath = sValue
 
 End
 
@@ -245,21 +245,21 @@ Private Function Hash256_Read() As String
 
 End
 
-Private Sub Hash256_Write(Value As String)
+Private Sub Hash256_Write(sValue As String)
 
-  $Hash256 = value
+  $Hash256 = sValue
 
 End
 
-Private Function SyncStatus_Read() As String
+Private Function SyncStatus_Read() As Integer
 
   Return $SyncStatus
 
 End
 
-Private Sub SyncStatus_Write(Value As String)
+Private Sub SyncStatus_Write(iValue As Integer)
 
-  $SyncStatus = value
+  $SyncStatus = iValue
 
 End
 
@@ -281,9 +281,9 @@ Private Function SoftDeleteBy_Read() As String
 
 End
 
-Private Sub SoftDeleteBy_Write(Value As String)
+Private Sub SoftDeleteBy_Write(sValue As String)
 
-  $SoftDeleteBy = value
+  $SoftDeleteBy = sValue
 
 End
 
@@ -305,9 +305,9 @@ Private Function IsLocked_Read() As Boolean
 
 End
 
-Private Sub IsLocked_Write(isLocked As Boolean)
+Private Sub IsLocked_Write(bIsLocked As Boolean)
 
-  $IsLocked = isLocked
+  $IsLocked = bIsLocked
 
 End
 
@@ -317,9 +317,9 @@ Private Function LockedBy_Read() As String
 
 End
 
-Private Sub LockedBy_Write(Value As String)
+Private Sub LockedBy_Write(sValue As String)
 
-  $LockedBy = value
+  $LockedBy = sValue
 
 End
 
@@ -329,9 +329,9 @@ Private Function LockedReason_Read() As String
 
 End
 
-Private Sub LockedReason_Write(Value As String)
+Private Sub LockedReason_Write(sValue As String)
 
-  $LockedReason = value
+  $LockedReason = sValue
 
 End
 

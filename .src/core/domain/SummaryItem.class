@@ -26,9 +26,9 @@ Private Function FilePath_Read() As String
   
 End
 
-Private Sub FilePath_Write(Value As String)
+Private Sub FilePath_Write(sValue As String)
   
-  $FilePath = Value
+  $FilePath = sValue
   
 End
 
@@ -38,9 +38,9 @@ Private Function FileName_Read() As String
   
 End
 
-Private Sub FileName_Write(Value As String)
+Private Sub FileName_Write(sValue As String)
   
-  $FileName = Value
+  $FileName = sValue
   
 End
 
@@ -50,9 +50,9 @@ Private Function Status_Read() As Integer
   
 End
 
-Private Sub Status_Write(Value As Integer)
+Private Sub Status_Write(iValue As Integer)
   
-  $Status = Value
+  $Status = iValue
   
 End
 
@@ -62,9 +62,9 @@ Private Function Reason_Read() As String
   
 End
 
-Private Sub Reason_Write(Value As String)
+Private Sub Reason_Write(sValue As String)
   
-  $Reason = Value
+  $Reason = sValue
   
 End
 
@@ -74,8 +74,8 @@ Private Function Message_Read() As String
   
 End
 
-Private Sub Message_Write(Value As String)
+Private Sub Message_Write(sValue As String)
   
-  $Message = Value
+  $Message = sValue
   
 End

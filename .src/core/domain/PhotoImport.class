@@ -20,9 +20,9 @@ Private Function SelectedPaths_Read() As String[]
 
 End
 
-Private Sub SelectedPaths_Write(Value As String[])
+Private Sub SelectedPaths_Write(aValue As String[])
 
-  $SelectedPaths = Value
+  $SelectedPaths = aValue
 
 End
 
@@ -32,8 +32,8 @@ Private Function SelectedAlbumId_Read() As Integer
 
 End
 
-Private Sub SelectedAlbumId_Write(Value As Integer)
+Private Sub SelectedAlbumId_Write(iValue As Integer)
 
-  $SelectedAlbumId = Value
+  $SelectedAlbumId = iValue
 
 End

@@ -15,34 +15,35 @@ Gestor de Álbumes Compartidos En Linux Avanzado
 
 ### ✨ Lo que hace único a Gacela
 
-- **Multiusuario inteligente**: Galerías privadas y compartidas en la misma aplicación a solo un click
-- **Previews instantáneos**: Miniaturas ultrarrápidas sin esperas
-- **Base de datos única**: Todo organizado en SQLite autocontenido
-- **Súper liviano**: Arranca en segundos, consume mínimos recursos
+- **Multiusuario inteligente**: Galerías privadas y compartidas en la misma aplicación a solo un click.
+- **Seguridad Garantizada**: Sistema de **bloqueo de fotos** para proteger tus recuerdos más preciados contra borrados accidentales.
+- **Previews instantáneos**: Miniaturas ultrarrápidas sin esperas gracias a su base de datos optimizada.
+- **Arquitectura de Eventos**: Una interfaz fluida y desacoplada que responde al instante a tus acciones.
+- **Súper liviano**: Arranca en segundos, consume mínimos recursos de sistema.
 
 ## 🚀 ¿Por qué elegir Gacela?
 
 ### El problema con otros gestores
 
-- **digiKam**: Potente pero pesado, replica archivos, complejo para uso familiar
-- **Shotwell**: Básico, sin multiusuario real
-- **Otros**: O muy simples o muy complicados
+- **digiKam**: Potente pero pesado, replica archivos, complejo para uso familiar.
+- **Shotwell**: Básico, sin multiusuario real.
+- **Otros**: O muy simples o muy complicados.
 
 ### La solución Gacela
 
-- Tus fotos no se pierden, ocultas en un lugar privado
-- Gacela crea una base de datos inteligente
-- Previews mas rápidos de carga
-- Cada usuario ve lo suyo y lo compartido cambiando el entorno
-- Un solo lugar para toda la familia
+- Tus fotos no se pierden, se gestionan de forma inteligente.
+- Cada usuario ve lo suyo y lo compartido cambiando el entorno.
+- **Confirmaciones Positivas**: La aplicación siempre te preguntará antes de realizar acciones críticas, dándote el control total.
+- Un solo lugar para toda la familia, sin duplicar archivos en disco.
 
-## 🏗️ Arquitectura innovadora
+## 🏗️ Arquitectura de Vanguardia
 
-Gacela usa una arquitectura híbrida única:
+Gacela no es solo un programa de fotos; es un sistema diseñado bajo principios de ingeniería modernos:
 
-- **Thumbnails binarios**: Previsualizaciones ultrarrápidas integradas en la BD gracias a una miniatura
-- **Directorio autoalojado**: Directorio donde se manejan cada una de las imagenes que se compartan en gacela
-- **Orden**: Puedes seleccionar que gacela maneje tus imagenes y cada vez que las importes las sacara de donde estaban para tomar el control de ellas
+- **Clean Architecture**: Separación estricta entre lógica de negocio e infraestructura (SQLite, Filesystem).
+- **Mediator Pattern**: Un cerebro centralizado (`PhotoSelectionService`) que coordina la sincronización de toda la UI.
+- **Thumbnails binarios**: Previsualizaciones almacenadas en la base de datos para máxima velocidad de carga.
+- **UI Desacoplada**: Componentes inteligentes (`FPhoto`) que se comunican mediante eventos.
 
 ### Beneficios de esta arquitectura
 

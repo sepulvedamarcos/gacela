@@ -6,54 +6,48 @@ Inherits LoggerPort
 
 Private $Backend As New Log4Gambas3
 
-Public Sub _new()
-  
-  
-  
+Public Sub Debug(oMessage As LogMessage)
+  $Backend.Debug(Super.FormatMessage(oMessage))
 End
 
-Public Sub Debug(message As LogMessage)
-  $Backend.Debug(Super.FormatMessage(message))
+Public Sub Info(oMessage As LogMessage)
+  $Backend.Info(Super.FormatMessage(oMessage))
 End
 
-Public Sub Info(message As LogMessage)
-  $Backend.Info(Super.FormatMessage(message))
+Public Sub Warning(oMessage As LogMessage)
+  $Backend.Warning(Super.FormatMessage(oMessage))
 End
 
-Public Sub Warning(message As LogMessage)
-  $Backend.Warning(Super.FormatMessage(message))
+Public Sub Error(oMessage As LogMessage)
+  $Backend.Error(Super.FormatMessage(oMessage))
 End
 
-Public Sub Error(message As LogMessage)
-  $Backend.Error(Super.FormatMessage(message))
+Public Sub Fatal(oMessage As LogMessage)
+  $Backend.Fatal(Super.FormatMessage(oMessage))
 End
 
-Public Sub Fatal(message As LogMessage)
-  $Backend.Fatal(Super.FormatMessage(message))
+Public Sub SetAppName(sAppName As String)
+  $Backend.SetAppName(sAppName)
 End
 
-Public Sub SetAppName(appName As String)
-  $Backend.SetAppName(appName)
+Public Sub SetMinLevel(iLevel As Integer)
+  $Backend.SetMinLevel(iLevel)
 End
 
-Public Sub SetMinLevel(level As Integer)
-  $Backend.SetMinLevel(level)
+Public Sub SetOutput(iOutput As Integer)
+  $Backend.SetOutput(iOutput)
 End
 
-Public Sub SetOutput(output As Integer)
-  $Backend.SetOutput(output)
+Public Sub SetLogFile(sLogFile As String)
+  $Backend.SetLogFile(sLogFile)
 End
 
-Public Sub SetLogFile(logFile As String)
-  $Backend.SetLogFile(logFile)
+Public Sub SetMaxFileSize(iSizeBytes As Integer)
+  $Backend.SetMaxFileSize(iSizeBytes)
 End
 
-Public Sub SetMaxFileSize(sizeBytes As Integer)
-  $Backend.SetMaxFileSize(sizeBytes)
-End
-
-Public Sub SetMaxFiles(maxFiles As Integer)
-  $Backend.SetMaxFiles(maxFiles)
+Public Sub SetMaxFiles(iMaxFiles As Integer)
+  $Backend.SetMaxFiles(iMaxFiles)
 End
 
 Public Function GetMinLevel() As Integer

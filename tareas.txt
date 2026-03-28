@@ -1,4 +1,16 @@
-- al eliminar un album no esta guardando las fecha y usuario
-- creacion de mover a carpeta compartida
-- manejo de paginacion aun tiene un comportamiento extraño
--
+- ✅ actualizar el readme.md => hecho
+- ✅ actualizar el spec.md => hecho
+- ✅ actualizar el agents.md => hecho
+-Cuando se importa una imagen que ya existe en el directorio pero no esta en la BD debe continuar igual con la creacion
+el saveImageIO debe devolver un objeto con el resultado. si ya existe se salta ese proceso pero avisa que ya existe. si no lo graba sin problemas
+-manejo de paginacion aun tiene un comportamiento extraño (clase PHotoIterator) darle una revisada a nivel de arquitectura
+-revisar mantenedor de tag no esta actualizando los campos
+-definir como regla de construccion de codigo que los parametors recibidos en un metodo deben tener la logica siguiente:
+o => para cualquier objeto de como clases, entiodades,
+a => arreglos
+i=> integer
+b=> boolean
+s=> string
+f=> float
+solo las propiedades no usan un descriptor inicial en sus nombre para que se pueda respetar la regla de los bollean por ejemplo.
+- no usar los PRINT para enviar mensajes. para eso tenemos log4gambas, y se usa el debug para cuando estamos probando. luego en produccion se cambiara

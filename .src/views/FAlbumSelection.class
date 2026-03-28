@@ -6,7 +6,7 @@ Private $Logger As LoggerPort
 Private $Titulo As String = "FAlbumSelection"
 Private $LogMessage As LogMessage
 Private $Action As Integer
-Private $IsEditMode As Boolean
+' Private $IsEditMode As Boolean
 Private $AlbumBeingEdited As AlbumEntity
 Private $ShouldAllowMultiple As Boolean
 
@@ -16,13 +16,13 @@ Private $ShouldAllowMultiple As Boolean
 '
 ' =============================================================================
 
-Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, oSelectionService As AlbumSelectionService, iAction As Integer, Optional shouldAllowMultiple As Boolean = True)
+Public Sub _new(oAlbumService As AlbumService, oLogger As LoggerPort, oSelectionService As AlbumSelectionService, iAction As Integer, Optional bShouldAllowMultiple As Boolean = True)
   
   $AlbumService = oAlbumService
   $SelectionService = oSelectionService
   $Logger = oLogger
   $Action = iAction
-  $ShouldAllowMultiple = shouldAllowMultiple
+  $ShouldAllowMultiple = bShouldAllowMultiple
   If $SelectionService <> Null Then $SelectionService.Clear()
   
   VBoxListAlbums.Visible = True
@@ -227,19 +227,19 @@ Private Sub InitializeGrid()
   
 End
 
-Private Sub BindGrid(oAlbums As AlbumEntity[])
+Private Sub BindGrid(aAlbums As AlbumEntity[])
   
   Dim iRow As Integer = 0
   
   TableViewAlbums.Rows.Count = 0
-  For Each oAlbum As AlbumEntity In oAlbums
+  For Each oAlbum As AlbumEntity In aAlbums
     iRow = TableViewAlbums.Rows.Count
     TableViewAlbums.Rows.Count = TableViewAlbums.Rows.Count + 1
     TableViewAlbums[iRow, 0].Text = Trim(oAlbum.Name)
     TableViewAlbums[iRow, 1].Text = Trim(oAlbum.Description)
     TableViewAlbums[iRow, 2].Text = Trim(CStr(oAlbum.PhotoCount)) & " "
   Next
-  TableViewAlbums.Tag = oAlbums
+  TableViewAlbums.Tag = aAlbums
   
 End
 
@@ -277,9 +277,9 @@ Private Sub FindAlbums()
   
 End
 
-Private Sub ChangePanels(shouldShowManagePanel As Boolean)
+Private Sub ChangePanels(bShouldShowManagePanel As Boolean)
   
-  If shouldShowManagePanel Then
+  If bShouldShowManagePanel Then
     VBoxListAlbums.Visible = False
     VBoxManageAlbum.Visible = True
     TextBoxAlbum.SetFocus()
@@ -358,8 +358,6 @@ Private Sub InitializePrincipalButtonBar()
     ButtonAccept.Text = ("Select")
     
   Else If $Action = Enumeration.ALBUM_REMOVE_ACTION Then
-    
-    '' TODO: aca deberia llegar el listado de imagenes selecionadas para premarcar los albumes que estan siendo usados y luego al deseleccionar uno de ellos o varios ejecutar la eliminacion de la tabla relacionada con las imagenes eso albumes deseleccionados
     
     Me.Text = ("Remove selected photos from albums")
     ButtonAccept.Text = ("Select")

@@ -1,7 +1,7 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,24,16)
+  MoveScaled(0,0,28,16)
   Margin = True
   Padding = 2
   { ButtonSeleccionar Button
@@ -9,13 +9,23 @@
     Visible = False
     Picture = Picture["icon:/tiny/add"]
   }
+  { ButtonLock Button
+    MoveScaled(5,1,3.4286,3.4286)
+    Visible = False
+    Picture = Picture["icon:/16/unlock"]
+  }
   { PanelPhoto Panel
     MoveScaled(1,5,10,10)
     Expand = True
     Arrangement = Arrange.Vertical
     { PictureBoxPhoto PictureBox
-      MoveScaled(2,2,6,6)
+      MoveScaled(1,2,6,6)
       Expand = True
     }
+  }
+  { ButtonDelete Button
+    MoveScaled(24,13,3.4286,3.4286)
+    Visible = False
+    Picture = Picture["icon:/16/remove"]
   }
 }

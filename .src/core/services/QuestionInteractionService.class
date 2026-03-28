@@ -3,26 +3,28 @@
 ' QuestionInteractionService.class
 
 Private $Logger As LoggerPort
-Private $ShouldNotShowAgain As Boolean = False
+' Private $ShouldNotShowAgain As Boolean = False
 Private $Titulo As String = "QuestionInteractionService"
 Private $LogMessage As LogMessage
 
 ' Property ShouldNotShowAgain As Boolean
 
-Public Sub _new(cLogger As LoggerPort)
+Public Sub _new(oLogger As LoggerPort)
   
-  $Logger = cLogger
+  $Logger = oLogger
   
 End
 
 ' Determina si el sistema debe realizar la pregunta al usuario (Regla de Negocio)
-Public Function ShouldAsk(cConfiguration As Configuration, sConfigKey As String) As Boolean
+Public Function ShouldAsk(oConfiguration As Configuration, sConfigKey As String) As Boolean
   
   Select Case sConfigKey
-    Case Constants.DONTSHOWAGAIN_MOVETRASH
-      Return Not cConfiguration.ShouldSkipMoveTrashConfirmation
-    Case Constants.DONTSHOWAGAIN_IMPORT
-      Return Not cConfiguration.ShouldSkipImportConfirmation
+    Case Constants.ASKBEFORE_MOVETRASH
+      Return oConfiguration.ShouldAskBeforeMoveTrash
+    Case Constants.ASKBEFORE_IMPORT
+      Return oConfiguration.ShouldAskBeforeImport
+    Case Constants.ASKBEFORE_LOCK
+      Return oConfiguration.ShouldAskBeforeLock
     Case Else
       Return True ' Por defecto preguntamos si no conocemos la clave
   End Select
@@ -30,18 +32,29 @@ Public Function ShouldAsk(cConfiguration As Configuration, sConfigKey As String)
 End
 
 ' Centraliza la persistencia de la decisión del usuario (DRY)
-Public Sub SaveUserDecision(cConfiguration As Configuration, sConfigKey As String, shouldNotShowAgain As Boolean)
+Public Sub SaveUserDecision(oConfiguration As Configuration, sConfigKey As String, bShouldNotShowAgain As Boolean)
   
-  If Not shouldNotShowAgain Then Return ' Si no marcó el flag, no hacemos nada
+  If Not bShouldNotShowAgain Then Return ' Si no marcó el flag, no hacemos nada
   
   $LogMessage = New LogMessage($Titulo, "SaveUserDecision", "User decided to not show again for: " & sConfigKey)
   $Logger.Info($LogMessage)
   
+  ' Si el usuario marcó "No volver a mostrar", seteamos el ASKBEFORE en False
   Select Case sConfigKey
-    Case Constants.DONTSHOWAGAIN_MOVETRASH
-      cConfiguration.ShouldSkipMoveTrashConfirmation = True
-    Case Constants.DONTSHOWAGAIN_IMPORT
-      cConfiguration.ShouldSkipImportConfirmation = True
+    Case Constants.ASKBEFORE_MOVETRASH
+      oConfiguration.ShouldAskBeforeMoveTrash = False
+    Case Constants.ASKBEFORE_IMPORT
+      oConfiguration.ShouldAskBeforeImport = False
+    Case Constants.ASKBEFORE_LOCK
+      oConfiguration.ShouldAskBeforeLock = False
   End Select
   
 End
+
+' Private Function ShouldNotShowAgain_Read() As Boolean
+'   Return $ShouldNotShowAgain
+' End
+
+' Private Sub ShouldNotShowAgain_Write(Value As Boolean)
+'   $ShouldNotShowAgain = Value
+' End

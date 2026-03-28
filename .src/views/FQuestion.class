@@ -5,10 +5,10 @@ Private $Logger As LoggerPort
 Private $Titulo As String = "FQuestion"
 Private $LogMessage As LogMessage
 
-Public Sub _new(cQuestion As QuestionInteractionService, cLogger As LoggerPort, sTitle As String, sTexto As String)
+Public Sub _new(oQuestion As QuestionInteractionService, oLogger As LoggerPort, sTitle As String, sTexto As String)
     
-  $Question = cQuestion
-  $Logger = cLogger
+  $Question = oQuestion
+  $Logger = oLogger
   
   Me.Text = sTitle
   LabelQuestion.Text = sTexto

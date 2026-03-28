@@ -24,7 +24,7 @@ Public Sub Main()
   $Configuration.InitializeEnvironment()
   
   $PhotoRepository = DataSourceFactory.CreatePhotoRepository($Configuration, $Logger)
-  $FileStorage = DataSourceFactory.CreateFileStorage($Configuration, $Logger)
+  $FileStorage = DataSourceFactory.CreateFileStorage($Configuration)
   
   $PhotoService = New PhotoService($Logger, $PhotoRepository, $Configuration, $FileStorage)
   $AlbumService = New AlbumService($Logger, $PhotoRepository)
@@ -35,7 +35,7 @@ Public Sub Main()
   
 Catch
   $LogMessage = New LogMessage($Titulo, "Main", ("A critical problem was detected and the application will stop: ") & Error.Text)
-  Print $LogMessage.ToText()
+  $Logger.Fatal($LogMessage)
   Message.Error($LogMessage.ToText())
 
 End
