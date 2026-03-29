@@ -115,7 +115,7 @@ Public Sub PictureBoxPhoto_DblClick() '' Handles double click on the photo.
   
   Dim FV As FPhotoViewer
   
-  FV = New FPhotoViewer
+  FV = New FPhotoViewer($PhotoEntity)
   FV.ShowModal()
   
 End
