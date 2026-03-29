@@ -1,2 +1,95 @@
 ' Gambas class file
 
+Private $SelectedPhoto As PhotoEntity
+
+Public Sub _new(oPhoto As PhotoEntity) ' Removed Logger parameter as per user's request.
+  
+  $SelectedPhoto = oPhoto
+  
+End
+
+Public Sub Form_Open()
+  
+  Dim oImage As Image
+  Dim sImagePath As String
+  
+  ' Ensure we have a photo entity to display
+  If $SelectedPhoto = Null Then
+    Message.Error("FPhotoViewer: No PhotoEntity provided.")
+    Me.Close() ' Close the form if image loading fails
+    Return
+  Endif
+  
+  ' Construct the full image path using the directory from ImagePath and the FileName.
+  sImagePath = $SelectedPhoto.ImagePath
+  
+  ' Load the image
+  Try oImage = Image.Load(sImagePath)
+  
+  If Error Then
+    Message.Error("Error loading image: " & $SelectedPhoto.FileName & " - " & Error.Text)
+    Me.Close() ' Close the form if image loading fails
+    Return
+  Endif
+  
+  ' Set the image to the PictureBox named "PictureBoxViewer" as identified from the .form file.
+  ' The PictureBox is set to Expand = True in the .form, so it should fill the form.
+  ' We will display the image as is for now. Zoom/scaling will be a later enhancement.
+  ImageViewPhoto.Image = oImage
+  
+  ' Set window title with image filename and dimensions.
+  Me.Text = "Viewing: " & $SelectedPhoto.FileName & " (" & oImage.Width & "x" & oImage.Height & ")"
+  
+  ' --- START: Image-based form resizing ---
+  ' Calculate and set form dimensions to 70% of the image size
+  Dim oLoadedImage As Image
+  oLoadedImage = ImageViewPhoto.Image
+  
+  If oLoadedImage Then
+    ' Calculate 60% of screen dimensions while maintaining image aspect ratio
+    Dim screenWidth As Integer = Desktop.Width
+    Dim screenHeight As Integer = Desktop.Height
+    Dim targetMaxWidth As Integer = Int(screenWidth * 0.7)
+    Dim targetMaxHeight As Integer = Int(screenHeight * 0.7)
+    
+    Dim scaleFactor As Float
+    Dim NewWidth As Integer
+    Dim NewHeight As Integer
+    
+    ' Ensure image dimensions are valid before calculating scale factor to avoid division by zero
+    If oLoadedImage.Width > 0 And oLoadedImage.Height > 0 Then
+      ' Determine the limiting dimension (width or height) to fit within 60% of screen
+      If (oLoadedImage.Width / screenWidth) > (oLoadedImage.Height / screenHeight) Then ' Width is the limiting factor
+        scaleFactor = targetMaxWidth / oLoadedImage.Width
+      Else ' Height is the limiting factor (or they are equal)
+        scaleFactor = targetMaxHeight / oLoadedImage.Height
+      Endif
+      
+      ' Calculate new dimensions based on the scale factor
+      NewWidth = Int(oLoadedImage.Width * scaleFactor)
+      NewHeight = Int(oLoadedImage.Height * scaleFactor)
+      
+      ' Ensure dimensions are reasonable.
+      If NewWidth > 0 And NewHeight > 0 Then
+        Me.Width = NewWidth
+        Me.Height = NewHeight
+      Else
+        ' Fallback to a default size if calculation is invalid
+        Me.Width = 800 ' Example fallback width
+        Me.Height = 600 ' Example fallback height
+      Endif
+    Else
+      ' Fallback if image has zero or negative dimensions
+      Message.Warning("Image has invalid dimensions for resizing.")
+      Me.Width = 800 ' Example fallback width
+      Me.Height = 600 ' Example fallback height
+    Endif
+  Else
+    ' Fallback if image is somehow null after assignment
+    Message.Warning("Could not get image dimensions for resizing.")
+    Me.Width = 800 ' Example fallback width
+    Me.Height = 600 ' Example fallback height
+  Endif
+  ' --- END: Image-based form resizing ---
+
+End

@@ -3,9 +3,7 @@
 { Form Form
   MoveScaled(0,0,64,64)
   Arrangement = Arrange.Fill
-  { PictureBoxViewer PictureBox
-    MoveScaled(17,16,16,16)
-    Background = Color.Magenta
-    Expand = True
+  { ImageViewPhoto ImageView
+    MoveScaled(13,10,36,36)
   }
 }
