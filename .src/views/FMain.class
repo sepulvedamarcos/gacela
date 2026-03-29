@@ -69,6 +69,7 @@ Public Sub TreeViewFilters_Select() '' Handles filter selection from the tree vi
   
   If sKey Begins "ROOT:" Then
    oSpec = New PhotoSpecification
+   oSpec.IsSoftDeleted = $IsViewingTrash
   Else If sKey Begins "ALB:" Then
     aKeyParts = Split(sKey, ":")
     oSpec.AlbumId = CInt(aKeyParts[1])
@@ -95,7 +96,7 @@ Public Sub TreeViewFilters_Select() '' Handles filter selection from the tree vi
   Endif
   
   $PhotoService.ApplyFilters(oSpec)
-  ReloadGallery()
+  RenderCurrentPhotoFilter()
   
 End
 
@@ -625,8 +626,7 @@ Private Sub ReloadTrash()
   oSpec.IsSoftDeleted = True
   $PhotoService.ApplyFilters(oSpec)
   
-  ClearPhotoGallery()
-  CreatePhotoPanels($PhotoService.LoadFirstPage())
+  RenderCurrentPhotoFilter(False)
   
 End
 
@@ -775,9 +775,18 @@ Private Sub ReloadGallery()
   oSpec.IsSoftDeleted = False
   $PhotoService.ApplyFilters(oSpec)
   
+  RenderCurrentPhotoFilter()
+  
+End
+
+Private Sub RenderCurrentPhotoFilter(Optional bUpdateTrashCount As Boolean = True)
+  
   ClearPhotoGallery()
   CreatePhotoPanels($PhotoService.LoadFirstPage())
-  UpdateTrashCount()
+  
+  If bUpdateTrashCount Then
+    UpdateTrashCount()
+  Endif
   
 End
 
@@ -1200,4 +1209,3 @@ Private Sub ExecuteSharing(bToShared As Boolean)
   ReloadGallery()
   
 End
-
