@@ -1,92 +1,87 @@
-<!-- SPANISH CONTENT -->
-
 # 🦌 Gacela
-Gestor de Álbumes Compartidos En Linux Avanzado
 
-*El gestor de galería que tu familia necesitaba*
+[Español](./README_es.md)
+
+Advanced Shared Album Manager for Linux.
+
+*The gallery manager your family actually needed.*
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Made with Gambas](https://img.shields.io/badge/Made%20with-Gambas-green.svg)](http://gambas.sourceforge.net/)
 [![Platform](https://img.shields.io/badge/Platform-Linux-orange.svg)](https://www.linux.org/)
 
-## ¿Cansado de duplicar fotos por toda tu computadora?
+## Why Gacela?
 
-**Gacela** es el primer gestor de galería diseñado específicamente para **familias y equipos que comparten una computadora Linux**. Olvídate de tener copias de tus fotos dispersas por el sistema - Gacela mantiene tus archivos originales intactos mientras te da acceso instantáneo a toda tu colección.
+**Gacela** is a photo gallery manager built for **families and teams sharing the same Linux computer**. Instead of scattering duplicate files across user folders, Gacela keeps your original images intact while giving fast access to private and shared collections.
 
-### ✨ Lo que hace único a Gacela
+## What makes it different
 
-- **Multiusuario inteligente**: Galerías privadas y compartidas en la misma aplicación a solo un click.
-- **Seguridad Garantizada**: Sistema de **bloqueo de fotos** para proteger tus recuerdos más preciados contra borrados accidentales.
-- **Previews instantáneos**: Miniaturas ultrarrápidas sin esperas gracias a su base de datos optimizada.
-- **Arquitectura de Eventos**: Una interfaz fluida y desacoplada que responde al instante a tus acciones.
-- **Súper liviano**: Arranca en segundos, consume mínimos recursos de sistema.
+- **Smart multi-user workflow**: switch between private and shared galleries from the same app.
+- **Safer photo management**: photo locking helps prevent accidental deletions.
+- **Fast previews**: thumbnails are optimized for quick browsing.
+- **Event-driven UI**: a responsive interface coordinated through internal services.
+- **Lightweight desktop app**: fast startup and low resource usage.
 
-## 🚀 ¿Por qué elegir Gacela?
+## Why choose Gacela instead of other tools?
 
-### El problema con otros gestores
+### Common problems with traditional gallery software
 
-- **digiKam**: Potente pero pesado, replica archivos, complejo para uso familiar.
-- **Shotwell**: Básico, sin multiusuario real.
-- **Otros**: O muy simples o muy complicados.
+- Some tools are powerful but heavy.
+- Others are simple but do not handle shared usage well.
+- Many duplicate or reorganize files in ways that do not fit a family workflow.
 
-### La solución Gacela
+### Gacela's approach
 
-- Tus fotos no se pierden, se gestionan de forma inteligente.
-- Cada usuario ve lo suyo y lo compartido cambiando el entorno.
-- **Confirmaciones Positivas**: La aplicación siempre te preguntará antes de realizar acciones críticas, dándote el control total.
-- Un solo lugar para toda la familia, sin duplicar archivos en disco.
+- Your original photos remain yours.
+- Private and shared environments are separated clearly.
+- The app favors confirmation before critical actions.
+- A single gallery workflow can serve a whole household or small team.
 
-## 🏗️ Arquitectura de Vanguardia
+## Architecture highlights
 
-Gacela no es solo un programa de fotos; es un sistema diseñado bajo principios de ingeniería modernos:
+Gacela is designed with pragmatic engineering principles:
 
-- **Clean Architecture**: Separación estricta entre lógica de negocio e infraestructura (SQLite, Filesystem).
-- **Mediator Pattern**: Un cerebro centralizado (`PhotoSelectionService`) que coordina la sincronización de toda la UI.
-- **Thumbnails binarios**: Previsualizaciones almacenadas en la base de datos para máxima velocidad de carga.
-- **UI Desacoplada**: Componentes inteligentes (`FPhoto`) que se comunican mediante eventos.
+- **Clean Architecture**: separation between business logic and infrastructure.
+- **Mediator pattern**: UI coordination is centralized through services such as `PhotoSelectionService`.
+- **SQLite-backed metadata**: fast local access to gallery data.
+- **Binary thumbnails**: quick preview loading from the database.
+- **Decoupled UI components**: forms and services collaborate without excessive coupling.
 
-### Beneficios de esta arquitectura
+## Main features
 
-- **Velocidad**: Previews desde memoria, sin acceso a disco
-- **Integridad**: Tus archivos originales intactos
+### For families
 
-## 📋 Características principales
+- **Private spaces per user**
+- **Shared albums for household memories**
 
-### Para familias
-- **Perfiles por usuario**: Cada miembro tiene su espacio privado
-- **Álbumes compartidos**: Fotos familiares visibles para todos
+### For power users
 
-### Para power users  
-- **Importación inteligente**: Detecta duplicados por huella digital, organiza automáticamente
-- **Base de datos SQLite**: Acceso directo para consultas avanzadas
-- **Sin vendor lock-in**: Tus fotos siguen siendo tuyas y accesibles
+- **Smart import flow**
+- **SQLite-based storage**
+- **No vendor lock-in**
 
-## 🖥️ Capturas de pantalla
+## Use cases
 
-*[Screenshots placeholder ]*
+- Families sharing one Linux desktop
+- Small offices with collaborative photo archives
+- Home servers or NAS-like gallery setups
+- Community or group photography projects
 
+## Screenshots
 
+*Screenshots placeholder*
 
-## 🎯 Casos de uso perfectos
+## Contributing
 
-- **Familias**: Computadora compartida con fotos de todos
-- **Pequeñas oficinas**: Archivo fotográfico colaborativo
-- **Servidores caseros**: NAS con acceso multiusuario
-- **Colectivos**: Proyectos fotográficos grupales
+Contributions are welcome, whether you are reporting bugs, suggesting improvements, or sending code.
 
-## 🤝 Contribuir
+1. Fork the repository
+2. Create a branch (`git checkout -b feature/my-change`)
+3. Commit your changes
+4. Push your branch
+5. Open a Pull Request
 
-¡Las contribuciones son bienvenidas! Ya sea reportando bugs, sugiriendo funcionalidades o enviando código.
-
-1. Has un **Fork** del proyecto
-2. Crea tu branch (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Agrega nueva funcionalidad'`)
-4. Push al branch (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
-
----
-
-### 👥 Conectemos
+## Contact
 
 <p align="center">
   <a href="https://www.linkedin.com/in/sepulvedamarcos">
@@ -96,18 +91,10 @@ Gacela no es solo un programa de fotos; es un sistema diseñado bajo principios 
     <img src="https://img.shields.io/badge/Email-sepulvedamarcos%40gmail.com-red?logo=gmail&logoColor=white" />
   </a>
   <a href="https://ko-fi.com/sepulvedamarcos">
-    <img src="https://img.shields.io/badge/Ko--fi-Apoyar%20con%20un%20caf%C3%A9-ff5e5b?logo=kofi&logoColor=white" />
+    <img src="https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-ff5e5b?logo=kofi&logoColor=white" />
   </a>
 </p>
 
 ---
 
-**¿Te gusta Gacela?**
-
-⭐ Dale una estrella al repo y cuéntanos tu experiencia 
-
----
-
-<p align="center">
-  <i>"Una aplicación no debería obligarte a reorganizar tu vida digital. Debería adaptarse a como ya trabajas."</i>
-</p>
+If you like Gacela, consider starring the repository.
