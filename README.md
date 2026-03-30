@@ -1,6 +1,6 @@
 # 🦌 Gacela
 
-[Español](./README_es.md)
+[Español](./readme-es.md)
 
 Advanced Shared Album Manager for Linux.
 
