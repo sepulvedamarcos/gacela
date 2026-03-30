@@ -97,4 +97,4 @@ Contributions are welcome, whether you are reporting bugs, suggesting improvemen
 
 ---
 
-If you like Gacela, consider starring the repository.
+If you like, consider starring the repository.
