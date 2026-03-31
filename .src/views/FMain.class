@@ -669,7 +669,7 @@ Private Sub CreatePhotoPanels(aPhotos As PhotoEntity[])
   $Logger.Info($LogMessage)
   
   For Each cPhoto As PhotoEntity In aPhotos
-    oFPhoto = New FPhoto($PhotoSelectionService, cPhoto, $IsViewingTrash, PanelGalleryContent)
+    oFPhoto = New FPhoto($PhotoSelectionService, cPhoto, $IsViewingTrash, $PhotoService, $AlbumService, $TagService, $Logger, PanelGalleryContent)
     For i = 1 To $Amplifier
       oFPhoto.ResizeScaledForm(1)
     Next

@@ -26,6 +26,14 @@ Public Function FindAlbums(Optional sText As String, Optional iId As Integer = 0
   
 End
 
+Public Function FindAlbumsByPhoto(iPhotoId As Integer) As AlbumEntity[] '' Retrieves albums associated to a photo.
+  
+  If iPhotoId <= 0 Then Return New AlbumEntity[]
+  
+  Return $PhotoRepository.FindAlbumsByPhoto(iPhotoId)
+  
+End
+
 Public Function AddAlbum(sName As String, sDescription As String) As Boolean ''Method to add a new album
   
   Dim oAlbum As New AlbumEntity

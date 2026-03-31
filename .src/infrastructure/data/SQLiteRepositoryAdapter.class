@@ -119,6 +119,28 @@ Catch
   
 End
 
+Public Function FindPhotoById(iId As Integer) As PhotoEntity '' Retrieves a single photo with all persisted detail fields.
+  
+  Dim oResult As Result
+  Dim aPhotos As PhotoEntity[]
+  
+  If iId <= 0 Then Return Null
+  
+  oResult = $DbContext.DBConnection.Exec("SELECT * FROM " & SQLiteRepositoryAdapter.TABLE_PHOTOS & " WHERE photo_id = &1 LIMIT 1", iId)
+  If Not oResult.Available Then Return Null
+  
+  aPhotos = MapResultToEntities(oResult)
+  If aPhotos.Count = 0 Then Return Null
+  
+  Return aPhotos[0]
+  
+Catch
+  $LogMessage = New LogMessage($Titulo, "FindPhotoById", "Problem retrieving photo detail: " & Error.Text)
+  $Logger.Error($LogMessage)
+  Return Null
+  
+End
+
 Public Function CountWithFilters(oSpec As PhotoSpecification) As Integer '' Count records in the photos table
   
   Dim oResult As Result
@@ -492,6 +514,16 @@ Public Function FindAlbums(Optional sText As String, Optional iId As Integer = 0
   Return MapAlbumEntitys($DbContext.DBConnection.Exec(sQuery))
 End
 
+Public Function FindAlbumsByPhoto(iPhotoId As Integer) As AlbumEntity[] '' Retrieves albums linked to the specified photo.
+  Dim sQuery As String
+  
+  If iPhotoId <= 0 Then Return New AlbumEntity[]
+  
+  sQuery = "SELECT a.*, COUNT(pa2.photo_id) AS photo_count FROM " & SQLiteRepositoryAdapter.TABLE_ALBUMS & " AS a " & "INNER JOIN " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " AS pa ON pa.album_id = a.album_id " & "LEFT JOIN " & SQLiteRepositoryAdapter.TABLE_PHOTOS_ALBUMS & " AS pa2 ON pa2.album_id = a.album_id " & "WHERE pa.photo_id = " & $DbContext.DBConnection.Quote(iPhotoId) & " AND a.soft_delete = 0 GROUP BY a.album_id ORDER BY LOWER(a.name)"
+  
+  Return MapAlbumEntitys($DbContext.DBConnection.Exec(sQuery))
+End
+
 Public Function FindTags(Optional sText As String, Optional iId As Integer = 0) As TagEntity[] '' Retrieves tags.
   Dim sQuery As String = "SELECT t.*, COUNT(pt.photo_id) AS photo_count FROM " & SQLiteRepositoryAdapter.TABLE_TAGS & " AS t LEFT JOIN " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " AS pt ON pt.tag_id = t.tag_id"
   Dim sCon As String = " WHERE "
@@ -501,6 +533,16 @@ Public Function FindTags(Optional sText As String, Optional iId As Integer = 0) 
   Endif
   If sText <> "" Then sQuery &= sCon & " LOWER(t.name) LIKE " & $DbContext.DBConnection.Quote("%" & Lower(sText) & "%")
   sQuery &= " GROUP BY t.tag_id ORDER BY LOWER(t.name)"
+  Return MapTagEntitys($DbContext.DBConnection.Exec(sQuery))
+End
+
+Public Function FindTagsByPhoto(iPhotoId As Integer) As TagEntity[] '' Retrieves tags linked to the specified photo.
+  Dim sQuery As String
+  
+  If iPhotoId <= 0 Then Return New TagEntity[]
+  
+  sQuery = "SELECT t.*, COUNT(pt2.photo_id) AS photo_count FROM " & SQLiteRepositoryAdapter.TABLE_TAGS & " AS t " & "INNER JOIN " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " AS pt ON pt.tag_id = t.tag_id " & "LEFT JOIN " & SQLiteRepositoryAdapter.TABLE_PHOTOS_TAGS & " AS pt2 ON pt2.tag_id = t.tag_id " & "WHERE pt.photo_id = " & $DbContext.DBConnection.Quote(iPhotoId) & " GROUP BY t.tag_id ORDER BY LOWER(t.name)"
+  
   Return MapTagEntitys($DbContext.DBConnection.Exec(sQuery))
 End
 
@@ -611,7 +653,12 @@ Private Function MapResultToEntities(oResult As Result) As PhotoEntity[]
     cPhoto.Hash256 = oResult["Hash256"]
     cPhoto.Thumbnail = oResult["thumbnail"]
     cPhoto.IsSoftDeleted = oResult["soft_delete"]
+    cPhoto.SoftDeleteDate = oResult["soft_deleted_date"]
+    cPhoto.SoftDeleteBy = oResult["soft_deleted_by"]
     cPhoto.IsLocked = oResult["is_locked"]
+    cPhoto.LockedBy = oResult["locked_by"]
+    cPhoto.LockedDate = oResult["locked_date"]
+    cPhoto.LockedReason = oResult["lock_reason"]
     oPhotos.Add(cPhoto)
   Next
   Return oPhotos
@@ -624,6 +671,7 @@ Private Sub MapAlbumEntitys(oResult As Result) As AlbumEntity[]
     cAlbum = New AlbumEntity
     cAlbum.Id = oResult["album_id"]
     cAlbum.Name = oResult["name"]
+    cAlbum.Description = oResult["description"]
     cAlbum.IsSoftDeleted = oResult["soft_delete"]
     cAlbum.PhotoCount = oResult["photo_count"]
     oAlbums.Add(cAlbum)

@@ -3,11 +3,11 @@
 ' QuestionInteractionService.class
 
 Private $Logger As LoggerPort
-' Private $ShouldNotShowAgain As Boolean = False
+Private $ShouldNotShowAgain As Boolean = False
 Private $Titulo As String = "QuestionInteractionService"
 Private $LogMessage As LogMessage
 
-' Property ShouldNotShowAgain As Boolean
+Property ShouldNotShowAgain As Boolean
 
 Public Sub _new(oLogger As LoggerPort)
   
@@ -51,10 +51,10 @@ Public Sub SaveUserDecision(oConfiguration As Configuration, sConfigKey As Strin
   
 End
 
-' Private Function ShouldNotShowAgain_Read() As Boolean
-'   Return $ShouldNotShowAgain
-' End
+Private Function ShouldNotShowAgain_Read() As Boolean
+  Return $ShouldNotShowAgain
+End
 
-' Private Sub ShouldNotShowAgain_Write(Value As Boolean)
-'   $ShouldNotShowAgain = Value
-' End
+Private Sub ShouldNotShowAgain_Write(bShouldNotShowAgain As Boolean)
+  $ShouldNotShowAgain = bShouldNotShowAgain
+End

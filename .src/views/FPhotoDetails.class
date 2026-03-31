@@ -1,2 +1,581 @@
 ' Gambas class file
 
+Private $OriginalPhoto As PhotoEntity
+Private $PhotoDetail As PhotoEntity
+Private $PhotoService As PhotoService
+Private $AlbumService As AlbumService
+Private $TagService As TagService
+Private $Logger As LoggerPort
+Private $IsBindingDescription As Boolean
+Private $CurrentAlbums As AlbumEntity[]
+Private $CurrentTags As TagEntity[]
+Private $OriginalAlbumIds As Integer[]
+Private $OriginalTagIds As Integer[]
+
+Public Sub _new(oPhoto As PhotoEntity, oPhotoService As PhotoService, oAlbumService As AlbumService, oTagService As TagService, oLogger As LoggerPort)
+  
+  $OriginalPhoto = oPhoto
+  $PhotoService = oPhotoService
+  $AlbumService = oAlbumService
+  $TagService = oTagService
+  $Logger = oLogger
+  
+End
+
+Public Sub Form_Open()
+  
+  InitializeTables()
+  ReloadDetails()
+  
+End
+
+Public Sub ButtonAccept_Click()
+
+  SaveChanges()
+
+End
+
+Public Sub ButtonExit_Click()
+
+  If Not ConfirmCloseIfPendingChanges() Then Return
+  Me.Close()
+
+End
+
+Public Sub ButtonAddAlbum_Click()
+  
+  Dim oDialog As FAlbumSelection
+  Dim oSelection As AlbumSelectionService
+  
+  If $PhotoDetail = Null Then Return
+  
+  oSelection = New AlbumSelectionService
+  oDialog = New FAlbumSelection($AlbumService, $Logger, oSelection, Enumeration.ALBUM_ADD_ACTION, Null, False)
+  If oDialog.ShowModal() <> Enumeration.DLG_OK Then Return
+  
+  For Each oAlbum As AlbumEntity In oSelection.GetSelectedAlbumEntities()
+    AddAlbumToCurrentList(oAlbum)
+  Next
+  
+  BindAlbums($CurrentAlbums)
+  UpdateSaveButtonState()
+  
+End
+
+Public Sub ButtonRemoveAlbum_Click()
+  
+  If $PhotoDetail = Null Then Return
+  If $CurrentAlbums = Null Then Return
+  
+  If RemoveSelectedAlbums() Then
+    BindAlbums($CurrentAlbums)
+    UpdateSaveButtonState()
+  Else
+    Message.Warning(("You must select at least one album"))
+  Endif
+  
+End
+
+Public Sub ButtonAddTag_Click()
+  
+  Dim oDialog As FTagSelection
+  Dim oSelection As TagSelectionService
+  Dim aSelectedTagIds As Integer[]
+  
+  If $PhotoDetail = Null Then Return
+  
+  oSelection = New TagSelectionService
+  oDialog = New FTagSelection($TagService, $Logger, oSelection, Enumeration.TAG_ADD_ACTION)
+  If oDialog.ShowModal() <> Enumeration.DLG_OK Then Return
+  
+  aSelectedTagIds = oSelection.GetSelectedIds()
+  AddTagsToCurrentList(aSelectedTagIds)
+  BindTags($CurrentTags)
+  UpdateSaveButtonState()
+  
+End
+
+Public Sub ButtonRemoveTag_Click()
+  
+  If $PhotoDetail = Null Then Return
+  If $CurrentTags = Null Then Return
+  
+  If RemoveSelectedTags() Then
+    BindTags($CurrentTags)
+    UpdateSaveButtonState()
+  Else
+    Message.Warning(("You must select at least one tag"))
+  Endif
+  
+End
+
+' =============================================================================
+'
+'          Private methods
+'
+' =============================================================================
+
+Private Sub InitializeTables()
+  
+  With TableViewAlbums
+    .Columns.Count = 2
+    .Rows.Count = 0
+    .Header = GridView.Horizontal
+    .Columns[0].Text = ("Album")
+    .Columns[0].Expand = True
+    .Columns[1].Text = ("Photos")
+    .Columns[1].Alignment = Align.Right
+    .Columns[1].Width = 55
+  End With
+  
+  With TableViewTags
+    .Columns.Count = 3
+    .Rows.Count = 0
+    .Header = GridView.Horizontal
+    .Columns[0].Text = ("Tag")
+    .Columns[0].Expand = True
+    .Columns[1].Text = ("Color")
+    .Columns[1].Width = 70
+    .Columns[2].Text = ("Photos")
+    .Columns[2].Alignment = Align.Right
+    .Columns[2].Width = 55
+  End With
+  
+End
+
+Private Sub ReloadDetails()
+  
+  Dim oPhoto As PhotoEntity
+  Dim aAlbums As AlbumEntity[]
+  Dim aTags As TagEntity[]
+  
+  If $OriginalPhoto = Null Then
+    Message.Error(("No photo selected"))
+    Me.Close()
+    Return
+  Endif
+  
+  oPhoto = LoadPhotoDetail()
+  If oPhoto = Null Then
+    Message.Error(("Could not load photo details"))
+    Return
+  Endif
+  
+  aAlbums = $AlbumService.FindAlbumsByPhoto(oPhoto.Id)
+  aTags = $TagService.FindTagsByPhoto(oPhoto.Id)
+  
+  $PhotoDetail = oPhoto
+  $CurrentAlbums = CloneAlbums(aAlbums)
+  $CurrentTags = CloneTags(aTags)
+  $OriginalAlbumIds = ExtractAlbumIds(aAlbums)
+  $OriginalTagIds = ExtractTagIds(aTags)
+  
+  BindPhoto(oPhoto)
+  BindAlbums($CurrentAlbums)
+  BindTags($CurrentTags)
+  SyncOriginalPhoto(oPhoto)
+  
+End
+
+Private Function LoadPhotoDetail() As PhotoEntity
+  
+  If $PhotoService = Null Then Return $OriginalPhoto
+  
+  Return $PhotoService.FindPhotoById($OriginalPhoto.Id)
+  
+End
+
+Private Sub BindPhoto(oPhoto As PhotoEntity)
+  
+  Me.Text = ("Photo details") & " - " & oPhoto.FileName
+  TextBoxName.Text = oPhoto.FileName
+  $IsBindingDescription = True
+  TextAreaDescription.Text = NzText(oPhoto.Description)
+  $IsBindingDescription = False
+  ValueBoxImportDate.Value = oPhoto.ImportDate
+  TextBoxImportUser.Text = NzText(oPhoto.ImportUser)
+  LabelStarsValue.Text = BuildStars(oPhoto.Stars)
+  
+  SwitchButtonLock.Value = oPhoto.IsLocked
+  TextBoxLockedBy.Text = NzText(oPhoto.LockedBy)
+  ValueBoxLockedDate.Value = oPhoto.LockedDate
+  TextAreaLockReason.Text = NzText(oPhoto.LockedReason)
+  
+  SwitchButtonTrash.Value = oPhoto.IsSoftDeleted
+  TextBoxSoftDeleteBy.Text = NzText(oPhoto.SoftDeleteBy)
+  ValueBoxSoftDeleteDate.Value = oPhoto.SoftDeleteDate
+  TextAreaSoftDeleteReason.Text = BuildSoftDeleteReason(oPhoto)
+  UpdateSaveButtonState()
+  
+End
+
+Private Sub BindAlbums(aAlbums As AlbumEntity[])
+  
+  Dim iRow As Integer
+  
+  TableViewAlbums.Rows.Count = 0
+  If aAlbums = Null Then
+    TableViewAlbums.Tag = New AlbumEntity[]
+    Return
+  Endif
+  
+  For Each oAlbum As AlbumEntity In aAlbums
+    iRow = TableViewAlbums.Rows.Count
+    TableViewAlbums.Rows.Count += 1
+    TableViewAlbums[iRow, 0].Text = Trim(oAlbum.Name)
+    TableViewAlbums[iRow, 1].Text = Str(oAlbum.PhotoCount)
+  Next
+  
+  TableViewAlbums.Tag = aAlbums
+  
+End
+
+Private Sub BindTags(aTags As TagEntity[])
+  
+  Dim iRow As Integer
+  
+  TableViewTags.Rows.Count = 0
+  If aTags = Null Then
+    TableViewTags.Tag = New TagEntity[]
+    Return
+  Endif
+  
+  For Each oTag As TagEntity In aTags
+    iRow = TableViewTags.Rows.Count
+    TableViewTags.Rows.Count += 1
+    TableViewTags[iRow, 0].Text = Trim(oTag.Name)
+    TableViewTags[iRow, 1].Text = Trim(oTag.Color)
+    TableViewTags[iRow, 2].Text = Str(oTag.PhotoCount)
+  Next
+  
+  TableViewTags.Tag = aTags
+  
+End
+
+Public Sub TextAreaDescription_Change()
+
+  If $IsBindingDescription Then Return
+  UpdateSaveButtonState()
+
+End
+
+Private Function ConfirmCloseIfPendingChanges() As Boolean
+  
+  If Not HasPendingChanges() Then Return True
+  
+  Return Message.Question(("There are unsaved changes. Do you want to close without saving?"), ("Close without saving"), ("Keep editing")) = 1
+  
+End
+
+Private Sub SaveChanges()
+  
+  Dim sNewDescription As String
+  Dim aCurrentAlbumIds As Integer[]
+  Dim aCurrentTagIds As Integer[]
+  Dim aPhotoIds As New Integer[]
+  Dim aAlbumIdsToAdd As Integer[]
+  Dim aAlbumIdsToRemove As Integer[]
+  Dim aTagIdsToAdd As Integer[]
+  Dim aTagIdsToRemove As Integer[]
+  
+  If $PhotoDetail = Null Then Return
+  If Not HasPendingChanges() Then Return
+  
+  sNewDescription = NormalizeDescription(TextAreaDescription.Text)
+  $PhotoDetail.Description = sNewDescription
+  
+  If Not $PhotoService.UpdatePhoto($PhotoDetail) Then
+    Message.Error(("Could not save photo description"))
+    Return
+  Endif
+  
+  aCurrentAlbumIds = ExtractAlbumIds($CurrentAlbums)
+  aCurrentTagIds = ExtractTagIds($CurrentTags)
+  aAlbumIdsToAdd = GetIdsToAdd($OriginalAlbumIds, aCurrentAlbumIds)
+  aAlbumIdsToRemove = GetIdsToRemove($OriginalAlbumIds, aCurrentAlbumIds)
+  aTagIdsToAdd = GetIdsToAdd($OriginalTagIds, aCurrentTagIds)
+  aTagIdsToRemove = GetIdsToRemove($OriginalTagIds, aCurrentTagIds)
+  
+  aPhotoIds.Add($PhotoDetail.Id)
+  
+  If aAlbumIdsToAdd.Count > 0 Then $AlbumService.AddPhotosToAlbums(aPhotoIds, aAlbumIdsToAdd)
+  If aAlbumIdsToRemove.Count > 0 Then $AlbumService.RemovePhotosFromAlbums(aPhotoIds, aAlbumIdsToRemove)
+  If aTagIdsToAdd.Count > 0 Then $TagService.AddPhotosToTags(aPhotoIds, aTagIdsToAdd)
+  If aTagIdsToRemove.Count > 0 Then $TagService.RemovePhotosFromTags(aPhotoIds, aTagIdsToRemove)
+  
+  ReloadDetails()
+  Message.Info(("Photo details updated"))
+  
+End
+
+Private Sub UpdateSaveButtonState()
+  
+  ButtonAccept.Enabled = HasPendingChanges()
+  
+End
+
+Private Function HasPendingChanges() As Boolean
+  
+  If $PhotoDetail = Null Then Return False
+  If NormalizeDescription(TextAreaDescription.Text) <> NzText($PhotoDetail.Description) Then Return True
+  If Not SameIdSet($OriginalAlbumIds, ExtractAlbumIds($CurrentAlbums)) Then Return True
+  If Not SameIdSet($OriginalTagIds, ExtractTagIds($CurrentTags)) Then Return True
+  
+  Return False
+  
+End
+
+Private Sub AddAlbumToCurrentList(oAlbum As AlbumEntity)
+  
+  If oAlbum = Null Then Return
+  If $CurrentAlbums = Null Then $CurrentAlbums = New AlbumEntity[]
+  If ContainsAlbumId($CurrentAlbums, oAlbum.Id) Then Return
+  
+  $CurrentAlbums.Add(oAlbum)
+  
+End
+
+Private Function RemoveSelectedAlbums() As Boolean
+  
+  Dim aAlbums As AlbumEntity[]
+  Dim aRemaining As New AlbumEntity[]
+  Dim iRow As Integer
+  Dim bRemoved As Boolean
+  
+  aAlbums = TableViewAlbums.Tag
+  If aAlbums = Null Then Return False
+  
+  For iRow = 0 To TableViewAlbums.Rows.Count - 1
+    If TableViewAlbums.Rows[iRow].Selected Then
+      bRemoved = True
+    Else
+      aRemaining.Add(aAlbums[iRow])
+    Endif
+  Next
+  
+  If Not bRemoved Then Return False
+  $CurrentAlbums = aRemaining
+  Return True
+  
+End
+
+Private Sub AddTagsToCurrentList(aSelectedTagIds As Integer[])
+  
+  Dim aExistingIds As Integer[]
+  Dim aAllTags As TagEntity[]
+  
+  If aSelectedTagIds = Null Then Return
+  If aSelectedTagIds.Count = 0 Then Return
+  
+  aExistingIds = ExtractTagIds($CurrentTags)
+  aAllTags = $TagService.FindTags()
+  If aAllTags = Null Then Return
+  
+  For Each oTag As TagEntity In aAllTags
+    If ContainsInteger(aSelectedTagIds, oTag.Id) And Not ContainsInteger(aExistingIds, oTag.Id) Then
+      If $CurrentTags = Null Then $CurrentTags = New TagEntity[]
+      $CurrentTags.Add(oTag)
+    Endif
+  Next
+  
+End
+
+Private Function RemoveSelectedTags() As Boolean
+  
+  Dim aTags As TagEntity[]
+  Dim aRemaining As New TagEntity[]
+  Dim iRow As Integer
+  Dim bRemoved As Boolean
+  
+  aTags = TableViewTags.Tag
+  If aTags = Null Then Return False
+  
+  For iRow = 0 To TableViewTags.Rows.Count - 1
+    If TableViewTags.Rows[iRow].Selected Then
+      bRemoved = True
+    Else
+      aRemaining.Add(aTags[iRow])
+    Endif
+  Next
+  
+  If Not bRemoved Then Return False
+  $CurrentTags = aRemaining
+  Return True
+  
+End
+
+Private Function CloneAlbums(aAlbums As AlbumEntity[]) As AlbumEntity[]
+  
+  Dim aCopy As New AlbumEntity[]
+  
+  If aAlbums = Null Then Return aCopy
+  For Each oAlbum As AlbumEntity In aAlbums
+    aCopy.Add(oAlbum)
+  Next
+  
+  Return aCopy
+  
+End
+
+Private Function CloneTags(aTags As TagEntity[]) As TagEntity[]
+  
+  Dim aCopy As New TagEntity[]
+  
+  If aTags = Null Then Return aCopy
+  For Each oTag As TagEntity In aTags
+    aCopy.Add(oTag)
+  Next
+  
+  Return aCopy
+  
+End
+
+Private Function ExtractAlbumIds(aAlbums As AlbumEntity[]) As Integer[]
+  
+  Dim aIds As New Integer[]
+  
+  If aAlbums = Null Then Return aIds
+  For Each oAlbum As AlbumEntity In aAlbums
+    aIds.Add(oAlbum.Id)
+  Next
+  
+  Return aIds
+  
+End
+
+Private Function ExtractTagIds(aTags As TagEntity[]) As Integer[]
+  
+  Dim aIds As New Integer[]
+  
+  If aTags = Null Then Return aIds
+  For Each oTag As TagEntity In aTags
+    aIds.Add(oTag.Id)
+  Next
+  
+  Return aIds
+  
+End
+
+Private Function GetIdsToAdd(aOriginalIds As Integer[], aCurrentIds As Integer[]) As Integer[]
+  
+  Dim aIds As New Integer[]
+  
+  For Each iId As Integer In aCurrentIds
+    If Not ContainsInteger(aOriginalIds, iId) Then aIds.Add(iId)
+  Next
+  
+  Return aIds
+  
+End
+
+Private Function GetIdsToRemove(aOriginalIds As Integer[], aCurrentIds As Integer[]) As Integer[]
+  
+  Dim aIds As New Integer[]
+  
+  For Each iId As Integer In aOriginalIds
+    If Not ContainsInteger(aCurrentIds, iId) Then aIds.Add(iId)
+  Next
+  
+  Return aIds
+  
+End
+
+Private Function SameIdSet(aFirstIds As Integer[], aSecondIds As Integer[]) As Boolean
+  
+  If aFirstIds.Count <> aSecondIds.Count Then Return False
+  
+  For Each iId As Integer In aFirstIds
+    If Not ContainsInteger(aSecondIds, iId) Then Return False
+  Next
+  
+  Return True
+  
+End
+
+Private Function ContainsAlbumId(aAlbums As AlbumEntity[], iAlbumId As Integer) As Boolean
+  
+  If aAlbums = Null Then Return False
+  For Each oAlbum As AlbumEntity In aAlbums
+    If oAlbum.Id = iAlbumId Then Return True
+  Next
+  
+  Return False
+  
+End
+
+Private Function ContainsInteger(aIds As Integer[], iValue As Integer) As Boolean
+  
+  If aIds = Null Then Return False
+  For Each iId As Integer In aIds
+    If iId = iValue Then Return True
+  Next
+  
+  Return False
+  
+End
+
+Private Function BuildStars(iStars As Integer) As String
+  
+  Dim iIndex As Integer
+  Dim sStars As String
+  
+  If iStars < 0 Then iStars = 0
+  If iStars > 5 Then iStars = 5
+  
+  For iIndex = 1 To 5
+    If iIndex <= iStars Then
+      sStars &= "★"
+    Else
+      sStars &= "☆"
+    Endif
+  Next
+  
+  Return sStars
+  
+End
+
+Private Function BuildSoftDeleteReason(oPhoto As PhotoEntity) As String
+  
+  If Not oPhoto.IsSoftDeleted Then Return ""
+  
+  If oPhoto.SoftDeleteDate <> Null Then
+    Return ("Moved to trash on ") & CStr(oPhoto.SoftDeleteDate)
+  Endif
+  
+  Return ("Photo currently in trash")
+  
+End
+
+Private Function NormalizeDescription(sValue As String) As String
+  
+  If sValue = Null Then Return ""
+  Return Trim(sValue)
+  
+End
+
+Private Function NzText(sValue As String) As String
+  
+  If sValue = Null Then Return ""
+  
+  Return Trim(sValue)
+  
+End
+
+Private Sub SyncOriginalPhoto(oPhoto As PhotoEntity)
+  
+  If $OriginalPhoto = Null Or oPhoto = Null Then Return
+  
+  $OriginalPhoto.FileName = oPhoto.FileName
+  $OriginalPhoto.Description = oPhoto.Description
+  $OriginalPhoto.ImportDate = oPhoto.ImportDate
+  $OriginalPhoto.ImportUser = oPhoto.ImportUser
+  $OriginalPhoto.Stars = oPhoto.Stars
+  $OriginalPhoto.IsSoftDeleted = oPhoto.IsSoftDeleted
+  $OriginalPhoto.SoftDeleteDate = oPhoto.SoftDeleteDate
+  $OriginalPhoto.SoftDeleteBy = oPhoto.SoftDeleteBy
+  $OriginalPhoto.IsLocked = oPhoto.IsLocked
+  $OriginalPhoto.LockedBy = oPhoto.LockedBy
+  $OriginalPhoto.LockedDate = oPhoto.LockedDate
+  $OriginalPhoto.LockedReason = oPhoto.LockedReason
+  
+End
