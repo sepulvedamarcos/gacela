@@ -5,17 +5,25 @@ Private $PhotoId As Integer
 Private $SelectionService As PhotoSelectionService
 Private $PhotoEntity As PhotoEntity
 Private $IsTrashView As Boolean
+Private $PhotoService As PhotoService
+Private $AlbumService As AlbumService
+Private $TagService As TagService
+Private $Logger As LoggerPort
 
 Property Read PhotoId As Integer
 Property Read IsSelected As Boolean
 Property Read PhotoEntity As PhotoEntity
 
-Public Sub _new(oSelectionService As PhotoSelectionService, oPhoto As PhotoEntity, bIsTrashView As Boolean) '' Initializes the photo component with its entity and selection service.
+Public Sub _new(oSelectionService As PhotoSelectionService, oPhoto As PhotoEntity, bIsTrashView As Boolean, oPhotoService As PhotoService, oAlbumService As AlbumService, oTagService As TagService, oLogger As LoggerPort) '' Initializes the photo component with its entity and selection service.
   
   $SelectionService = oSelectionService
   $PhotoEntity = oPhoto
   $PhotoId = oPhoto.Id
   $IsTrashView = bIsTrashView
+  $PhotoService = oPhotoService
+  $AlbumService = oAlbumService
+  $TagService = oTagService
+  $Logger = oLogger
   
   Me.Width = 160
   Me.Height = 100
@@ -44,6 +52,7 @@ Public Sub _new(oSelectionService As PhotoSelectionService, oPhoto As PhotoEntit
   PictureBoxPhoto.Padding = 8
   
   If oPhoto.IsLocked Then ButtonLock.Picture = Picture["icon:/16/lock"]
+  UpdateTooltip()
   
 End
 
@@ -58,7 +67,10 @@ Public Sub Form_Enter() '' Handles mouse hover entry.
     ButtonDelete.Visible = True
     ButtonDelete.Raise()
     ButtonLock.Visible = False
+    ButtonDetails.Visible = False
   Else
+    ButtonDetails.Visible = True
+    ButtonDetails.Raise()
     ButtonLock.Visible = True
     ButtonLock.Raise()
     ButtonDelete.Visible = False
@@ -71,6 +83,7 @@ Public Sub Form_Leave() '' Handles mouse hover exit.
   ButtonSeleccionar.Visible = False
   PictureBoxPhoto.Border = Border.None
   
+  ButtonDetails.Visible = False
   ButtonLock.Visible = False
   ButtonDelete.Visible = False
 
@@ -144,6 +157,16 @@ Public Sub ButtonLock_Click()
   
 End
 
+Public Sub ButtonDetails_Click()
+
+  Dim oDialog As FPhotoDetails
+
+  oDialog = New FPhotoDetails($PhotoEntity, $PhotoService, $AlbumService, $TagService, $Logger)
+  oDialog.ShowModal()
+  RefreshTileVisuals()
+
+End
+
 
 ' =============================================================================
 '
@@ -179,3 +202,49 @@ Private Sub RefreshSelectionVisual()
   
 End
 
+Private Sub RefreshTileVisuals()
+  
+  Dim oUpdatedPhoto As PhotoEntity
+  
+  If $PhotoService = Null Then Return
+  
+  oUpdatedPhoto = $PhotoService.FindPhotoById($PhotoEntity.Id)
+  If oUpdatedPhoto = Null Then Return
+  
+  $PhotoEntity = oUpdatedPhoto
+  
+  If oUpdatedPhoto.IsLocked Then
+    ButtonLock.Picture = Picture["icon:/16/lock"]
+  Else
+    ButtonLock.Picture = Picture["icon:/16/unlock"]
+  Endif
+  
+  UpdateTooltip()
+  
+End
+
+Private Sub UpdateTooltip()
+  
+  Dim sTooltip As String
+  Dim sDescription As String
+  
+  sTooltip = $PhotoEntity.FileName
+  sDescription = BuildTooltipDescription($PhotoEntity.Description)
+  If sDescription <> "" Then sTooltip &= gb.NewLine & sDescription
+  
+  Me.Tooltip = sTooltip
+  PictureBoxPhoto.Tooltip = sTooltip
+  PanelPhoto.Tooltip = sTooltip
+  
+End
+
+Private Function BuildTooltipDescription(sDescription As String) As String
+  
+  If sDescription = Null Then sDescription = ""
+  sDescription = Trim(Replace(Replace(sDescription, gb.NewLine, " "), gb.Tab, " "))
+  If sDescription = "" Then Return ""
+  If Len(sDescription) > 120 Then sDescription = Left(sDescription, 117) & "..."
+  
+  Return ("Comment: ") & sDescription
+  
+End

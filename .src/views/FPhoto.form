@@ -28,4 +28,9 @@
     Visible = False
     Picture = Picture["icon:/16/remove"]
   }
+  { ButtonDetails Button
+    MoveScaled(25,1,3.4286,3.4286)
+    Visible = False
+    Picture = Picture["icon:/16/more-h"]
+  }
 }

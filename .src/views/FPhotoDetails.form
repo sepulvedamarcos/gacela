@@ -1,5 +1,191 @@
 # Gambas Form File 3.0
 
-{ FPhotoDetails Form
-  MoveScaled(0,0,64,64)
+{ Form Form
+  MoveScaled(0,0,86,108)
+  Text = ("Photo details")
+  Resizable = False
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  Margin = True
+  Padding = 4
+  { VBoxContent VBox
+    MoveScaled(1,1,84,95)
+    Expand = True
+    Spacing = True
+    { LabelTitle Label
+      MoveScaled(1,1,32,4)
+      Text = ("Photo information")
+    }
+    { FrameGeneral VBox
+      MoveScaled(1,6,82,22)
+      Expand = True
+      { Label1 Label
+        MoveScaled(1,1,12,3)
+        Text = ("Name")
+      }
+      { TextBoxName TextBox
+        MoveScaled(1,4,80,4)
+        ReadOnly = True
+      }
+      { Label2 Label
+        MoveScaled(1,8,12,3)
+        Text = ("Description")
+      }
+      { TextAreaDescription TextArea
+        MoveScaled(1,11,80,8)
+      }
+      { HBoxGeneralMeta HBox
+        MoveScaled(1,19,80,4)
+        Spacing = True
+        { ValueBoxImportDate ValueBox
+          MoveScaled(1,0,21,4)
+          Type = ValueBox.DateTime
+          ReadOnly = True
+        }
+        { TextBoxImportUser TextBox
+          MoveScaled(23,0,21,4)
+          ReadOnly = True
+        }
+        { LabelStarsTitle Label
+          MoveScaled(45,0,7,4)
+          Text = ("Stars")
+        }
+        { LabelStarsValue Label
+          MoveScaled(53,0,18,4)
+          Text = ("☆☆☆☆☆")
+        }
+      }
+    }
+    { FrameStatus VBox
+      MoveScaled(1,29,82,28)
+      Expand = True
+      { HBoxLock HBox
+        MoveScaled(1,1,80,4)
+        Spacing = True
+        { SwitchButtonLock SwitchButton
+          MoveScaled(1,0,6,3)
+          Enabled = False
+        }
+        { Label3 Label
+          MoveScaled(8,0,12,3)
+          Text = ("Lock photo")
+        }
+        { TextBoxLockedBy TextBox
+          MoveScaled(22,0,18,4)
+          ReadOnly = True
+        }
+        { ValueBoxLockedDate ValueBox
+          MoveScaled(41,0,18,4)
+          Type = ValueBox.DateTime
+          ReadOnly = True
+        }
+      }
+      { TextAreaLockReason TextArea
+        MoveScaled(1,5,80,7)
+        ReadOnly = True
+      }
+      { HBoxTrash HBox
+        MoveScaled(1,13,80,4)
+        Spacing = True
+        { SwitchButtonTrash SwitchButton
+          MoveScaled(1,0,6,3)
+          Enabled = False
+        }
+        { Label6 Label
+          MoveScaled(8,0,14,3)
+          Text = ("Move to trash")
+        }
+        { TextBoxSoftDeleteBy TextBox
+          MoveScaled(24,0,18,4)
+          ReadOnly = True
+        }
+        { ValueBoxSoftDeleteDate ValueBox
+          MoveScaled(43,0,18,4)
+          Type = ValueBox.DateTime
+          ReadOnly = True
+        }
+      }
+      { TextAreaSoftDeleteReason TextArea
+        MoveScaled(1,17,80,7)
+        ReadOnly = True
+      }
+    }
+    { HBoxAssociations HBox
+      MoveScaled(1,58,82,34)
+      Expand = True
+      Spacing = True
+      { VBoxAlbums VBox
+        MoveScaled(1,1,40,32)
+        Expand = True
+        { LabelAlbums Label
+          MoveScaled(1,1,10,3)
+          Text = ("Albums")
+        }
+        { TableViewAlbums TableView
+          MoveScaled(1,4,38,20)
+          Expand = True
+          Mode = Select.Multiple
+        }
+        { HBoxAlbumButtons HBox
+          MoveScaled(1,25,38,5)
+          Spacing = True
+          { ButtonAddAlbum Button
+            MoveScaled(1,0,12,4)
+            Text = ("Add")
+          }
+          { ButtonRemoveAlbum Button
+            MoveScaled(14,0,12,4)
+            Text = ("Remove")
+          }
+        }
+      }
+      { VBoxTags VBox
+        MoveScaled(42,1,40,32)
+        Expand = True
+        { LabelTags Label
+          MoveScaled(1,1,10,3)
+          Text = ("Tags")
+        }
+        { TableViewTags TableView
+          MoveScaled(1,4,38,20)
+          Expand = True
+          Mode = Select.Multiple
+        }
+        { HBoxTagButtons HBox
+          MoveScaled(1,25,38,5)
+          Spacing = True
+          { ButtonAddTag Button
+            MoveScaled(1,0,12,4)
+            Text = ("Add")
+          }
+          { ButtonRemoveTag Button
+            MoveScaled(14,0,12,4)
+            Text = ("Remove")
+          }
+        }
+      }
+    }
+  }
+  { VBoxButtons2 VBox
+    MoveScaled(1,97,84,8)
+    { Separator2 Separator
+      MoveScaled(0,0,72,2)
+    }
+    { HBoxButtons2 HBox
+      MoveScaled(0,2,82,5)
+      Spacing = True
+      Padding = 4
+      { Spring2 Spring
+        MoveScaled(7,1,4,4)
+      }
+      { ButtonAccept Button
+        MoveScaled(15,0,18,4)
+        Text = ("Save")
+      }
+      { ButtonExit Button
+        MoveScaled(37,0,18,4)
+        Text = ("Close")
+      }
+    }
+  }
 }

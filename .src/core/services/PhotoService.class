@@ -69,6 +69,23 @@ Public Function LoadNextPage() As PhotoEntity[] '' Returns the next batch of pho
   
 End
 
+Public Function FindPhotoById(iId As Integer) As PhotoEntity '' Retrieves a single photo with persisted detail fields.
+  
+  If iId <= 0 Then Return Null
+  
+  Return $PhotoRepository.FindPhotoById(iId)
+  
+End
+
+Public Function UpdatePhoto(oPhoto As PhotoEntity) As Boolean '' Persists editable photo fields.
+  
+  If oPhoto = Null Then Return False
+  If oPhoto.Id <= 0 Then Return False
+  
+  Return $PhotoRepository.UpdatePhoto(oPhoto)
+  
+End
+
 Public Sub ApplyFilters(oSpec As PhotoSpecification) '' Applies the specified filters to the photo collection.
   
   $Iterator.SetSpecification(oSpec)

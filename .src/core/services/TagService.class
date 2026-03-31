@@ -23,6 +23,14 @@ Public Function FindTags(Optional sText As String, Optional iId As Integer = 0) 
 
 End
 
+Public Function FindTagsByPhoto(iPhotoId As Integer) As TagEntity[] '' Retrieves tags associated to a photo.
+
+  If iPhotoId <= 0 Then Return New TagEntity[]
+
+  Return $PhotoRepository.FindTagsByPhoto(iPhotoId)
+
+End
+
 Public Function AddTag(sName As String, sDescription As String, sColor As String) As Boolean '' Creates a new tag from primitive values.
 
   Dim oTag As New TagEntity
